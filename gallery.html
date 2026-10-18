@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b36">
+  <meta name="description" content="다른 사람이 만든 선택형 역사 이야기를 둘러보고, 좋아요를 누르고, 바로 플레이하세요.">
+  <title>시나리오 갤러리 · 역사의 갈림길</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="community.css">
+</head>
+<body class="gallery-page">
+  <header class="masthead">
+    <a class="brand" href="index.html" aria-label="역사의 갈림길 처음 화면"><span class="brand-mark" aria-hidden="true">岐</span><div><strong>역사의 갈림길</strong><span>CHRONICLES OF CHOICE</span></div></a>
+    <nav class="header-actions" aria-label="사이트 메뉴">
+      <a class="btn secondary" href="index.html">만들기 · 플레이</a>
+      <span id="auth-area" class="auth-area"></span>
+    </nav>
+  </header>
+
+  <main class="gallery-main">
+    <section class="gallery-hero">
+      <div>
+        <p class="eyebrow">COMMUNITY CHRONICLES</p>
+        <h1>시나리오 갤러리</h1>
+        <p class="gallery-lead">다른 사람이 쓴 역사의 갈림길을 골라 바로 플레이하세요. 마음에 들면 좋아요를, 내 이야기는 직접 올려 나눌 수 있습니다.</p>
+      </div>
+      <button class="btn primary upload-cta" id="upload-button" type="button"><span aria-hidden="true">↑</span> 내 시나리오 올리기</button>
+    </section>
+
+    <div id="setup-notice" class="setup-notice" hidden></div>
+
+    <section id="gallery-app" class="gallery-app" hidden>
+      <div class="gallery-tabs" role="tablist" aria-label="목록 종류">
+        <button type="button" role="tab" class="gallery-tab" data-tab="all" aria-selected="true">전체</button>
+        <button type="button" role="tab" class="gallery-tab" data-tab="liked" aria-selected="false">좋아요한 것</button>
+        <button type="button" role="tab" class="gallery-tab" data-tab="mine" aria-selected="false">내가 올린 것</button>
+        <button type="button" role="tab" class="gallery-tab" data-tab="admin" aria-selected="false" hidden>관리</button>
+      </div>
+      <form class="gallery-toolbar" id="gallery-toolbar" role="search">
+        <label class="search-field"><span class="sr-only">검색</span><input id="search-input" type="search" maxlength="60" placeholder="제목·소개·작가 검색" autocomplete="off"></label>
+        <label class="sort-field"><span>정렬</span><select id="sort-select"><option value="popular">좋아요 많은 순</option><option value="recent">최신순</option><option value="played">많이 플레이한 순</option></select></label>
+        <button class="btn secondary" type="submit">검색</button>
+      </form>
+      <div id="active-filter" class="active-filter" hidden></div>
+      <p id="list-status" class="list-status" role="status" aria-live="polite"></p>
+      <div id="card-grid" class="card-grid"></div>
+      <div class="more-row"><button class="btn secondary" id="more-button" type="button" hidden>더 보기</button></div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><span>역사의 갈림길 · 시나리오 갤러리</span><span>올라온 시나리오는 작성자의 책임이며, 신고가 쌓이면 자동으로 숨겨집니다.</span></footer>
+
+  <dialog id="detail-dialog" class="g-dialog detail-dialog" aria-label="시나리오 자세히 보기"><div id="detail-content"></div></dialog>
+  <dialog id="upload-dialog" class="g-dialog" aria-label="시나리오 올리기"><div id="upload-content"></div></dialog>
+  <dialog id="report-dialog" class="g-dialog small" aria-label="신고하기"><div id="report-content"></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <input id="upload-file" type="file" accept=".json,application/json" hidden>
+
+  <script src="config.js"></script>
+  <script src="vendor/supabase.js"></script>
+  <script src="engine.js"></script>
+  <script src="gallery.js"></script>
+</body>
+</html>

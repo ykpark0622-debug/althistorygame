@@ -1,0 +1,132 @@
+{
+  "version": "1.2.0-community",
+  "builtAt": "2026-10-18",
+  "scenarioIncluded": false,
+  "files": [
+    {
+      "path": ".github/workflows/keep-supabase-awake.yml",
+      "bytes": 1052,
+      "sha256": "7dde1fa5f71cc3f525242dcff389cd2270ed3a6337e56ba73333cbec1c382781"
+    },
+    {
+      "path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "README.md",
+      "bytes": 678,
+      "sha256": "68517b4daaec0fb05af6b12c6c82b597c13e0e913090e02f898fc591059a1640"
+    },
+    {
+      "path": "SETUP.md",
+      "bytes": 13105,
+      "sha256": "8371b729621e0600e2cc5bfff97eac95383f42fdcd352198c169f5b5a490d50b"
+    },
+    {
+      "path": "VERSION.txt",
+      "bytes": 154,
+      "sha256": "70f2c2c37df759ccac1967cd57835a2f161c622757c8ec8ac7af255cf13f2890"
+    },
+    {
+      "path": "ai-helper.js",
+      "bytes": 17833,
+      "sha256": "3f2d4554d89e7cec134884ce0f75807ade953d118e5d252bae40cd8413135d59"
+    },
+    {
+      "path": "app.js",
+      "bytes": 51984,
+      "sha256": "f9a24e457f269aef087c07c32994bd482c0c61e544eaf2a1e17e0c7c60c11822"
+    },
+    {
+      "path": "bootstrap.js",
+      "bytes": 154,
+      "sha256": "befa602242cdb167ded3f552c1d0b5a5bf7ecdaf28b0c020b614db6a87297df3"
+    },
+    {
+      "path": "community-bridge.js",
+      "bytes": 3086,
+      "sha256": "a13286a374c9a32ba076a2723048cfbfa376a794b522ffc8f339f6be7b791cb8"
+    },
+    {
+      "path": "community.css",
+      "bytes": 9931,
+      "sha256": "3514ca241beda417da3a335625787d2ef1600d46ba4c40c39d639b533ebd0132"
+    },
+    {
+      "path": "config.js",
+      "bytes": 688,
+      "sha256": "6c0b1f8fa6b0c99e70574e2ae79320b6b159772e687c7d0a4555298d080c9f79"
+    },
+    {
+      "path": "editor.js",
+      "bytes": 50847,
+      "sha256": "7cc5845704a03fd6ace8d7144f279d0a64b93e5de6e16462dbb9bf5a83e88d92"
+    },
+    {
+      "path": "engine.js",
+      "bytes": 30422,
+      "sha256": "98d0dafd89e1c29e9ac8b1a802242c273dbbc964ae531411d8540a512d2b8b0c"
+    },
+    {
+      "path": "flowchart.css",
+      "bytes": 18937,
+      "sha256": "1ad9e0ab75f1c90e26b08eec8c5d8c5b465ba5df5efedafa5c83437dcac27cb6"
+    },
+    {
+      "path": "flowchart.js",
+      "bytes": 64918,
+      "sha256": "dd75648ad0fbb991a590ba8be11444b5686e95263241f22134b04e3ceaeddc2d"
+    },
+    {
+      "path": "gallery.html",
+      "bytes": 4117,
+      "sha256": "9223768beac9ee80f21d8c2c09ca39b025c5069138c8e567894dc9c45d9a96a2"
+    },
+    {
+      "path": "gallery.js",
+      "bytes": 39464,
+      "sha256": "98d21cd38d3eb75114fc62b2ed72fa967c0dfa6ded60a45aa9f240170faa595b"
+    },
+    {
+      "path": "index.html",
+      "bytes": 4725,
+      "sha256": "483d53ec0c0606c2b98ad5dd752c521b662aae7558fd7a4994ae9402d1205478"
+    },
+    {
+      "path": "launcher.css",
+      "bytes": 6995,
+      "sha256": "5fba7ae63a1386758fa7c19c35fe32f6150b993a585578b3f3bb97590da47af4"
+    },
+    {
+      "path": "robots.txt",
+      "bytes": 24,
+      "sha256": "c70abcf98d7c268caa7a66739104962b1f5304d39762201e1074cacfcaba3134"
+    },
+    {
+      "path": "standalone.html",
+      "bytes": 267670,
+      "sha256": "432825f1862a13c01f2e790466ef76d5d0c60e8fc4e185688333a6d4cfa4bbe9"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 20889,
+      "sha256": "eeb47b4057274cad9ef5c46829c7d66b9b46808ea15deca10c81c0b180997b71"
+    },
+    {
+      "path": "supabase/schema.sql",
+      "bytes": 18457,
+      "sha256": "b70bdd004391b872cd0ee1bf30f8ad600f26e906f5292491d32ef9dae8dab5db"
+    },
+    {
+      "path": "vendor/supabase.js",
+      "bytes": 166800,
+      "sha256": "588fb53d9380e3cb8688065c48144fa839205c328b416cc68c11331ba01955ee"
+    },
+    {
+      "path": "vercel.json",
+      "bytes": 343,
+      "sha256": "ab5fa98fd13c1d266cde6551747391cf08b24066920bc363f367bc0ef507e430"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+역사의 갈림길 — 메이커 + 갤러리
+Version: 1.2.0-community
+Build date: 2026-10-18
+Runtime: static HTML, CSS, JavaScript + Supabase (optional)
