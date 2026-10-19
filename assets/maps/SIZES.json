@@ -1,5 +1,5 @@
 {
-  "registryBytes": 38858,
+  "registryBytes": 40756,
   "priorMonolithBytes": 24500024,
   "templates": [
     {
@@ -19,6 +19,12 @@
       "regions": 2431,
       "bytes": 1849164,
       "gzipBytes": 475298
+    },
+    {
+      "id": "world-balanced",
+      "regions": 5939,
+      "bytes": 6374018,
+      "gzipBytes": 1752813
     },
     {
       "id": "world-detailed",
