@@ -117,5 +117,5 @@ const current=JSON.parse(fs.readFileSync(path.join(root,'assets/maps/manifest.js
 for(const entry of prior.templates)assert.deepEqual(current.templates.find(item=>item.id===entry.id),entry,'Unchanged template '+entry.id);
 for(const asset of prior.assets)assert.deepEqual(current.assets.find(item=>item.id===asset.id),asset,'Unchanged source asset '+asset.id);
 assert.deepEqual(current.regions,prior.regions);assert.deepEqual(current.eras,prior.eras);
-assert.equal(current.templates.length,prior.templates.length+1);
+assert.equal(current.templates.length,prior.templates.length+5);
 console.log('PASS all '+prior.templates.length+' previous template asset hashes, IDs, sizes and region/era metadata remain exact');

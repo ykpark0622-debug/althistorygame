@@ -59,4 +59,18 @@ test('custom bounds outside new crop are removed instead of creating invalid box
   const result = context.ScenarioEditorV2.planMapChange(draft, 'regional_europe_med_1754');
   assert.equal(Object.hasOwn(result.nextMap.countries[0], 'focusBounds'), false);
 });
+test('balanced world and continental crops preserve custom country focus in the same geographic position', () => {
+  const worldBounds = [1837, 320, 1845, 330], originalBounds = worldBounds.slice();
+  const draft = context.GameEngine.createBlankScenario();
+  draft.schemaVersion = 2;
+  draft.map = realm({ templateId: 'world-balanced', playerCountry: 'kor', countries: [{ id: 'kor', name: '사용자 한국', color: '#123456', focusBounds: worldBounds }], initial: {} });
+  for (const id of ['balanced_eastasia_modern', 'balanced_asia_modern', 'world-balanced']) {
+    const template = context.MapTemplates.get(id), result = context.ScenarioEditorV2.planMapChange(draft, id);
+    assert.ok(result.nextMap);
+    const bounds = result.nextMap.countries.find(country => country.id === 'kor').focusBounds;
+    assert.deepEqual(plain(bounds), [worldBounds[0] - (template.offsetX || 0), worldBounds[1] - (template.offsetY || 0), worldBounds[2] - (template.offsetX || 0), worldBounds[3] - (template.offsetY || 0)]);
+    draft.map = result.nextMap;
+  }
+  assert.deepEqual(worldBounds, originalBounds, 'planning does not mutate caller bounds');
+});
 console.log('Editor regional country bounds: ' + cases + ' passed');

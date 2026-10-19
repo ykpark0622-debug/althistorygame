@@ -1,0 +1,13 @@
+{
+  "type": "map",
+  "schemaVersion": 1,
+  "id": "map_balanced_south_america",
+  "title": "남아메리카 균형 지도",
+  "description": "세계 균형 지도를 남아메리카 범위로 자른 현대 편집용 기본안입니다. 국가 이름·소유국·색상은 시나리오에 맞춰 바꾸세요.",
+  "map": {
+    "templateId": "balanced_south_america_modern",
+    "playerCountry": "bra",
+    "countries": [],
+    "initial": {}
+  }
+}

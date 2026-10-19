@@ -698,6 +698,42 @@
       ]
     },
     {
+      "source": "/assets/maps/balanced_eastasia_modern.956f0dac4ddfbc12.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/balanced_asia_modern.14b319f83d6c9c43.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/balanced_north_america_modern.2ad2a7ba1610853b.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/balanced_south_america_modern.7af2d8732a17622e.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/maps/regional_eastasia_1419.ace4b703d16de632.json",
       "headers": [
         {
@@ -1085,7 +1121,7 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.033.f26b11a927310de3.txt",
+      "source": "/assets/program/standalone.033.eb54835fc348a9e3.txt",
       "headers": [
         {
           "key": "Cache-Control",

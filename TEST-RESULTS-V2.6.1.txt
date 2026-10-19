@@ -1,0 +1,198 @@
+Built blank standalone HTML, 33 web download parts, and manifest (271 files; examples separate).
+Program download checks passed: 23 (bounded UTF-8 parts, integrity, same-origin, legacy offline artifact).
+PASS metadata and synchronous lookup never request geometry in browser
+PASS recommended balanced Europe stays separate from existing region eras and loads only its own geometry
+PASS recommended balanced world fetches only its own geometry and preserves the detailed and Europe caches
+PASS selected region fetches only its geometry index, fragments and era patch, with exact old content
+PASS same map requests coalesce, cached era change only fetches changed era
+PASS switching continents fetches that continent and world aliases share the same base
+PASS failed downloads do not register templates and retry keeps previous map intact
+PASS malformed era content cannot poison cache and is retryable
+PASS HTML error responses and oversize responses fail without changing selected cache
+PASS stalled requests time out, abort and permit a later retry
+PASS preinstalled offline assets synchronously reconstruct shared era maps
+PASS Node lazy lookup and standalone registration preserve all nineteen template contracts
+PASS all physical map files fit 1 MiB and match byte, SHA-256 and gzip metrics
+PASS a damaged same-length map fragment is rejected and retry succeeds
+PASS fragment requests are limited to three in flight and preserve their original order
+15 map loader tests passed
+PASS balanced density, editable Italian provinces, crop coordinates and geometry invariants
+PASS map JSON import/export and engine initial ownership share the new template
+PASS all 17 previous templates retain exact asset hashes, IDs, sizes and region/era metadata
+PASS balanced density, country palette, unique geometry IDs and global projection bounds
+PASS mainland and island point coverage, including both sides of the antimeridian
+PASS portable editable map, playable choice territory effects and immutable save replay
+PASS build provenance hash, source area conservation and per-source credits
+PASS all 18 previous template asset hashes, IDs, sizes and region/era metadata remain exact
+PASS distribution without raw world source rebuilds the exact registry and all nineteen logical assets with their fragments
+PASS historical-mask generator updates source presets and delegates hashed asset rebuild
+PASS V1 RNG vectors, state shape, outcomes and replay remain identical to the original engine
+PASS original seedless non-random V1 saves still restore
+PASS V2 template countries/default influence and initial overrides initialize without modifying the scenario
+PASS V2 chronicle ownership, occupation, influence clearing, markers and results persist through replay
+PASS territory conditions distinguish layer values and null without changing stat/flag conditions
+PASS invalid template, province, country, territory operators and reign references are rejected
+PASS a territory-triggered immediate ending takes precedence over random encounters
+PASS reign entry rules run in order and cards update while already chosen parts remain selected
+PASS reign decisions ignore ordinary next and settlements/deferred between effects use post-rule conditions
+PASS random interruptions and response chains RETURN to the same reign decisions without nested draws
+PASS settlement immediate endings precede entry into the next turn
+PASS V2 map/reign/actions/results are reconstructed through save replay and altered saves fail
+PASS historical reference follows explicitly marked choices and skips random/immediate risk draws
+PASS historical reign reference applies rules and all marked parts without inventing unmarked choices
+PASS mapless V2 reign accepts empty effect arrays and skips turns without eligible cards
+PASS empty and cleared marker values remain distinct valid territory conditions
+PASS turn entry never draws risks; the next action checks its post-choice state
+PASS bundled maps and both V2 examples play, restore every action, and complete marked historical paths
+18 V1/V2 engine tests passed.
+ok V1 strict JSON and wrapped JSON stay readable
+ok prose placeholders and unrelated objects do not mask the scenario
+ok markdown fences and appended prose are accepted
+ok comment braces and comma before comment are cleaned outside strings
+ok quoted URLs, braces and comment-looking text are preserved
+ok empty, malformed and cut answers retain useful repair categories
+ok normalization preserves V1 and fills unambiguous V2 defaults
+ok example validates and replays: {}
+ok example validates and replays: {"mode":"reign"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"eastasia1419"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"eastasia1419"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"world1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"world1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"europe-balanced"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"europe-balanced"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"world-balanced"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"world-balanced"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"world-detailed"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"world-detailed"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_eastasia_1419"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_eastasia_1419"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_eastasia_1592"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_eastasia_1592"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_eastasia_1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_eastasia_1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_eastasia_modern"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_eastasia_modern"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_europe_med_1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_europe_med_1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_europe_med_modern"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_europe_med_modern"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_asia_1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_asia_1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_asia_modern"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_asia_modern"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_north_america_1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_north_america_1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_north_america_modern"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_north_america_modern"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_south_america_1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_south_america_1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_south_america_modern"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_south_america_modern"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_world_1754"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_world_1754"}
+ok example validates and replays: {"mode":"chronicle","mapTemplateId":"regional_world_modern"}
+ok example validates and replays: {"mode":"reign","mapTemplateId":"regional_world_modern"}
+ok prompt includes selected map IDs, mode and base scenario without SVG
+ok dense world prompt is bounded and keeps player country and existing targets
+ok liked collection sorts and filters globally before pagination (mock server, no network)
+ok additive SQL migration does not replace authentication or RLS
+Passed 51 focused AI/gallery checks. SQL was inspected, not executed.
+PASS V1 blank opens and closes without upgrade
+PASS map tab selects template, edits owner by province click and saves
+PASS reign form builds parts, turn, card and ordered rules
+PASS reference rename updates effects, conditions, start, next, turn and layout
+PASS normal choice editor writes result, historical and territory
+PASS territory condition form edits layer, province and country
+PASS dense map effect search stays bounded and preserves selection outside results
+Editor V2 smoke: 7 passed
+PASS renamed country uses new crop bounds instead of persisted template bounds
+PASS explicit custom country bounds translate between regional map origins
+PASS legacy projection changes discard incompatible custom focus bounds
+PASS custom bounds outside new crop are removed instead of creating invalid boxes
+Editor regional country bounds: 4 passed
+PASS actual reign sample reaches all registered turn cards without false next warnings
+PASS ordinary reign next values are preserved but ignored by analysis and connecting
+PASS unregistered reign events get an actionable membership warning
+PASS reign random roots and their response chains retain usable links
+PASS chronicle graph connections and missing-target warnings remain unchanged
+5 flow reign smoke tests passed
+PASS 61940 unique real-world regions; valid projected geometry, owners, physical layers and fallbacks
+PASS dense-map reign scenario choices, outcomes, immutable input and save/reload replay
+PASS source inventory and fixed source version match runtime map
+PASS six regional choices and explicit supported eras
+PASS legacy templates retain identity and contents
+PASS regional views share original paths, use local coordinates and cache identity
+PASS 1592 Joseon unites both peninsula grids without altering the modern source
+PASS 1419 frontier and 1754 colonial preset differ from modern ownership
+PASS modern preset preserves country owners and cropped lists include regional descriptors
+PASS continent lists exclude unrelated continents while preserving relevant islands
+7 regional map tests passed.
+PASS scenario validates without warnings and identifies the whole peninsula as Joseon
+  japan_victory {"treasury":52,"morale":12,"military":11,"diplomacy":25}
+  full_terms {"treasury":45,"morale":42,"military":81,"diplomacy":60}
+  partition {"treasury":50,"morale":36,"military":66,"diplomacy":60}
+  ascension {"treasury":4,"morale":60,"military":82,"diplomacy":66}
+  recovery {"treasury":41,"morale":83,"military":100,"diplomacy":91}
+  pyrrhic {"treasury":0,"morale":64,"military":58,"diplomacy":82}
+PASS all six endings are reachable through legal choices without state mutation
+PASS preparation adds a scene and preserving the fleet skips rebuilding
+PASS overseas conquest needs logistics and a preserved fleet, not military score alone
+PASS occupation clears after withdrawal, partition transfers ownership, conquest reaches the correct Tsushima
+PASS random encounters trigger by their rules, return to the story and never interrupt completed peace
+PASS marked reference choices complete a historical broad-outline comparison
+7 Imjin scenario checks passed.
+PASS a map is a separate portable document and local storage key
+PASS map to scenario round trip preserves initial map data without adding fake play content
+PASS canonicalization strips inherited metadata and redundant defaults without changing semantics
+PASS unknown template, provinces, countries and unsupported geometry are rejected
+PASS invalid JSON objects, sparse arrays, accessors and prototype pollution stay data errors
+PASS the 5MB limit counts UTF8 bytes and missing initial layers are filled
+PASS fromScenario extracts only map content and accepts metadata overrides
+PASS engine editor limits are checked after redundant template defaults are removed
+PASS all bundled scenario maps convert to compact editable map documents
+9 map document tests passed.
+ok map upload validation is independent from playable scenarios and enforces 1 MB
+ok working maps use a separate storage key and have map badges without game modes
+ok map row actions and pending imports cannot select scenario documents
+ok additive map migration keeps authentication, grants, moderation and existing records
+ok map/scenario server filtering precedes pagination for liked/all/mine/admin
+Passed 5 map gallery checks. Database SQL inspected, not executed.
+PASS program starts with a blank draft, exposes clone-based API, and stores under a fixed release namespace
+PASS BOM JSON import enters the name gate and gameplay/manual save/reload preserve the imported story and player
+PASS malformed JSON, invalid schema, and oversized text reject without replacing the current scenario or saved progress
+PASS new scenario opens an empty flow editor and blank drafts survive reload
+PASS file chooser and drop zone load JSON while oversize and broken files preserve the current story
+PASS same-origin relative query URLs auto-load over HTTP with redirects disabled
+PASS foreign origins, non-HTTP protocols, embedded credentials, and file-page URL loading are blocked before fetch
+PASS failed HTTP, malformed remote JSON, oversized response, and cross-origin final URL retain prior saved scenario
+PASS streamed UTF-8 loads safely and oversized or malformed streams roll back
+PASS reopening an unchanged linked story retains its existing named autosave
+PASS reopening the same linked URL preserves locally edited story content and saved drafts without fetching the server original
+PASS direct JSON replacements and newly emptied drafts remain local when the same linked URL is reopened
+PASS opening a different scenario query fetches the new story after local changes to the old query
+PASS manual replacement on the plain root page invalidates old linked context before an old URL is revisited
+PASS an editor cancellation rejects imported replacements without touching the active scenario
+PASS single-file program export contains only a blank scenario and no imported story or player DOM
+PASS release source and standalone assets are coherent and contain no bundled example scenario
+PASS V2 chronicle displays escaped named results after ordinary and final choices
+PASS V2 map country overrides preserve defaults, cleared layers redraw, and map state survives reload
+PASS territory risk previews isolate changed layers without cloning the full map or changing live state
+PASS V2 reign previews ignored next correctly, returns from encounters, persists decisions, and renders final settlements
+PASS actual V2 examples render through both modes and retain the last displayed state after reload
+PASS dense atlas saves only owner differences and restores the full verified state
+PASS standalone V2 export removes private map/results DOM and keeps offline-only visibility rules
+PASS web player downloads the full blank offline bundle and preserves the active V2 manuscript
+25 release tests passed.
+PASS blank startup and home metadata download no map data
+PASS a delayed map import preserves current work until success and freezes the incoming manuscript
+PASS a later map import wins even if an earlier asset resolves afterwards
+PASS a failed asset preserves exact manuscript and save; retry can load the map
+PASS startup waits for its saved map before replaying autosave and leaves the original storage intact
+PASS home opens its editor only after hydrating the saved map and original progress
+PASS startup map failure retains an actionable retry and resumes the preserved save
+PASS a different scenario URL loads only its selected map rather than the previously saved map
+PASS AI map selection waits for the selected asset and stale completions cannot enable or rewrite its prompt
+PASS gallery consumes a pending scenario only after its selected map and import complete
+PASS gallery map failure leaves the pending manuscript and current progress available for retry
+11 lazy application checks passed
+All suites passed. Production login/database are not exercised by these offline tests.

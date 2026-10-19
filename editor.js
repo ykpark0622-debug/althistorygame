@@ -27,6 +27,36 @@
   const mark = () => { if (current) current.dirty = true; };
   const cancelMapPreparation = () => { if (current) { current.mapRequest = (current.mapRequest || 0) + 1; current.mapLoading = ''; } };
 
+  // Balanced maps keep their saved template IDs and geometry, while sharing
+  // the same region/era controls as the older detailed regional templates.
+  const balancedRegionTemplates = {
+    eastasia: 'balanced_eastasia_modern', europe_med: 'europe-balanced',
+    asia: 'balanced_asia_modern', north_america: 'balanced_north_america_modern',
+    south_america: 'balanced_south_america_modern', world: 'world-balanced'
+  };
+  function balancedMapForRegion(regionId) {
+    const id = balancedRegionTemplates[regionId];
+    return id && globalThis.MapTemplates?.list().find(template => template.id === id);
+  }
+  function mapSetupSelection(templateId) {
+    const regionId = Object.keys(balancedRegionTemplates).find(id => balancedRegionTemplates[id] === templateId && balancedMapForRegion(id));
+    return regionId ? { regionId, eraId: 'balanced_modern' } : globalThis.MapTemplates?.selection?.(templateId) || null;
+  }
+  function mapSetupEras(regionId) {
+    const eras = globalThis.MapTemplates?.eras?.(regionId) || [], balanced = balancedMapForRegion(regionId);
+    if (!balanced) return eras;
+    return [{ id: 'balanced_modern', name: '현대 · 균형 지도 (' + balanced.provinceCount.toLocaleString('ko-KR') + '개 지역)', notice: '현대 행정구역을 바탕으로 지역 수를 조정한 편집용 기본안입니다. 시대별 실제 국경을 재현한 지도는 아닙니다. 지도 준비 후 국가명·색·소유권을 바꿔 시나리오에 맞추세요.' },
+      ...eras.map(era => ({ ...era, name: era.name + ' · 세부 지도' }))];
+  }
+  function mapSetupDefault(region) {
+    // Retain the existing first-time era for the four added continental crops.
+    // A loaded balanced map is restored separately by mapSetupSelection().
+    return { regionId: region.id, eraId: ['europe_med', 'world'].includes(region.id) && balancedMapForRegion(region.id) ? 'balanced_modern' : region.defaultEra };
+  }
+  function mapSetupTemplateId(regionId, eraId) {
+    return eraId === 'balanced_modern' ? balancedMapForRegion(regionId)?.id || null : globalThis.MapTemplates?.regionalId?.(regionId, eraId) || null;
+  }
+
   function button(text, action, style = 'secondary') {
     const node = $('button', 'btn ' + style, text);
     node.type = 'button';
@@ -233,8 +263,9 @@
       } else if (previousTemplate?.id !== template.id) {
         // Custom bounds in regional templates use the same world geometry with
         // different origins. Legacy templates can use unrelated projections.
-        if (previousTemplate?.regionId && template.regionId && bounds.length === 4 && bounds.every(Number.isFinite)) {
-          const dx = previousTemplate.offsetX - template.offsetX, dy = previousTemplate.offsetY - template.offsetY;
+        const worldOrigin = value => value && (value.regionId || value.balancedRegionId || ['world-detailed', 'world-balanced', 'europe-balanced'].includes(value.id)) && Number.isFinite(value.offsetX || 0) && Number.isFinite(value.offsetY || 0);
+        if (worldOrigin(previousTemplate) && worldOrigin(template) && bounds.length === 4 && bounds.every(Number.isFinite)) {
+          const dx = (previousTemplate.offsetX || 0) - (template.offsetX || 0), dy = (previousTemplate.offsetY || 0) - (template.offsetY || 0);
           const translated = [Math.max(0, bounds[0] + dx), Math.max(0, bounds[1] + dy), Math.min(template.width, bounds[2] + dx), Math.min(template.height, bounds[3] + dy)];
           if (translated[0] < translated[2] && translated[1] < translated[3]) override.focusBounds = translated;
           else delete override.focusBounds;
@@ -504,36 +535,23 @@
       const newPlayerName = plan.nextMap && allMapCountries(draft).find(country => country.id === draft.map.playerCountry)?.name;
       current.mapStatus = plan.playerChanged ? '이전 플레이 국가의 영토·점령·영향권이 새 지도 범위에 없어, 플레이 국가를 ' + (newPlayerName || draft.map.playerCountry) + '(으)로 설정했습니다. 아래에서 다른 국가로 바꿀 수 있습니다.' : '';
       current.mapProvince = null; current.mapCountry = null; current.mapPaintUndo = [];
-      current.mapSetup = globalThis.MapTemplates?.selection?.(templateId) || null;
+      current.mapSetup = mapSetupSelection(templateId);
       mark(); render();
-    }
-    const recommendedTemplates = templates.filter(template => template.recommended);
-    if (recommendedTemplates.length) {
-      const stage = section('추천 지도'), actions = $('div', 'toolbar');
-      for (const template of recommendedTemplates) {
-        const active = draft.map?.templateId === template.id;
-        const choose = button(current.mapLoading === template.id ? '선택한 지도를 불러오는 중…' : template.name + ' · ' + template.provinceCount.toLocaleString('ko-KR') + '개 지역' + (active ? ' · 사용 중' : ''), () => applyMap(template.id), 'primary');
-        choose.disabled = active || current.mapLoading === template.id;
-        choose.dataset.recommendedTemplate = template.id;
-        actions.append(choose);
-      }
-      stage.append(notice('현대 행정구역을 바탕으로 지역 수를 조정한 편집용 지도입니다. 시대별 실제 국경을 재현한 지도는 아닙니다. 지도를 고른 뒤 국가명·색·소유권을 바꿔 시나리오에 맞추세요.'), actions);
-      content.append(stage);
     }
     const regions = globalThis.MapTemplates?.regions?.() || [];
     if (regions.length) {
-      const applied = draft.map && MapTemplates.selection(draft.map.templateId);
-      if (!current.mapSetup) current.mapSetup = applied ? { ...applied } : { regionId: regions[0].id, eraId: regions[0].defaultEra };
+      const applied = draft.map && mapSetupSelection(draft.map.templateId);
+      if (!current.mapSetup) current.mapSetup = applied ? { ...applied } : mapSetupDefault(regions[0]);
       const setup = current.mapSetup, region = regions.find(item => item.id === setup.regionId) || regions[0];
-      const eras = MapTemplates.eras(region.id);
-      if (!eras.some(era => era.id === setup.eraId)) setup.eraId = region.defaultEra || eras[0]?.id;
+      const eras = mapSetupEras(region.id);
+      if (!eras.some(era => era.id === setup.eraId)) setup.eraId = mapSetupDefault(region).eraId || eras[0]?.id;
       const stage = section(current.mapOnly ? '만들 지도의 범위' : '시나리오의 지도 범위'), controls = $('div', 'form-grid regional-map-controls');
       controls.append(select('① 사용할 지역 지도', region.id, regions.map(item => [item.id, item.name]), value => {
         const nextRegion = regions.find(item => item.id === value);
         current.mapRequest = (current.mapRequest || 0) + 1; current.mapLoading = '';
-        current.mapSetup = { regionId: value, eraId: nextRegion.defaultEra }; render();
+        current.mapSetup = mapSetupDefault(nextRegion); render();
       }, { mark: false }), select('② 시대 기본안', setup.eraId, eras.map(era => [era.id, era.name]), value => { current.mapRequest = (current.mapRequest || 0) + 1; current.mapLoading = ''; setup.eraId = value; render(); }, { mark: false }));
-      const era = eras.find(item => item.id === setup.eraId), requested = MapTemplates.regionalId(region.id, setup.eraId);
+      const era = eras.find(item => item.id === setup.eraId), requested = mapSetupTemplateId(region.id, setup.eraId);
       if (era?.notice) stage.append(notice(era.notice));
       const prepare = button(current.mapLoading === requested ? '선택한 지도를 불러오는 중…' : '③ 이 설정으로 지도 준비', () => applyMap(requested), 'primary');
       prepare.disabled = draft.map?.templateId === requested || current.mapLoading === requested;
@@ -544,10 +562,10 @@
     }
     const legacy = $('details', 'regional-legacy-maps');
     legacy.append($('summary', '', regions.length ? '기존 시나리오 지도·호환 템플릿' : '지도 템플릿 선택'));
-    const legacyTemplates = templates.filter(template => !template.recommended && !globalThis.MapTemplates?.selection?.(template.id));
-    if (!regions.length || (draft.map && !MapTemplates.selection(draft.map.templateId) && !recommendedTemplates.some(template => template.id === draft.map.templateId))) legacy.open = true;
-    const regionalApplied = draft.map && globalThis.MapTemplates?.selection?.(draft.map.templateId);
-    legacy.append(select('지도 템플릿', regionalApplied || recommendedTemplates.some(template => template.id === draft.map?.templateId) ? '' : draft.map?.templateId || '', [['', regions.length ? '기존 템플릿을 선택하세요' : '지도 사용 안 함'], ...legacyTemplates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => { if (value || !regions.length) applyMap(value); }));
+    const legacyTemplates = templates.filter(template => !mapSetupSelection(template.id));
+    if (!regions.length || (draft.map && !mapSetupSelection(draft.map.templateId))) legacy.open = true;
+    const regionalApplied = draft.map && mapSetupSelection(draft.map.templateId);
+    legacy.append(select('지도 템플릿', regionalApplied ? '' : draft.map?.templateId || '', [['', regions.length ? '기존 템플릿을 선택하세요' : '지도 사용 안 함'], ...legacyTemplates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => { if (value || !regions.length) applyMap(value); }));
     content.append(legacy);
     const config = mapConfig(draft); if (!config) { content.append(notice(templates.length ? '템플릿을 선택하면 지도와 지역 편집기가 열립니다.' : '지도 템플릿 파일을 불러오지 못했습니다.')); return; }
     const countryItems = () => mapConfig(draft).countries.map(country => [country.id, country.name]);
@@ -1390,5 +1408,6 @@
   }
 
   globalThis.ScenarioEditor = { open, close: () => close(false), cancelPending: () => { ++openSequence; } };
-  globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences, planMapChange, territoryReferences };
+  globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences, planMapChange, territoryReferences,
+    mapSetupSelection, mapSetupEras, mapSetupDefault, mapSetupTemplateId };
 })();

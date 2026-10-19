@@ -78,8 +78,10 @@ async function main(){
   const gameBefore=await page.evaluate(()=>({scenario:HistoryCrossroads.getScenario(),state:HistoryCrossroads.getState(),scenarioRaw:localStorage.getItem('history-crossroads:web:v1:scenario'),saveRaw:localStorage.getItem('history-crossroads:web:v1:autosave')}));
   await page.locator('#story-panel [data-launch-action="new-map"]').click();
   await page.getByLabel('지도 제목',{exact:true}).waitFor();
-  const choose=page.locator(`[data-recommended-template="${templateId}"]`);
-  assert.equal(await choose.isVisible(),true);
+  assert.equal(await page.locator('[data-recommended-template]').count(),0);
+  await page.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('world');
+  assert.equal(await page.getByLabel('② 시대 기본안',{exact:true}).inputValue(),'balanced_modern');
+  const choose=page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true});
   await page.getByLabel('지도 제목',{exact:true}).fill('세계 균형 지도 브라우저 검사');
   const beforeChoose=requests.length;await choose.click();
   await page.waitForFunction(id=>document.querySelector('#editor-root .map-heading h2')?.textContent.includes(MapTemplates.get(id).name),templateId);
@@ -87,7 +89,7 @@ async function main(){
   assert.equal(await page.getByLabel('지도 제목',{exact:true}).inputValue(),'세계 균형 지도 브라우저 검사');
   assert.equal(await page.locator('#editor-root [data-province]').count(),direct.count);
   assert.equal(await page.locator('#editor-root circle').count(),0);
-  passed('Map workshop exposes the recommended map and keeps the title while switching');
+  passed('Region and era selectors prepare the balanced map and keep the title');
 
   await page.getByLabel('중심 국가',{exact:true}).selectOption('chn');
   await page.locator('#editor-root [data-map-tool="country"]').click();
@@ -121,7 +123,7 @@ async function main(){
   await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
   await nextDialog;
   await page.waitForFunction(()=>MapTemplates.isLoaded('regional_europe_med_1754'));
-  await page.waitForFunction(()=>!document.querySelector('#editor-root button[data-recommended-template]')?.textContent.includes('불러오는 중'));
+  await page.waitForFunction(()=>!document.querySelector('#editor-root .regional-map-controls')?.parentElement.textContent.includes('불러오는 중'));
   await page.waitForFunction(()=>document.querySelector('#editor-root .map-heading h2')?.textContent.includes(MapTemplates.get('world-balanced').name));
   assert.equal(dialogs.length,dialogsBefore+1);assert.equal(rejectNextDialog,false);
   await page.getByRole('button',{name:'지도 저장',exact:true}).click();
@@ -165,12 +167,14 @@ async function main(){
   await serve(offline,offlineRequests,true);await offline.goto('https://offline-balanced-world.test/index.html');
   await offline.waitForFunction(()=>window.HistoryCrossroads?.getScenario());
   await offline.locator('#story-panel [data-launch-action="new-map"]').click();
-  await offline.locator(`[data-recommended-template="${templateId}"]`).click();
+  await offline.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('world');
+  assert.equal(await offline.getByLabel('② 시대 기본안',{exact:true}).inputValue(),'balanced_modern');
+  await offline.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
   await offline.waitForFunction(id=>document.querySelector('#editor-root .map-heading h2')?.textContent.includes(MapTemplates.get(id).name),templateId);
   assert.equal(await offline.locator('#editor-root [data-province]').count(),direct.count);
   assert.equal(await offline.evaluate(()=>MapTemplates.get('world-balanced').provinces.filter(p=>p.owner==='chn').length),direct.owners.chn);
   assert.deepEqual(offlineRequests,[]);
-  passed('The standalone HTML includes the same recommended map and works with all network blocked');
+  passed('The standalone HTML includes the same integrated balanced map and works with all network blocked');
   assert.deepEqual(report.browserErrors,[]);report.network.runtimeErrors=0;report.network.offlineRequests=offlineRequests.length;
   report.passed=true;
  }finally{

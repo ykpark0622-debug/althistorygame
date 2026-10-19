@@ -6,11 +6,11 @@ const dir=__dirname,read=f=>fs.readFileSync(path.join(dir,f),'utf8');
 // embedded copy of every overlapping continental view.
 function offlineMapScripts(){
  const maps=require('./map-templates.js');
- const sourceIds=['eastasia1419','world1754','world-detailed',...maps.list().filter(template=>template.recommended).map(template=>template.id)];
+ const sourceIds=['eastasia1419','world1754','world-detailed',...maps.list().filter(template=>template.recommended&&!template.balancedRegionId).map(template=>template.id)];
  const templates=[...new Set(sourceIds)].map(id=>maps.get(id));
  if(templates.some(template=>!template))throw Error('Offline map sources are missing.');
  const registry=`(function(root){'use strict';const templates=${JSON.stringify(templates)};const cache=new Map(templates.map(t=>[t.id,t]));root.MapTemplates={get:id=>cache.get(id)||null,list:()=>templates.map(t=>({id:t.id,name:t.name,provinceCount:t.provinces.length,...(t.recommended?{recommended:true}:{})}))};})(globalThis);`;
- const presets=read('tools/map-source/regional-presets.cjs');
+ const presets=read('tools/map-source/regional-presets.cjs')+'\n'+read('tools/map-source/balanced-regions.cjs');
  const adapter=`\n(function(root){const maps=root.MapTemplates,originalGet=maps.get.bind(maps),custom=new Map();maps.get=id=>custom.get(id)||originalGet(id);maps.register=t=>{custom.set(t.id,t);return t;};maps.isLoaded=maps.has=id=>Boolean(maps.get(id));maps.ensure=id=>{const t=maps.get(id);return t?Promise.resolve(t):Promise.reject(new Error('지도 템플릿을 찾을 수 없습니다: '+id));};maps.ensureScenario=value=>value?.map?.templateId?maps.ensure(value.map.templateId):Promise.resolve(null);maps.offline=true;})(globalThis);`;
  return {'map-templates.js':registry,'map-regions.js':presets+adapter};
 }
@@ -54,7 +54,7 @@ const webEntry=`<!doctype html>
 </body></html>\n`;
 fs.writeFileSync(path.join(dir,'standalone-web.html'),webEntry);
 fs.writeFileSync(path.join(dir,'vercel.json'),JSON.stringify(vercel,null,2)+'\n');
-fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 세계·유럽 균형 지도 · 지역별 지도 지연 로딩 · 지도 제작·공유\nVersion: 2.6.0-community\nBuild date: 2026-10-20\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
+fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 대륙별 균형 지도 · 지역·시대 선택기 통합 · 지도 제작·공유\nVersion: 2.7.0-community\nBuild date: 2026-10-20\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
 const files=[];function visit(folder){for(const ent of fs.readdirSync(path.join(dir,folder),{withFileTypes:true})){const rel=path.posix.join(folder,ent.name);if(ent.isDirectory())visit(rel);else if(!['RELEASE-MANIFEST.json','tools/map-source/world-detailed.json','tools/map-source/world-balanced.json'].includes(rel)){const data=fs.readFileSync(path.join(dir,rel));files.push({path:rel,bytes:data.length,sha256:crypto.createHash('sha256').update(data).digest('hex')});}}}visit('');
-fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.6.0-community',builtAt:'2026-10-20',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
+fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.7.0-community',builtAt:'2026-10-20',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
 console.log(`Built blank standalone HTML, ${programFiles.length} web download parts, and manifest (${files.length} files; examples separate).`);

@@ -1,5 +1,5 @@
 {
-  "registryBytes": 40756,
+  "registryBytes": 42641,
   "priorMonolithBytes": 24500024,
   "templates": [
     {
@@ -115,6 +115,30 @@
       "regions": 61940,
       "bytes": 24620851,
       "gzipBytes": 5642432
+    },
+    {
+      "id": "balanced_eastasia_modern",
+      "regions": 473,
+      "bytes": 621080,
+      "gzipBytes": 162600
+    },
+    {
+      "id": "balanced_asia_modern",
+      "regions": 1929,
+      "bytes": 2323948,
+      "gzipBytes": 637042
+    },
+    {
+      "id": "balanced_north_america_modern",
+      "regions": 598,
+      "bytes": 1009288,
+      "gzipBytes": 294514
+    },
+    {
+      "id": "balanced_south_america_modern",
+      "regions": 525,
+      "bytes": 841907,
+      "gzipBytes": 231915
     }
   ]
 }

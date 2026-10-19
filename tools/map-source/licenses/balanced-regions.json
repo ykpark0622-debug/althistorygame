@@ -1,0 +1,86 @@
+{
+  "format": "hc-balanced-region-provenance-v1",
+  "sourceId": "world-balanced",
+  "sourceSha256": "8844a64e9ee053356e149642860475f6678db268fac87f8591aeacbda2a682c1",
+  "derivation": "tools/map-source/balanced-regions.cjs",
+  "sourceLicenses": "WORLD-MAP-SOURCES.md and tools/map-source/licenses/world-balanced-sources.json",
+  "geometry": "Clipped copies of existing world-balanced M/L/Z SVG geometry. Province IDs, country IDs, modern owners and source attribution preserved. Paths retain global projection coordinates; labels, bounding boxes and country focus bounds are crop-local.",
+  "templates": [
+    {
+      "id": "balanced_eastasia_modern",
+      "name": "동아시아 · 균형 지도",
+      "regionId": "eastasia",
+      "eraId": "balanced_modern",
+      "geographicBounds": [
+        73,
+        15,
+        150,
+        55
+      ],
+      "provinceCount": 473,
+      "representedCountryCount": 9,
+      "countryDefinitions": 252,
+      "jsonBytes": 621041,
+      "sourceId": "world-balanced",
+      "provinceIdsPreserved": true,
+      "sha256": "3a3aecb75faf6082ccbf93733c4a743277e594a237bfe4cbcfef5f62b42f8e4f"
+    },
+    {
+      "id": "balanced_asia_modern",
+      "name": "아시아 전체 · 균형 지도",
+      "regionId": "asia",
+      "eraId": "balanced_modern",
+      "geographicBounds": [
+        25,
+        -12,
+        180,
+        80
+      ],
+      "provinceCount": 1929,
+      "representedCountryCount": 59,
+      "countryDefinitions": 252,
+      "jsonBytes": 2323909,
+      "sourceId": "world-balanced",
+      "provinceIdsPreserved": true,
+      "sha256": "db5d8f9cc68165e4adeac9e32c49c5a67f2704d1b8abbea23f8457fee99881f5"
+    },
+    {
+      "id": "balanced_north_america_modern",
+      "name": "북아메리카 · 균형 지도",
+      "regionId": "north_america",
+      "eraId": "balanced_modern",
+      "geographicBounds": [
+        -180,
+        5,
+        -10,
+        84
+      ],
+      "provinceCount": 598,
+      "representedCountryCount": 41,
+      "countryDefinitions": 252,
+      "jsonBytes": 1009249,
+      "sourceId": "world-balanced",
+      "provinceIdsPreserved": true,
+      "sha256": "90f16acc1f8ba78dbf65deb1dc351f5168ca798468aa78d731467c01c611fb8c"
+    },
+    {
+      "id": "balanced_south_america_modern",
+      "name": "남아메리카 · 균형 지도",
+      "regionId": "south_america",
+      "eraId": "balanced_modern",
+      "geographicBounds": [
+        -85,
+        -58,
+        -30,
+        15
+      ],
+      "provinceCount": 525,
+      "representedCountryCount": 14,
+      "countryDefinitions": 252,
+      "jsonBytes": 841868,
+      "sourceId": "world-balanced",
+      "provinceIdsPreserved": true,
+      "sha256": "214b630971b5000c52f83fb56743a5ced5bb0673409591a0a992d355f51aa6a6"
+    }
+  ]
+}

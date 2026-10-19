@@ -1,5 +1,5 @@
 {
-  "version": "2.6.0-community",
+  "version": "2.7.0-community",
   "builtAt": "2026-10-20",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -12,8 +12,8 @@
     },
     {
       "path": "BALANCED-EUROPE.md",
-      "bytes": 2238,
-      "sha256": "29fac24dcb2159d82325a911d46a5aff378addf09916797047f5539061693f04"
+      "bytes": 2278,
+      "sha256": "a41895d6bd9f49f8409712ba233f95da08593938f4d9c091cb608995064659d2"
     },
     {
       "path": "BALANCED-MAP-SOURCES.md",
@@ -21,9 +21,14 @@
       "sha256": "66b20389a85ea501ba8947814a5235afc8c92bc0d7657eb7ce47d5962bf73d77"
     },
     {
+      "path": "BALANCED-REGIONS.md",
+      "bytes": 2751,
+      "sha256": "bd5de1f8c46008464bf7bef427773f0d7ebbe4f3e8c59e5fe36ed30fa870165f"
+    },
+    {
       "path": "BALANCED-WORLD.md",
-      "bytes": 2570,
-      "sha256": "9e978385c25d732eb5c77c02be272d9c13473b9f1fc361cf85e32e1a7c2e8683"
+      "bytes": 2613,
+      "sha256": "57f9d09907cb9414187579cdddb504b74ede8fb56c8d2a044676f15967efa883"
     },
     {
       "path": "MAP-LOADING.md",
@@ -32,8 +37,8 @@
     },
     {
       "path": "MAP-MAKER.md",
-      "bytes": 3364,
-      "sha256": "54a638ac0dc9458cacc7d28efc06569d058e1c47a6076b7fa1c4a87eeb08ca22"
+      "bytes": 3854,
+      "sha256": "fe74888d534e25a77b1e2d23ccc8055a120006a6d3e3924e2021e529654cc4d8"
     },
     {
       "path": "MAP-SOURCES.md",
@@ -42,13 +47,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 6962,
-      "sha256": "43a13a2f1c85f30d35e8c158854916943f28e788c37deddacf5efcc24c888051"
+      "bytes": 7012,
+      "sha256": "7383c12bbd686fad7ba9e0828368f010dcc3a9b3b57aba72f14c3b377df00655"
     },
     {
       "path": "REGIONAL-MAPS.md",
-      "bytes": 7906,
-      "sha256": "4c95b57c1284c70de45b54c7c5a19ab0a23c65a55e232973bedf69da6d6aafae"
+      "bytes": 8200,
+      "sha256": "1d68de1728e4ecf28efe2d98cc2c7506f7863042d7140a91609bc7acdca48045"
     },
     {
       "path": "SCHEMA-V2.md",
@@ -96,9 +101,19 @@
       "sha256": "48c8d67f11f3b3b3405978d1a62a588b33b77ebb2160afa4055464872295b5f0"
     },
     {
+      "path": "TEST-RESULTS-V2.6.1.txt",
+      "bytes": 16679,
+      "sha256": "a4a6d5a9ca63d144c9124c5670576813470fc37ad25be95b5fd7ae429c790eae"
+    },
+    {
       "path": "TEST-RESULTS-V2.6.txt",
       "bytes": 16679,
       "sha256": "5267e3ca0af9d6aed91a92864a9af57a26517b6f54e357a930b7c5f302761faa"
+    },
+    {
+      "path": "TEST-RESULTS-V2.7.txt",
+      "bytes": 18562,
+      "sha256": "a8c2ba3dcdf430f9435174e78e8d62f19bc49b036c1cd913d78cb538638c1067"
     },
     {
       "path": "TEST-RESULTS.txt",
@@ -146,14 +161,24 @@
       "sha256": "031486e848f43cf04be05de2a3ec8e3318b869592c45af3784ccca16075e31fa"
     },
     {
+      "path": "UPDATE-V2.6.1.md",
+      "bytes": 1607,
+      "sha256": "543a88dda4987ff600b846be61b1ae8dc9a221ddc30efe7ada32813fb723ed44"
+    },
+    {
       "path": "UPDATE-V2.6.md",
       "bytes": 1484,
       "sha256": "94df1b1949b3d0e8adfa0b2f929947aece87398bd34a9c98a827d6282bf3e1ec"
     },
     {
+      "path": "UPDATE-V2.7.md",
+      "bytes": 2304,
+      "sha256": "9748baec3c6b5149966391aad2bff0942d93eabef3b984838156dc73b6869c5e"
+    },
+    {
       "path": "VERSION.txt",
-      "bytes": 220,
-      "sha256": "e6a8ecba66a16cbee1ff32aa992afc637ca0b1766b542433986b092662eb6995"
+      "bytes": 216,
+      "sha256": "b37b590f072bb9a01c664ec229c21cff1a206e02c235c1d116bd6343e98374ad"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -177,8 +202,28 @@
     },
     {
       "path": "assets/maps/SIZES.json",
-      "bytes": 2433,
-      "sha256": "f1272bf359d2adc37ae971973eb4911bec3d913455f7dd9033a2249592cdff96"
+      "bytes": 2938,
+      "sha256": "e9b2f5489d2be8b00aba0aa3e6382ee86ce28c7d1b31d399d5bd17e06314b5cb"
+    },
+    {
+      "path": "assets/maps/balanced_asia_modern.14b319f83d6c9c43.json",
+      "bytes": 2323948,
+      "sha256": "14b319f83d6c9c430540e5905ba22ef11eabb4510af1d0e4b439c4fa8824d4b0"
+    },
+    {
+      "path": "assets/maps/balanced_eastasia_modern.956f0dac4ddfbc12.json",
+      "bytes": 621080,
+      "sha256": "956f0dac4ddfbc128805979c1a0da9dd5c322e4873a4ee4b923173ba421d1f12"
+    },
+    {
+      "path": "assets/maps/balanced_north_america_modern.2ad2a7ba1610853b.json",
+      "bytes": 1009288,
+      "sha256": "2ad2a7ba1610853b4a6ad878cf2eeef0a798df3dbed9ecc713a4a303d0b1080f"
+    },
+    {
+      "path": "assets/maps/balanced_south_america_modern.7af2d8732a17622e.json",
+      "bytes": 841907,
+      "sha256": "7af2d8732a17622efd00f8e14f45c9bf0e90dae6b08badc6c9ffb4c97440403f"
     },
     {
       "path": "assets/maps/eastasia1419.d6e5b2872949754d.json",
@@ -202,8 +247,8 @@
     },
     {
       "path": "assets/maps/manifest.json",
-      "bytes": 36148,
-      "sha256": "082820e4416db35e4a8fdc0fad9fdce2976bfe35ce38a1a20a5289d107abf074"
+      "bytes": 38529,
+      "sha256": "6d7fd8843b5aa4660ce69c62114eea47f5cf5499afc17aced0a9314142869f9b"
     },
     {
       "path": "assets/maps/regional_asia_1754.98b0a77511fa0f6b.json",
@@ -618,7 +663,7 @@
     {
       "path": "assets/program/manifest.json",
       "bytes": 6359,
-      "sha256": "b94daa7b0e2da7af812feddfcd67c294b15d87b924147ef600689c79a6200393"
+      "sha256": "d5408b6cd8a9c9f571ced547510935857350af3c24673078223acb9781257598"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -781,9 +826,9 @@
       "sha256": "c3942629b4943a3fbb412477890eed5c4d6b60e862e9709b1e2e2123ba53ebc4"
     },
     {
-      "path": "assets/program/standalone.033.f26b11a927310de3.txt",
-      "bytes": 514083,
-      "sha256": "f26b11a927310de34a1de4a396bf9b774438240cd6335de01043e8ab5599a764"
+      "path": "assets/program/standalone.033.eb54835fc348a9e3.txt",
+      "bytes": 525227,
+      "sha256": "eb54835fc348a9e3582f40fa7e04647c38240a73b57ba8ecf97ea8a0301f3ec0"
     },
     {
       "path": "bootstrap.js",
@@ -797,8 +842,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 8877,
-      "sha256": "faa8f130d41ddcd6e42203ca6c73aea0623db02389ad21f06519b1bb5917e934"
+      "bytes": 8952,
+      "sha256": "26c18e27f34ada8b0892b9211cfd28b4d965eecd21a64c1e42eb4c1cf079d538"
     },
     {
       "path": "community-bridge.js",
@@ -817,13 +862,33 @@
     },
     {
       "path": "editor.js",
-      "bytes": 101930,
-      "sha256": "58badaf7bb9418aada8e6a9349a9c2eadaad66ce9132b1c33cacf95e10e6b8e7"
+      "bytes": 103033,
+      "sha256": "a95fb26fe2735a9c42fa6516ad9cc4a51a92f2c5c384c060b311f5d6d5d5316f"
     },
     {
       "path": "engine.js",
       "bytes": 51143,
       "sha256": "dcde25300dd68622845055a62a9497e4c1fdb65436934cd6e1e7329450dd8f7f"
+    },
+    {
+      "path": "examples/balanced-asia.map.json",
+      "bytes": 429,
+      "sha256": "5937ea2ecd3e369640c86709c5d481fba6f0c6e23c0866196a1c6b133270be89"
+    },
+    {
+      "path": "examples/balanced-eastasia.map.json",
+      "bytes": 429,
+      "sha256": "37cd7265f9ac15375878da714d56081a8700027ab95b98b06c6e9247d8a152ec"
+    },
+    {
+      "path": "examples/balanced-north_america.map.json",
+      "bytes": 445,
+      "sha256": "a351b790b072752ff71a43f66f123e0390e27e237b3070e3975ece6871f18607"
+    },
+    {
+      "path": "examples/balanced-south_america.map.json",
+      "bytes": 445,
+      "sha256": "9866ad6c7c07c73a5652753f63f901e2961063835fd1a864df6f1ddd6d2e1e5f"
     },
     {
       "path": "examples/chronicle-sejong.json",
@@ -927,8 +992,8 @@
     },
     {
       "path": "map-templates.js",
-      "bytes": 40756,
-      "sha256": "e8b999b1a27ecc5fcec5a5f100445e3ab37c512de2a044afb6ef240f9705a06b"
+      "bytes": 42641,
+      "sha256": "4e63a5a3cf5e9f66ffcd98cebe1873765432caad9188300d7f4fac9d7c341d28"
     },
     {
       "path": "map-view.css",
@@ -957,8 +1022,8 @@
     },
     {
       "path": "run-tests.cjs",
-      "bytes": 917,
-      "sha256": "23f2228a588eb71175236835c4f4dc949d4140e890994dec1776d6edc32340fa"
+      "bytes": 946,
+      "sha256": "9aecd117ad5da382d425b3a14c825f02ebd05eca1761511648a9f9d5bb43bd66"
     },
     {
       "path": "serve.cjs",
@@ -968,7 +1033,7 @@
     {
       "path": "standalone.html",
       "bytes": 7592,
-      "sha256": "387ebb92ca6956d20279c5b2ec4b342859c49b0de00dc61018081db9d68a92d1"
+      "sha256": "60c0abb5077d57d4ac3852f84d7ca21c8c0815d4d53a8f0185fe9aa33a89c625"
     },
     {
       "path": "styles.css",
@@ -1007,13 +1072,23 @@
     },
     {
       "path": "tests/balanced-europe-browser.cjs",
-      "bytes": 14139,
-      "sha256": "b3103ae1b10227f68f60ab8adeae183923a5d2ffb4761b431dcd34cb034758cb"
+      "bytes": 14624,
+      "sha256": "a0183315ea0404f0ebaf20c4411e6e570dc75ae8b22d62effa5bc5e0ef0f32f5"
     },
     {
       "path": "tests/balanced-europe.cjs",
       "bytes": 3997,
       "sha256": "1edac51420a4d965f779591bac9a2c7234a04d7f606faf8e19ce7e2d5a328695"
+    },
+    {
+      "path": "tests/balanced-regions-browser.cjs",
+      "bytes": 16200,
+      "sha256": "1ec667e1d94d518c54e4f0b0fb0e705126959d7a6b4d36a4405a842753fc65b5"
+    },
+    {
+      "path": "tests/balanced-regions.cjs",
+      "bytes": 11162,
+      "sha256": "50c6e92253dc591fee2b46c5b6c57723747dd886e5f5589e693ec3855835eb8c"
     },
     {
       "path": "tests/detailed-map.cjs",
@@ -1022,8 +1097,8 @@
     },
     {
       "path": "tests/editor-regional-country.cjs",
-      "bytes": 3976,
-      "sha256": "9cbfb08f897fb6f34a7decc5440a71c6d21e9a8e6bc19b4e767de365df64b287"
+      "bytes": 5116,
+      "sha256": "39a4cb6c08572dfe52d9cba6a68a7c16e0839ae15dc262813ce1c9cf28bedc5b"
     },
     {
       "path": "tests/editor-v2-smoke.cjs",
@@ -1051,6 +1126,11 @@
       "sha256": "8da9568d9c6e3cb0ca437a773d92a761d6a944db552ff6c67bae233c1bf2a08f"
     },
     {
+      "path": "tests/fixtures/v261-map-manifest.json",
+      "bytes": 36148,
+      "sha256": "082820e4416db35e4a8fdc0fad9fdce2976bfe35ce38a1a20a5289d107abf074"
+    },
+    {
       "path": "tests/flow-reign-smoke.cjs",
       "bytes": 3717,
       "sha256": "56992b3545e3213411be58e3c3fc74398d11b28cd01c4a1c3ff69d80e1e2850e"
@@ -1076,6 +1156,11 @@
       "sha256": "42abc46a9cc24aabc3c3fccfb2a2685fa3e2e6aae231456566bfd888b159b12c"
     },
     {
+      "path": "tests/integrated-map-browser.cjs",
+      "bytes": 12169,
+      "sha256": "8521fb618180174e4a77fb755b70f6a188df6127e1c8a831a4e366f6609857fb"
+    },
+    {
       "path": "tests/lazy-editor-browser.cjs",
       "bytes": 7272,
       "sha256": "2488a11c1366cea4a5dee0d6a35a328b8a91ce1bf5798f5b909b9abbcf35684a"
@@ -1087,8 +1172,8 @@
     },
     {
       "path": "tests/map-build-fallback.cjs",
-      "bytes": 2671,
-      "sha256": "9f60e2a612c5aaf28657f54a7c37d5c684c253839c2dead0c8476d00b0629b6a"
+      "bytes": 2654,
+      "sha256": "7f14aae8cdcb8032d35e1292c22298c5307513091613ca487d3c4a01a108c102"
     },
     {
       "path": "tests/map-document.cjs",
@@ -1097,8 +1182,8 @@
     },
     {
       "path": "tests/map-loader.cjs",
-      "bytes": 12796,
-      "sha256": "0dabba6dfff69fab65f356631959b54e67aa140edf8b04172c1d0a00beec0c14"
+      "bytes": 14057,
+      "sha256": "c4ab459974c5b69e49ab48af5095cfc1011a3b35075942a4f2bd130f87b9eb26"
     },
     {
       "path": "tests/map-maker-browser.cjs",
@@ -1133,7 +1218,7 @@
     {
       "path": "tests/regional-maps.cjs",
       "bytes": 5617,
-      "sha256": "51f9718387536d5ba14d5d1f15bc7af233a0333237058dbc8c6b1522af199633"
+      "sha256": "cce63694710eafcaa47781f8eabc0f8ba48a7db6c39d301387c5a6d017bcf7c4"
     },
     {
       "path": "tests/regional-renderer-browser.cjs",
@@ -1152,18 +1237,18 @@
     },
     {
       "path": "tests/web-upload-browser.cjs",
-      "bytes": 8660,
-      "sha256": "95805146c79a56c50599ca5359d7ef6c3597de64d405f0af4bfba47362196c7d"
+      "bytes": 9002,
+      "sha256": "457b9a9f10ca88d64230f75fa28e112e8a6dcbd9114bd672ad0c8ed069936c63"
     },
     {
       "path": "tests/world-balanced-browser.cjs",
-      "bytes": 15189,
-      "sha256": "407358faa28d9b67352bbe9af65b440885e150a1fadeca6b23237ae005c3eb1c"
+      "bytes": 15664,
+      "sha256": "50077dc6379f342b1077adb2ca95da99e28413befb8cf7f4d0b121c1cb6667d0"
     },
     {
       "path": "tests/world-balanced.cjs",
       "bytes": 9792,
-      "sha256": "acd83a1e6b81ef0debe2db445299a43513be3430fdc8d023d0268744a6b3a449"
+      "sha256": "6eb7edea15996430dd58faac8f196221e9ef54e8a15d025ac104ce7cab6bb5b0"
     },
     {
       "path": "tests/world-ui-browser.cjs",
@@ -1192,8 +1277,8 @@
     },
     {
       "path": "tools/build-map-assets.cjs",
-      "bytes": 8658,
-      "sha256": "119a596e07f880c04a797ff41c5d7537779f518625758539b3ec96d58f1e2159"
+      "bytes": 9231,
+      "sha256": "dc943ea6d5df212142ec48549b5ea84508977b3dcf09fbde16db3005095f2987"
     },
     {
       "path": "tools/build-map-regions.cjs",
@@ -1221,6 +1306,11 @@
       "sha256": "47f1ce2554291baca8e5f02e25de25f8cbbfe8d4c513117c30060cda7f5aa346"
     },
     {
+      "path": "tools/map-source/balanced-regions.cjs",
+      "bytes": 10040,
+      "sha256": "cc37a42d91017d3515ba2e0dc54faa7a391fef0ac0b37d2eaf6ae84d67345a4b"
+    },
+    {
       "path": "tools/map-source/eastasia1419.json",
       "bytes": 110189,
       "sha256": "2ddf44470ec799c9578dd025db0d6c96615940225b8d1ce8d7303d9913054418"
@@ -1234,6 +1324,11 @@
       "path": "tools/map-source/legacy-templates.json",
       "bytes": 479775,
       "sha256": "bfe6e62eea043a40c3f7138b939f3f527352a32ee933e8c31eee73a3a38c1091"
+    },
+    {
+      "path": "tools/map-source/licenses/balanced-regions.json",
+      "bytes": 2755,
+      "sha256": "9c70f9954e50653ce496d5cd3860fe27adc9a2bd4f76923509c093959c7f8e32"
     },
     {
       "path": "tools/map-source/licenses/europe-balanced-build.json",
@@ -1287,8 +1382,8 @@
     },
     {
       "path": "vercel.json",
-      "bytes": 28867,
-      "sha256": "363aced3353bda20d6b2eb587a30bb91b900c797c8e907e129304032e99565d6"
+      "bytes": 29793,
+      "sha256": "bc5ea400c4bfed9e826c24a7f3e82ba2245eecb55cceafd6b7c1785c251f1706"
     }
   ]
 }

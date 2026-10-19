@@ -84,6 +84,10 @@ async function main(){
   await p.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('europe_med');
   await p.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
   await p.getByRole('button',{name:'지도 저장',exact:true}).click();
+  assert.equal((await p.evaluate(()=>MapMaker.getStored())).map.templateId,'europe-balanced');
+  await p.getByLabel('② 시대 기본안',{exact:true}).selectOption('1754');
+  await p.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
+  await p.getByRole('button',{name:'지도 저장',exact:true}).click();
   assert.equal((await p.evaluate(()=>MapMaker.getStored())).map.templateId,'regional_europe_med_1754');
   await p.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('south_america');
   await p.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();

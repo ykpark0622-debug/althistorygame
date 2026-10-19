@@ -132,6 +132,22 @@
       "downloadBytes": 297815
     },
     {
+      "id": "europe-balanced",
+      "name": "유럽과 지중해 · 균형 지도",
+      "provinceCount": 2431,
+      "asset": "assets/maps/europe-balanced.8de94c02725f3504.json",
+      "downloadBytes": 1849164,
+      "recommended": true
+    },
+    {
+      "id": "world-balanced",
+      "name": "세계 · 균형 지도",
+      "provinceCount": 5939,
+      "asset": "assets/maps/world-balanced.8a7ada898ebc3515.json",
+      "downloadBytes": 6374018,
+      "recommended": true
+    },
+    {
       "id": "world-detailed",
       "name": "세계 세부 지도 · 현대 행정구역",
       "provinceCount": 61940,
@@ -272,6 +288,42 @@
       "regionId": "world",
       "eraId": "modern",
       "baseId": "world-detailed"
+    },
+    {
+      "id": "balanced_eastasia_modern",
+      "name": "동아시아 · 균형 지도",
+      "provinceCount": 473,
+      "asset": "assets/maps/balanced_eastasia_modern.956f0dac4ddfbc12.json",
+      "downloadBytes": 621080,
+      "recommended": true,
+      "balancedRegionId": "eastasia"
+    },
+    {
+      "id": "balanced_asia_modern",
+      "name": "아시아 전체 · 균형 지도",
+      "provinceCount": 1929,
+      "asset": "assets/maps/balanced_asia_modern.14b319f83d6c9c43.json",
+      "downloadBytes": 2323948,
+      "recommended": true,
+      "balancedRegionId": "asia"
+    },
+    {
+      "id": "balanced_north_america_modern",
+      "name": "북아메리카 · 균형 지도",
+      "provinceCount": 598,
+      "asset": "assets/maps/balanced_north_america_modern.2ad2a7ba1610853b.json",
+      "downloadBytes": 1009288,
+      "recommended": true,
+      "balancedRegionId": "north_america"
+    },
+    {
+      "id": "balanced_south_america_modern",
+      "name": "남아메리카 · 균형 지도",
+      "provinceCount": 525,
+      "asset": "assets/maps/balanced_south_america_modern.7af2d8732a17622e.json",
+      "downloadBytes": 841907,
+      "recommended": true,
+      "balancedRegionId": "south_america"
     }
   ],
   "assets": [
@@ -290,6 +342,86 @@
       "bytes": 297815,
       "gzipBytes": 104818,
       "sha256": "421cfd05b8f43bbbd9912280c4f6587aa132e892532e96e6e1e409098b9dacfc"
+    },
+    {
+      "id": "europe-balanced",
+      "type": "base",
+      "path": "assets/maps/europe-balanced.8de94c02725f3504.json",
+      "bytes": 575,
+      "gzipBytes": 475298,
+      "sha256": "8de94c02725f3504c10cd1d619ffdad33e2e58cebfddc8b1dac1ba0633f91665",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 1848589,
+      "contentSha256": "f6dc9386d61c1c3c8e07875129c2f96cbe16f1cad11583a38558e359ceffdc81",
+      "parts": [
+        {
+          "path": "assets/maps/europe-balanced.f6dc9386d61c1c3c.part-001.899324450d418b96.txt",
+          "bytes": 1048574,
+          "gzipBytes": 263775,
+          "sha256": "899324450d418b96fe6b03baf9c1e2affe921ba7804509723f62632e0eeef663"
+        },
+        {
+          "path": "assets/maps/europe-balanced.f6dc9386d61c1c3c.part-002.d59f6cc7714f5ef9.txt",
+          "bytes": 800015,
+          "gzipBytes": 211196,
+          "sha256": "d59f6cc7714f5ef9c8505053697d06d6c74230a992f9f0f986010ad0dea0961e"
+        }
+      ]
+    },
+    {
+      "id": "world-balanced",
+      "type": "base",
+      "path": "assets/maps/world-balanced.8a7ada898ebc3515.json",
+      "bytes": 1550,
+      "gzipBytes": 1752813,
+      "sha256": "8a7ada898ebc3515cb4555782f3a7aee46dec6c54d5e6ed951ac6255dc9493a6",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 6372468,
+      "contentSha256": "a059c744e9d558c1b2390cccdeadc72693c557da2cb88dba1ffc42beaff38201",
+      "parts": [
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-001.437ef263d6d79c33.txt",
+          "bytes": 1048576,
+          "gzipBytes": 295998,
+          "sha256": "437ef263d6d79c336abf5ce9433061fa6b0fe6acc439ddba8721683dd265b560"
+        },
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-002.65625db6c0b0e47b.txt",
+          "bytes": 1048576,
+          "gzipBytes": 273301,
+          "sha256": "65625db6c0b0e47ba9071392c0baed0d4ec5ad82cd3c573f2ef12b13f54ae819"
+        },
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-003.f7a8002691c4b092.txt",
+          "bytes": 1048576,
+          "gzipBytes": 270486,
+          "sha256": "f7a8002691c4b0923d914bf1bc44eb410cfa0bf248fcbee01a868221236613a5"
+        },
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-004.22f08e3086a58db5.txt",
+          "bytes": 1048576,
+          "gzipBytes": 279863,
+          "sha256": "22f08e3086a58db594b75a747d25256b3638df2607260fb1e47517e00cfd3be8"
+        },
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-005.044b4a695ae9b1e8.txt",
+          "bytes": 1048574,
+          "gzipBytes": 282876,
+          "sha256": "044b4a695ae9b1e81d21cef260dfaff7c8f7bdb6c86d6b10f16d2afbdaee2823"
+        },
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-006.7781eff697467a94.txt",
+          "bytes": 1048576,
+          "gzipBytes": 339140,
+          "sha256": "7781eff697467a941bf1b76a2ebed9f4e8b19bfa87f36a2220602f6c71582be3"
+        },
+        {
+          "path": "assets/maps/world-balanced.a059c744e9d558c1.part-007.5485936d05e09775.txt",
+          "bytes": 81014,
+          "gzipBytes": 10571,
+          "sha256": "5485936d05e09775d3df2f1257908d9b70aa9374d37d2d644e99c8ef05a3f4e4"
+        }
+      ]
     },
     {
       "id": "world-detailed",
@@ -704,6 +836,38 @@
           "sha256": "dfff71c13a00ba71c72659ae2207091855bedddb5a0470769cc84c815dc1a3e4"
         }
       ]
+    },
+    {
+      "id": "balanced_eastasia_modern",
+      "type": "base",
+      "path": "assets/maps/balanced_eastasia_modern.956f0dac4ddfbc12.json",
+      "bytes": 621080,
+      "gzipBytes": 162600,
+      "sha256": "956f0dac4ddfbc128805979c1a0da9dd5c322e4873a4ee4b923173ba421d1f12"
+    },
+    {
+      "id": "balanced_asia_modern",
+      "type": "base",
+      "path": "assets/maps/balanced_asia_modern.14b319f83d6c9c43.json",
+      "bytes": 2323948,
+      "gzipBytes": 637042,
+      "sha256": "14b319f83d6c9c430540e5905ba22ef11eabb4510af1d0e4b439c4fa8824d4b0"
+    },
+    {
+      "id": "balanced_north_america_modern",
+      "type": "base",
+      "path": "assets/maps/balanced_north_america_modern.2ad2a7ba1610853b.json",
+      "bytes": 1009288,
+      "gzipBytes": 294514,
+      "sha256": "2ad2a7ba1610853b4a6ad878cf2eeef0a798df3dbed9ecc713a4a303d0b1080f"
+    },
+    {
+      "id": "balanced_south_america_modern",
+      "type": "base",
+      "path": "assets/maps/balanced_south_america_modern.7af2d8732a17622e.json",
+      "bytes": 841907,
+      "gzipBytes": 231915,
+      "sha256": "7af2d8732a17622efd00f8e14f45c9bf0e90dae6b08badc6c9ffb4c97440403f"
     },
     {
       "id": "regional_eastasia_1419",

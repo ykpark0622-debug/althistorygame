@@ -31,6 +31,7 @@ addDistributedSource('world-detailed');
 const sourceApi = {get: id => sources.find(template => template.id === id) || null, list: () => sources.map(template => ({id:template.id,name:template.name,provinceCount:template.provinces.length,...(template.recommended ? {recommended:true} : {})}))};
 const sandbox = {MapTemplates: sourceApi};
 vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'regional-presets.cjs'), 'utf8'), sandbox, {filename:'regional-presets.cjs'});
+vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'balanced-regions.cjs'), 'utf8'), sandbox, {filename:'balanced-regions.cjs'});
 const original = sandbox.MapTemplates;
 const all = original.list().map(item => original.get(item.id));
 const manifest = {format:'hc-map-manifest-v1', regions:original.regions(), eras:Object.fromEntries(original.regions().map(region => [region.id, original.eras(region.id)])), templates:[], assets:[]};
@@ -40,8 +41,12 @@ const digest = body => crypto.createHash('sha256').update(body).digest('hex');
 const compressedBytes = body => zlib.gzipSync(body, {level:9}).length;
 function save(id, type, value, baseId) {
   const content = Buffer.from(JSON.stringify(value), 'utf8'), contentHash = digest(content), parts = [];
+  // Continental balanced crops stay in one web-uploadable JSON file. Older
+  // assets retain their exact original chunking, URLs and cached bytes.
+  const singleCrop = Boolean(value.template?.balancedRegionId);
+  if (singleCrop && content.length > 8 * chunkBytes) throw new Error('Balanced crop exceeds the 8 MiB web-upload limit: ' + id);
   let body = content;
-  if (content.length > chunkBytes) {
+  if (content.length > chunkBytes && !singleCrop) {
     for (let start = 0; start < content.length;) {
       let end = Math.min(start + chunkBytes, content.length);
       // Never cut a UTF-8 continuation sequence: every fragment is valid text.
@@ -85,6 +90,7 @@ for(const template of all) {
   }
   const entry={id:template.id,name:template.name,provinceCount:template.provinces.length,asset:descriptor.path,downloadBytes:downloadBytes(descriptor)+(baseId?downloadBytes(bases.get(baseId)):0)};
   if(template.recommended)entry.recommended=true;
+  if(template.balancedRegionId)entry.balancedRegionId=template.balancedRegionId;
   if(template.regionId){entry.regionId=template.regionId;entry.eraId=template.eraId;}
   if(baseId)entry.baseId=baseId;
   manifest.templates.push(entry);
