@@ -7,21 +7,27 @@ const sources = JSON.parse(fs.readFileSync(path.join(sourceDir, 'legacy-template
 // geometry and province IDs when a more readable template is introduced.
 const balancedSource = path.join(sourceDir, 'europe-balanced.json');
 if (fs.existsSync(balancedSource)) sources.push(JSON.parse(fs.readFileSync(balancedSource, 'utf8')));
-// Development may keep the processed world source separately. Distribution ZIPs
-// use its identical hashed base asset, avoiding an extra 24.5 MB copy.
-const detailedSource = path.join(sourceDir, 'world-detailed.json');
-if (fs.existsSync(detailedSource)) {
-  sources.push(JSON.parse(fs.readFileSync(detailedSource, 'utf8')));
-} else {
+// Web distributions omit the larger processed world sources. Rebuild them from
+// their verified, manifest-owned hashed assets instead of keeping duplicate data.
+function addDistributedSource(id) {
+  const source = path.join(sourceDir, id + '.json');
+  if (fs.existsSync(source)) {
+    sources.push(JSON.parse(fs.readFileSync(source, 'utf8')));
+    return;
+  }
   const previousManifest = JSON.parse(fs.readFileSync(path.join(output, 'manifest.json'), 'utf8'));
-  const descriptor = previousManifest.assets.find(asset => asset.type === 'base' && asset.id === 'world-detailed');
-  if (!descriptor) throw new Error('Missing world-detailed source and hashed base asset.');
+  const descriptor = previousManifest.assets.find(asset => asset.type === 'base' && asset.id === id);
+  if (!descriptor) throw new Error('Missing ' + id + ' source and hashed base asset.');
   for (const file of [descriptor, ...(descriptor.parts || [])]) {
     if (!path.resolve(root, file.path).startsWith(output + path.sep)) throw new Error('World source must be inside assets/maps.');
   }
-  const previousRegistry = createRegistry({}, previousManifest, id => id === 'node:fs' ? fs : require(id), root);
-  sources.push(previousRegistry.get('world-detailed'));
+  const previousRegistry = createRegistry({}, previousManifest, name => name === 'node:fs' ? fs : require(name), root);
+  sources.push(previousRegistry.get(id));
 }
+addDistributedSource('world-balanced');
+// Development may keep the processed world source separately. Distribution ZIPs
+// use its identical hashed base asset, avoiding an extra 24.5 MB copy.
+addDistributedSource('world-detailed');
 const sourceApi = {get: id => sources.find(template => template.id === id) || null, list: () => sources.map(template => ({id:template.id,name:template.name,provinceCount:template.provinces.length,...(template.recommended ? {recommended:true} : {})}))};
 const sandbox = {MapTemplates: sourceApi};
 vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'regional-presets.cjs'), 'utf8'), sandbox, {filename:'regional-presets.cjs'});
