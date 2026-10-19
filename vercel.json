@@ -41,6 +41,33 @@
       ]
     },
     {
+      "source": "/assets/maps/europe-balanced.8de94c02725f3504.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/europe-balanced.f6dc9386d61c1c3c.part-001.899324450d418b96.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/europe-balanced.f6dc9386d61c1c3c.part-002.d59f6cc7714f5ef9.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/maps/world-detailed.c0c8a23fede0e770.json",
       "headers": [
         {
@@ -905,7 +932,7 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.024.1ae70ca14d4c88e4.txt",
+      "source": "/assets/program/standalone.024.297f4ac4867a7204.txt",
       "headers": [
         {
           "key": "Cache-Control",
@@ -914,7 +941,25 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.025.5507350351d65131.txt",
+      "source": "/assets/program/standalone.025.409e6c8ee868da8b.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.026.ce4002245ea477f8.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.027.2a077d3cdab82d4e.txt",
       "headers": [
         {
           "key": "Cache-Control",

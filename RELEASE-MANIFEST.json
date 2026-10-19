@@ -1,5 +1,5 @@
 {
-  "version": "2.4.1-community",
+  "version": "2.5.0-community",
   "builtAt": "2026-10-20",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -9,6 +9,16 @@
       "path": ".github/workflows/keep-supabase-awake.yml",
       "bytes": 578,
       "sha256": "53ebfa400f65cacd7407f68dc07495ff39099d7abf7e7904f219d20178d9ce11"
+    },
+    {
+      "path": "BALANCED-EUROPE.md",
+      "bytes": 2238,
+      "sha256": "29fac24dcb2159d82325a911d46a5aff378addf09916797047f5539061693f04"
+    },
+    {
+      "path": "BALANCED-MAP-SOURCES.md",
+      "bytes": 9431,
+      "sha256": "66b20389a85ea501ba8947814a5235afc8c92bc0d7657eb7ce47d5962bf73d77"
     },
     {
       "path": "MAP-LOADING.md",
@@ -22,13 +32,13 @@
     },
     {
       "path": "MAP-SOURCES.md",
-      "bytes": 48376,
-      "sha256": "450ebc5355cd60259795e46c98b1c821eb77c667ba446d51300862154b720322"
+      "bytes": 48664,
+      "sha256": "3e19a366b48d0c3ffa2351754efb4af597d9e293ff64137ebc31553de499a3dc"
     },
     {
       "path": "README.md",
-      "bytes": 6805,
-      "sha256": "c8b45dbae5bb4bc60b1c396d78ec6d3516eeceb19e37fc9bfd35f488434e07c7"
+      "bytes": 6916,
+      "sha256": "3282632ac154935c0910854c066e6f83fb915b01f1b9f1c793f9e590438eec3d"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -76,6 +86,11 @@
       "sha256": "dd9ca2ed78b56422381c92a05333ade32d9234bafa959e43731a68bf4b639b71"
     },
     {
+      "path": "TEST-RESULTS-V2.5.txt",
+      "bytes": 15965,
+      "sha256": "48c8d67f11f3b3b3405978d1a62a588b33b77ebb2160afa4055464872295b5f0"
+    },
+    {
       "path": "TEST-RESULTS.txt",
       "bytes": 2620,
       "sha256": "f8306bbdc13335dff8ed24c1f4e6c0baa063bb42d0eadfe260854da3e8ab52af"
@@ -116,9 +131,14 @@
       "sha256": "80f43854c294efa2fcd08f6d889c0bf382221009635f56ab37bceeab70688539"
     },
     {
+      "path": "UPDATE-V2.5.md",
+      "bytes": 1916,
+      "sha256": "031486e848f43cf04be05de2a3ec8e3318b869592c45af3784ccca16075e31fa"
+    },
+    {
       "path": "VERSION.txt",
-      "bytes": 222,
-      "sha256": "08da0c14dea2502638616a1ea4d3fbcbcc5f74c1048aa1e978c7135245b59210"
+      "bytes": 212,
+      "sha256": "5b397c43915318a4ef2e0f5937917ef8b20d185a8c5e639aa84f501fdb943ac0"
     },
     {
       "path": "ai-helper.js",
@@ -132,8 +152,8 @@
     },
     {
       "path": "assets/maps/SIZES.json",
-      "bytes": 2199,
-      "sha256": "d9c99b0ed8c5a3d9d5f14788171b7791a9ddccfd3d8bf8b29257b8b48211778a"
+      "bytes": 2316,
+      "sha256": "f0b513000a701e622089e112745f4ddb2325b50e028a0c188208d3c04ddafddd"
     },
     {
       "path": "assets/maps/eastasia1419.d6e5b2872949754d.json",
@@ -141,9 +161,24 @@
       "sha256": "d6e5b2872949754dd77e3dc71a38ef10b38d2fd4a1b3f5961f708025308f782e"
     },
     {
+      "path": "assets/maps/europe-balanced.8de94c02725f3504.json",
+      "bytes": 575,
+      "sha256": "8de94c02725f3504c10cd1d619ffdad33e2e58cebfddc8b1dac1ba0633f91665"
+    },
+    {
+      "path": "assets/maps/europe-balanced.f6dc9386d61c1c3c.part-001.899324450d418b96.txt",
+      "bytes": 1048574,
+      "sha256": "899324450d418b96fe6b03baf9c1e2affe921ba7804509723f62632e0eeef663"
+    },
+    {
+      "path": "assets/maps/europe-balanced.f6dc9386d61c1c3c.part-002.d59f6cc7714f5ef9.txt",
+      "bytes": 800015,
+      "sha256": "d59f6cc7714f5ef9c8505053697d06d6c74230a992f9f0f986010ad0dea0961e"
+    },
+    {
       "path": "assets/maps/manifest.json",
-      "bytes": 32409,
-      "sha256": "2db94de611bdb20db498fd8080021a4df94e2b430eb461454a3946440411085f"
+      "bytes": 33633,
+      "sha256": "8da9568d9c6e3cb0ca437a773d92a761d6a944db552ff6c67bae233c1bf2a08f"
     },
     {
       "path": "assets/maps/regional_asia_1754.98b0a77511fa0f6b.json",
@@ -517,8 +552,8 @@
     },
     {
       "path": "assets/program/manifest.json",
-      "bytes": 4855,
-      "sha256": "f89ea8a95dfed27a088a174ae881f8690bff36c4293312c69a664bbbbe53d1fa"
+      "bytes": 5231,
+      "sha256": "5a8fd4866a490b655cf288dbcec515718848c8d3f198a9f98ab5726bfa832fab"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -636,14 +671,24 @@
       "sha256": "641d2a7d1a588a54197a7307375fe6321fcab243ad6337748443295b76207b79"
     },
     {
-      "path": "assets/program/standalone.024.1ae70ca14d4c88e4.txt",
+      "path": "assets/program/standalone.024.297f4ac4867a7204.txt",
       "bytes": 1048576,
-      "sha256": "1ae70ca14d4c88e40aed6edb8f3710ceb2c56222afe3c160684932e3953a2dc7"
+      "sha256": "297f4ac4867a72046dfac2e7ac27e678448c6b354a299a9f2f004ce031236e9a"
     },
     {
-      "path": "assets/program/standalone.025.5507350351d65131.txt",
-      "bytes": 680355,
-      "sha256": "5507350351d65131572f1adf3f800630deb94fb3c33287a015b0491fecb5e78b"
+      "path": "assets/program/standalone.025.409e6c8ee868da8b.txt",
+      "bytes": 1048576,
+      "sha256": "409e6c8ee868da8b8de67baec0e7a1be9f378766e6bc538450d9faf3f6e82d48"
+    },
+    {
+      "path": "assets/program/standalone.026.ce4002245ea477f8.txt",
+      "bytes": 1048576,
+      "sha256": "ce4002245ea477f85a0fea9487ed1923ae5d48ea4fe84cd55368b6376e19afb0"
+    },
+    {
+      "path": "assets/program/standalone.027.2a077d3cdab82d4e.txt",
+      "bytes": 433109,
+      "sha256": "2a077d3cdab82d4e5588d2b5431b94d69f181d8ad351f7447872f4d10641e872"
     },
     {
       "path": "bootstrap.js",
@@ -657,8 +702,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 8676,
-      "sha256": "54844d654b89c51a9e80b81ece119a1c1ff0ced3a9cb9386216d2008b6667efb"
+      "bytes": 8830,
+      "sha256": "b8580bfc15f330c140e3426891732b5153bd9595b35a320b09e2bf7efb89009a"
     },
     {
       "path": "community-bridge.js",
@@ -677,8 +722,8 @@
     },
     {
       "path": "editor.js",
-      "bytes": 100674,
-      "sha256": "668de226f037219156509530cccae0f53536d191691cb8c1747761d0959b18a8"
+      "bytes": 101930,
+      "sha256": "58badaf7bb9418aada8e6a9349a9c2eadaad66ce9132b1c33cacf95e10e6b8e7"
     },
     {
       "path": "engine.js",
@@ -689,6 +734,11 @@
       "path": "examples/chronicle-sejong.json",
       "bytes": 10236,
       "sha256": "8a2c2616f1b920826ae07b00003fb285b435155f80eb923fcc43a7ba92a49e0c"
+    },
+    {
+      "path": "examples/europe-balanced.map.json",
+      "bytes": 519,
+      "sha256": "9057f9749df9e848578018f5b56b0ed2f92c70608f19a84a9b9aac7fbca73bfb"
     },
     {
       "path": "examples/imjin-world-notes.md",
@@ -777,8 +827,8 @@
     },
     {
       "path": "map-templates.js",
-      "bytes": 37921,
-      "sha256": "19962ba18d31f7bfeb23c4a8bbc4c8f27875bb8b21635480c1d0cb03d9c3f0bf"
+      "bytes": 38858,
+      "sha256": "b13ddf2f32f6162fa494891827305760dcaee2d651a40b1e48090ea05102706c"
     },
     {
       "path": "map-view.css",
@@ -787,8 +837,8 @@
     },
     {
       "path": "map-view.js",
-      "bytes": 22687,
-      "sha256": "351299d20ff152417dd6e3ca195e32fedef3dab826ed90877c582ec485c1ea36"
+      "bytes": 22745,
+      "sha256": "298d87e7e0dc4197aa12f654362edea888dc6570fe898c6966adf2bc33ac50f1"
     },
     {
       "path": "privacy.html",
@@ -807,8 +857,8 @@
     },
     {
       "path": "run-tests.cjs",
-      "bytes": 862,
-      "sha256": "5a384a41b5a1a04923871a396326369077e8ba98b2812fc2d27987a9d0639474"
+      "bytes": 890,
+      "sha256": "759938076957dab22ecfb19a275e4f5f453c3836b45d43ecc860a74a50876fa7"
     },
     {
       "path": "serve.cjs",
@@ -817,8 +867,8 @@
     },
     {
       "path": "standalone.html",
-      "bytes": 6360,
-      "sha256": "23ae3248b22e6a3d469be13e9d7592412d531207d8642c07a5907c96dce13440"
+      "bytes": 6668,
+      "sha256": "d41435ebd68a22329d0fe561957622e06703b37013cc64f1b3567c7f62a88e29"
     },
     {
       "path": "styles.css",
@@ -856,6 +906,16 @@
       "sha256": "30ae98108b3bbab953ca9a5440b776684b86815b276bbc3f058f58a7463e33ae"
     },
     {
+      "path": "tests/balanced-europe-browser.cjs",
+      "bytes": 14139,
+      "sha256": "b3103ae1b10227f68f60ab8adeae183923a5d2ffb4761b431dcd34cb034758cb"
+    },
+    {
+      "path": "tests/balanced-europe.cjs",
+      "bytes": 3997,
+      "sha256": "1edac51420a4d965f779591bac9a2c7234a04d7f606faf8e19ce7e2d5a328695"
+    },
+    {
       "path": "tests/detailed-map.cjs",
       "bytes": 2991,
       "sha256": "ac6727583593ffb2e9de5e187e7d2baf40318e45940e2e93551a4d993bd50c16"
@@ -879,6 +939,11 @@
       "path": "tests/fixtures/v1-engine.cjs",
       "bytes": 30422,
       "sha256": "98d0dafd89e1c29e9ac8b1a802242c273dbbc964ae531411d8540a512d2b8b0c"
+    },
+    {
+      "path": "tests/fixtures/v241-map-manifest.json",
+      "bytes": 32409,
+      "sha256": "2db94de611bdb20db498fd8080021a4df94e2b430eb461454a3946440411085f"
     },
     {
       "path": "tests/flow-reign-smoke.cjs",
@@ -917,8 +982,8 @@
     },
     {
       "path": "tests/map-build-fallback.cjs",
-      "bytes": 2284,
-      "sha256": "d4c3b44bc6e9121cf9e9fbbdbde0a04d9249fb97fc831f5dbd08378781166a4b"
+      "bytes": 2383,
+      "sha256": "ce7846890513374d7316e7550ec4e67401770dc9d961329946d8705e2efb637c"
     },
     {
       "path": "tests/map-document.cjs",
@@ -927,8 +992,8 @@
     },
     {
       "path": "tests/map-loader.cjs",
-      "bytes": 11143,
-      "sha256": "616ab631ce0ff076315f06abbf313e415a657e17d956f5edf76c3c828bc0f6d2"
+      "bytes": 11979,
+      "sha256": "c7d79fbd77172d66b044fbef3ea598d3312447017c875028e56aac51143b6fd3"
     },
     {
       "path": "tests/map-maker-browser.cjs",
@@ -962,8 +1027,8 @@
     },
     {
       "path": "tests/regional-maps.cjs",
-      "bytes": 5464,
-      "sha256": "d9f9a273b75a3bbf14373d968e9c1d090b00e1801c9f17c7204d45e641c08717"
+      "bytes": 5541,
+      "sha256": "e8a133bf11bd069748d7a6c106c64992c8c492fa35ab2adc2200961850ace5a3"
     },
     {
       "path": "tests/regional-renderer-browser.cjs",
@@ -996,14 +1061,19 @@
       "sha256": "b2f0b5a473b7f3c8cfb9e95b67192e087622e61cfe7598ee9d83463e11243f3d"
     },
     {
+      "path": "tools/build-balanced-europe.cjs",
+      "bytes": 16556,
+      "sha256": "5b190e93c18c8224af926ecab362ba9cb6499f360a8da758bbc75ab7bffe5e56"
+    },
+    {
       "path": "tools/build-detailed-map.cjs",
       "bytes": 11701,
       "sha256": "6ecca146dc58e4bab2a8f5b5b062107f7fe129dd6849ed2e5fdebdec0630cb76"
     },
     {
       "path": "tools/build-map-assets.cjs",
-      "bytes": 7997,
-      "sha256": "9e6b45169b0640e745b64794fe1b73b679a30f06b78ca97d9abbb43f40ad9eea"
+      "bytes": 8425,
+      "sha256": "09b4084e3c5dfeb31644b217ce6bfb97e4b4102007ba78ddb5310c092b18a99e"
     },
     {
       "path": "tools/build-map-regions.cjs",
@@ -1036,9 +1106,24 @@
       "sha256": "2ddf44470ec799c9578dd025db0d6c96615940225b8d1ce8d7303d9913054418"
     },
     {
+      "path": "tools/map-source/europe-balanced.json",
+      "bytes": 1848550,
+      "sha256": "cc68b26572fe209bc74b9a992bad9f30cd799964fc7cd4d0e3a66a2f31e9d9f4"
+    },
+    {
       "path": "tools/map-source/legacy-templates.json",
       "bytes": 479775,
       "sha256": "bfe6e62eea043a40c3f7138b939f3f527352a32ee933e8c31eee73a3a38c1091"
+    },
+    {
+      "path": "tools/map-source/licenses/europe-balanced-build.json",
+      "bytes": 14426,
+      "sha256": "30f4d212e3dccb7ff3bd00ba3fde6d7fb474e53525a0a8519f7c985909b3468b"
+    },
+    {
+      "path": "tools/map-source/licenses/europe-balanced-sources.json",
+      "bytes": 9385,
+      "sha256": "1f66987d5855c4ca6ecc550cfd458a39f1634cd9c7604f153f586ef0309ce0a5"
     },
     {
       "path": "tools/map-source/licenses/geoBoundaries-LICENSE.txt",
@@ -1072,8 +1157,8 @@
     },
     {
       "path": "vercel.json",
-      "bytes": 24443,
-      "sha256": "f271625949c4c6426619854a316b847eb43ad794114a346c51daa5e027a74ee0"
+      "bytes": 25600,
+      "sha256": "db30ffb3af8671f521a68cabe73073c002789820758eb20772a1d5055fd51fc4"
     }
   ]
 }

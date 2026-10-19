@@ -219,3 +219,8 @@
 ## 국가 단위 대체 목록
 
 - OMN / ADM2 / 원자료 표기: Other - Direct Permission
+
+
+## 유럽 균형 지도 추가
+
+새 europe-balanced 템플릿의 단계 선택·인접 구역 병합과 신규 이탈리아·스위스 원자료는 [BALANCED-MAP-SOURCES.md](BALANCED-MAP-SOURCES.md)를 참고하세요. 기존 템플릿과 원자료의 이용 조건은 유지됩니다.

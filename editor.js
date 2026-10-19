@@ -507,6 +507,19 @@
       current.mapSetup = globalThis.MapTemplates?.selection?.(templateId) || null;
       mark(); render();
     }
+    const recommendedTemplates = templates.filter(template => template.recommended);
+    if (recommendedTemplates.length) {
+      const stage = section('추천 지도'), actions = $('div', 'toolbar');
+      for (const template of recommendedTemplates) {
+        const active = draft.map?.templateId === template.id;
+        const choose = button(current.mapLoading === template.id ? '선택한 지도를 불러오는 중…' : template.name + ' · ' + template.provinceCount.toLocaleString('ko-KR') + '개 지역' + (active ? ' · 사용 중' : ''), () => applyMap(template.id), 'primary');
+        choose.disabled = active || current.mapLoading === template.id;
+        choose.dataset.recommendedTemplate = template.id;
+        actions.append(choose);
+      }
+      stage.append(notice('현대 행정구역을 바탕으로 지역 수를 조정한 편집용 지도입니다. 시대별 실제 국경을 재현한 지도는 아닙니다. 지도를 고른 뒤 국가명·색·소유권을 바꿔 시나리오에 맞추세요.'), actions);
+      content.append(stage);
+    }
     const regions = globalThis.MapTemplates?.regions?.() || [];
     if (regions.length) {
       const applied = draft.map && MapTemplates.selection(draft.map.templateId);
@@ -531,10 +544,10 @@
     }
     const legacy = $('details', 'regional-legacy-maps');
     legacy.append($('summary', '', regions.length ? '기존 시나리오 지도·호환 템플릿' : '지도 템플릿 선택'));
-    const legacyTemplates = templates.filter(template => !globalThis.MapTemplates?.selection?.(template.id));
-    if (!regions.length || (draft.map && !MapTemplates.selection(draft.map.templateId))) legacy.open = true;
+    const legacyTemplates = templates.filter(template => !template.recommended && !globalThis.MapTemplates?.selection?.(template.id));
+    if (!regions.length || (draft.map && !MapTemplates.selection(draft.map.templateId) && !recommendedTemplates.some(template => template.id === draft.map.templateId))) legacy.open = true;
     const regionalApplied = draft.map && globalThis.MapTemplates?.selection?.(draft.map.templateId);
-    legacy.append(select('지도 템플릿', regionalApplied ? '' : draft.map?.templateId || '', [['', regions.length ? '기존 템플릿을 선택하세요' : '지도 사용 안 함'], ...legacyTemplates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => { if (value || !regions.length) applyMap(value); }));
+    legacy.append(select('지도 템플릿', regionalApplied || recommendedTemplates.some(template => template.id === draft.map?.templateId) ? '' : draft.map?.templateId || '', [['', regions.length ? '기존 템플릿을 선택하세요' : '지도 사용 안 함'], ...legacyTemplates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => { if (value || !regions.length) applyMap(value); }));
     content.append(legacy);
     const config = mapConfig(draft); if (!config) { content.append(notice(templates.length ? '템플릿을 선택하면 지도와 지역 편집기가 열립니다.' : '지도 템플릿 파일을 불러오지 못했습니다.')); return; }
     const countryItems = () => mapConfig(draft).countries.map(country => [country.id, country.name]);
