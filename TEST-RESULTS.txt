@@ -1,4 +1,6 @@
-2.0.0-community 검증 기록 — 2026-10-19
+현재 2.1 검증 결과는 TEST-RESULTS-V2.1.txt를 보세요 (Node 검사 77개 + 실제 Chrome 검사 통과).
+
+아래는 보관한 이전 2.0.0-community 검증 기록 — 2026-10-19
 
 node run-tests.cjs: 자동 검사 68개 통과
   엔진 V1/V2: 18

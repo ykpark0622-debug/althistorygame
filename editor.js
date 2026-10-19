@@ -4,6 +4,14 @@
 
   let current = null;
   let resetUndo = null;
+  let openSequence = 0;
+  const needsTemplate = value => value?.map?.templateId && !globalThis.MapTemplates?.get(value.map.templateId);
+  async function ensureTemplate(value) {
+    if (needsTemplate(value)) {
+      if (!globalThis.MapTemplates?.ensure) throw new Error('지도 로더를 준비하지 못했습니다. 새로고침 후 다시 시도해 주세요.');
+      await MapTemplates.ensure(value.map.templateId);
+    }
+  }
   const $ = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -17,6 +25,7 @@
     ['events', '사건·선택지'], ['flowchart', '분기 흐름도'], ['map', '지도·초기 영토'], ['reign', '치세·연도'], ['randomEvents', '돌발 사건'], ['endings', '엔딩'], ['json', 'JSON']
   ];
   const mark = () => { if (current) current.dirty = true; };
+  const cancelMapPreparation = () => { if (current) { current.mapRequest = (current.mapRequest || 0) + 1; current.mapLoading = ''; } };
 
   function button(text, action, style = 'secondary') {
     const node = $('button', 'btn ' + style, text);
@@ -29,6 +38,7 @@
     const wrap = $('label', 'field');
     wrap.append($('span', '', label));
     const node = $(options.multiline ? 'textarea' : 'input', options.compact ? 'compact-input' : '');
+    node.setAttribute('aria-label', label);
     if (!options.multiline) node.type = options.type || 'text';
     else node.rows = options.rows || 4;
     if (options.step) node.step = options.step;
@@ -56,6 +66,7 @@
     const wrap = $('label', 'field');
     if (label) wrap.append($('span', '', label));
     const node = $('select', options.compact ? 'compact-input' : '');
+    if (label) node.setAttribute('aria-label', label);
     const choices = items.map(item => Array.isArray(item) ? item : [item, item]);
     if (value !== undefined && !choices.some(item => String(item[0]) === String(value))) {
       choices.unshift([value, '⚠ 찾을 수 없음: ' + value]);
@@ -66,16 +77,62 @@
       node.append(option);
     });
     node.value = value === undefined ? '' : String(value);
-    node.addEventListener('change', () => { action(node.value); mark(); });
+    node.addEventListener('change', () => { action(node.value); if (options.mark !== false) mark(); });
     wrap.append(node);
     if (options.help) wrap.append($('span', 'small muted', options.help));
     return wrap;
+  }
+
+  // A dense world template must not create tens of thousands of DOM options
+  // for every condition and territory effect. Keep the normal selector on
+  // small maps, and search the complete registry with a bounded result list.
+  const provinceIndexes = new WeakMap();
+  function provinceIndex(template) {
+    if (!template) return { byId: new Map(), rows: [] };
+    if (!provinceIndexes.has(template)) provinceIndexes.set(template, {
+      byId: new Map(template.provinces.map(province => [province.id, province])),
+      rows: template.provinces.map(province => ({ province, text: (province.name + ' ' + province.id + ' ' + province.owner).toLocaleLowerCase() }))
+    });
+    return provinceIndexes.get(template);
+  }
+  function provinceSelect(label, value, config, action) {
+    const provinces = config?.template.provinces || [];
+    if (provinces.length <= 500) return select(label, value, provinces.map(province => [province.id, province.name + ' · ' + province.id]), action);
+    const wrap = $('div', 'v2-province-search'), index = provinceIndex(config.template);
+    const searchLabel = $('label', 'field'), search = $('input'); search.type = 'search';
+    search.setAttribute('aria-label', label + ' 검색');
+    search.placeholder = '지역 이름 또는 ID 검색';
+    searchLabel.append($('span', '', label + ' 검색'), search);
+    const resultLabel = $('label', 'field'), result = $('select'), help = $('span', 'small muted');
+    result.setAttribute('aria-label', label);
+    resultLabel.append($('span', '', label), result);
+    let selected = value;
+    function fill() {
+      const query = search.value.trim().toLocaleLowerCase(), matches = [];
+      let count = 0;
+      for (const item of index.rows) if (!query || item.text.includes(query)) {
+        count++; if (matches.length < 100) matches.push(item.province);
+      }
+      const existing = index.byId.get(selected);
+      if (existing && !matches.some(province => province.id === selected)) matches.unshift(existing);
+      result.replaceChildren();
+      if (selected !== undefined && !existing) {
+        const missing = $('option', '', '⚠ 찾을 수 없음: ' + selected); missing.value = selected; result.append(missing);
+      }
+      for (const province of matches) { const option = $('option', '', province.name + ' · ' + province.id); option.value = province.id; result.append(option); }
+      result.value = selected || '';
+      help.textContent = count.toLocaleString() + '개 검색됨 · 최대 100개 표시. 현재 선택은 검색어와 관계없이 유지됩니다.';
+    }
+    search.addEventListener('input', fill);
+    result.addEventListener('change', () => { selected = result.value; action(selected); mark(); });
+    fill(); wrap.append(searchLabel, resultLabel, help); return wrap;
   }
 
   function checkbox(label, value, action, help) {
     const wrap = $('label', 'field-row');
     const node = $('input');
     node.type = 'checkbox';
+    node.setAttribute('aria-label', label);
     node.checked = Boolean(value);
     node.addEventListener('change', () => { action(node.checked); mark(); });
     wrap.append(node, $('span', '', label));
@@ -99,12 +156,106 @@
   function notice(text) { return $('p', 'notice small', text); }
 
   function upgrade(scenario) { scenario.schemaVersion = 2; if (!scenario.mode) scenario.mode = 'chronicle'; }
+  function territoryReferences(scenario) {
+    const provinces = [], countries = new Set();
+    function conditionList(list, label) {
+      (list || []).forEach(condition => {
+        if (condition.kind !== 'territory') return;
+        provinces.push({ id: condition.key, label: label + ' 조건' });
+        if ((condition.field || 'owner') !== 'marker' && condition.value) countries.add(condition.value);
+      });
+    }
+    function record(item, label) {
+      conditionList(item.when, label);
+      (item.territory || []).forEach(effect => {
+        provinces.push({ id: effect.prov, label: label + ' 영토 변화' });
+        for (const field of ['to', 'occupation', 'influence']) if (effect[field]) countries.add(effect[field]);
+      });
+    }
+    (scenario.events || []).forEach(event => {
+      record(event, event.title || event.id);
+      (event.choices || []).forEach((choice, index) => record(choice, (event.title || event.id) + ' 선택 ' + (index + 1)));
+    });
+    (scenario.randomEvents || []).forEach(rule => record(rule, rule.title || rule.id));
+    (scenario.endings || []).forEach(ending => record(ending, ending.title || ending.id));
+    (scenario.reign?.turns || []).forEach(turn => {
+      record(turn, turn.title || turn.id);
+      for (const field of ['between', 'settlements']) (turn[field] || []).forEach(rule => record(rule, rule.text || rule.id));
+    });
+    return { provinces, countries };
+  }
+  function allMapCountries(scenario) {
+    const template = scenario.map && globalThis.MapTemplates?.get(scenario.map.templateId);
+    if (!template) return [];
+    const countries = new Map((template.countries || []).map(country => [country.id, { ...country }]));
+    (scenario.map.countries || []).forEach(country => countries.set(country.id, { ...(countries.get(country.id) || {}), ...country }));
+    return [...countries.values()];
+  }
   function mapConfig(scenario) {
     const template = scenario.map && globalThis.MapTemplates?.get(scenario.map.templateId);
     if (!template) return null;
-    const countries = new Map((template.countries || []).map(country => [country.id, { ...country }]));
-    (scenario.map.countries || []).forEach(country => countries.set(country.id, { ...(countries.get(country.id) || {}), ...country }));
-    return { template, countries: [...countries.values()] };
+    const initial = scenario.map.initial || {}, owners = initial.owners || {}, used = new Set();
+    template.provinces.forEach(province => used.add(owners[province.id] || province.owner));
+    for (const layer of ['occupation', 'influence']) Object.values(initial[layer] || {}).forEach(id => { if (id) used.add(id); });
+    (scenario.map.countries || []).forEach(country => used.add(country.id));
+    territoryReferences(scenario).countries.forEach(id => used.add(id));
+    if (scenario.map.playerCountry) used.add(scenario.map.playerCountry);
+    return { template, countries: allMapCountries(scenario).filter(country => used.has(country.id)) };
+  }
+  // Plan a map change before touching the draft. Stable province IDs keep edits
+  // inside a new crop; references outside it must be fixed explicitly first.
+  function planMapChange(scenario, templateId) {
+    const template = templateId && globalThis.MapTemplates?.get(templateId);
+    if (templateId && !template) return { error: '선택한 지도 템플릿을 찾을 수 없습니다.' };
+    const valid = new Set(template?.provinces.map(province => province.id) || []);
+    const references = territoryReferences(scenario);
+    const blocked = references.provinces.filter(reference => !valid.has(reference.id));
+    if (blocked.length) return { blocked, removed: 0 };
+    let removed = 0;
+    const initial = {};
+    for (const layer of ['owners', 'occupation', 'influence', 'markers']) {
+      initial[layer] = {};
+      for (const [id, value] of Object.entries(scenario.map?.initial?.[layer] || {})) {
+        if (valid.has(id)) initial[layer][id] = value;
+        else removed++;
+      }
+    }
+    if (!template) return { nextMap: null, removed };
+    const previousTemplate = scenario.map && globalThis.MapTemplates?.get(scenario.map.templateId);
+    const previousCountries = new Map((previousTemplate?.countries || []).map(country => [country.id, country]));
+    function moveCountryOverride(country) {
+      const override = copy(country), bounds = override.focusBounds;
+      delete override.available;
+      if (!Array.isArray(bounds)) return override;
+      const defaultBounds = previousCountries.get(country.id)?.focusBounds;
+      if (Array.isArray(defaultBounds) && bounds.length === defaultBounds.length && bounds.every((value, index) => Math.abs(value - defaultBounds[index]) < 1e-7)) {
+        delete override.focusBounds;
+      } else if (previousTemplate?.id !== template.id) {
+        // Custom bounds in regional templates use the same world geometry with
+        // different origins. Legacy templates can use unrelated projections.
+        if (previousTemplate?.regionId && template.regionId && bounds.length === 4 && bounds.every(Number.isFinite)) {
+          const dx = previousTemplate.offsetX - template.offsetX, dy = previousTemplate.offsetY - template.offsetY;
+          const translated = [Math.max(0, bounds[0] + dx), Math.max(0, bounds[1] + dy), Math.min(template.width, bounds[2] + dx), Math.min(template.height, bounds[3] + dy)];
+          if (translated[0] < translated[2] && translated[1] < translated[3]) override.focusBounds = translated;
+          else delete override.focusBounds;
+        } else delete override.focusBounds;
+      }
+      return override;
+    }
+    const countries = (scenario.map?.countries || []).map(moveCountryOverride), known = new Set([...template.countries.map(country => country.id), ...countries.map(country => country.id)]);
+    const needed = new Set(references.countries);
+    for (const layer of ['owners', 'occupation', 'influence']) Object.values(initial[layer]).forEach(id => { if (id) needed.add(id); });
+    if (scenario.map?.playerCountry) needed.add(scenario.map.playerCountry);
+    allMapCountries(scenario).forEach(country => {
+      if (needed.has(country.id) && !known.has(country.id)) { countries.push(moveCountryOverride(country)); known.add(country.id); }
+    });
+    const represented = new Set(template.provinces.map(province => initial.owners[province.id] || province.owner));
+    const preferred = template.countries.find(country => represented.has(country.id) && ['joseon', 'france', 'kor', 'fra'].includes(country.id)) || template.countries.find(country => represented.has(country.id)) || countries[0];
+    const present = new Set(represented);
+    for (const layer of ['occupation', 'influence']) Object.values(initial[layer]).forEach(id => { if (id) present.add(id); });
+    const previousPlayer = scenario.map?.playerCountry;
+    const playerCountry = known.has(previousPlayer) && present.has(previousPlayer) ? previousPlayer : preferred?.id;
+    return { removed, playerChanged: Boolean(previousPlayer && previousPlayer !== playerCountry), nextMap: { ...(scenario.map || {}), templateId, playerCountry, countries, initial } };
   }
   function initialMapState(scenario) {
     const config = mapConfig(scenario); if (!config) return null;
@@ -139,7 +290,7 @@
           changed(); renderRows();
         }));
         if (condition.kind === 'territory') {
-          row.append(select('지역', condition.key, (config?.template.provinces || []).map(province => [province.id, province.name + ' · ' + province.id]), value => { condition.key = value; changedV2(scenario, onChange); }),
+          row.append(provinceSelect('지역', condition.key, config, value => { condition.key = value; changedV2(scenario, onChange); }),
             select('비교할 상태', condition.field || 'owner', [['owner', '소유국'], ['occupation', '군사 점령'], ['influence', '영향권'], ['marker', '표식']], value => { condition.field = value; condition.value = value === 'marker' ? '' : config?.countries[0]?.id || null; changedV2(scenario, onChange); renderRows(); }),
             select('비교', condition.op, [['eq', '같음'], ['ne', '다름']], value => { condition.op = value; changedV2(scenario, onChange); }));
           if (condition.field === 'marker') {
@@ -175,7 +326,7 @@
       rows.replaceChildren(); const config = mapConfig(scenario);
       (owner.territory || []).forEach((effect, index) => {
         const card = $('div', 'editor-card v2-effect-card');
-        const province = select('변경할 지역', effect.prov, (config?.template.provinces || []).map(item => [item.id, item.name + ' · ' + item.id]), value => { effect.prov = value; changed(); });
+        const province = provinceSelect('변경할 지역', effect.prov, config, value => { effect.prov = value; changed(); });
         card.append(province);
         const picker = $('div', 'v2-map-picker'); picker.hidden = true;
         card.append(button('지도에서 지역 선택', () => { picker.hidden = !picker.hidden; if (!picker.hidden) { picker.replaceChildren(); paintMap(picker, scenario, value => { effect.prov = typeof value === 'string' ? value : value.id || value.prov; changed(); renderRows(); }); } }), picker);
@@ -214,6 +365,7 @@
   }
   function idInput(label, item, kind, help) {
     const wrap = $('label', 'field'); wrap.append($('span', '', label)); const node = $('input'); node.value = item.id || '';
+    node.setAttribute('aria-label', label);
     node.addEventListener('change', () => {
       const next = node.value.trim(), collections = { stat: current.draft.stats, flag: current.draft.flags, event: current.draft.events, ending: current.draft.endings, part: current.draft.reign?.parts || [] };
       if (!/^[a-z][a-z0-9_]*$/i.test(next) || ['__proto__', 'prototype', 'constructor'].includes(next.toLowerCase()) || (kind === 'event' && ['END', 'RETURN'].includes(next)) || (collections[kind] || []).some(other => other !== item && other.id === next)) {
@@ -321,27 +473,109 @@
 
   function renderMap(content) {
     const draft = current.draft, templates = globalThis.MapTemplates?.list() || [];
-    content.append($('h2', '', '지도와 시작 영토'), notice('지역을 누르면 시작 소유국·점령·영향권·표식을 편집합니다. 소유권과 군사 점령은 서로 다른 상태입니다.'));
-    content.append(select('지도 템플릿', draft.map?.templateId || '', [['', '지도 사용 안 함'], ...templates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => {
-      if (draft.map && value !== draft.map.templateId && !confirm('지도 템플릿을 바꾸면 현재 지도의 초기 배치를 비웁니다. 사건의 영토 효과·조건은 남으므로 새 지역 ID에 맞게 확인하세요.')) return;
-      if (!value) delete draft.map;
-      else {
-        const template = MapTemplates.get(value); upgrade(draft);
-        const preferred = template.countries.find(country => ['joseon', 'france'].includes(country.id)) || template.countries[0];
-        draft.map = { templateId: value, playerCountry: preferred.id, countries: [], initial: { owners: {}, occupation: {}, influence: {}, markers: {} } };
+    content.append($('h2', '', '지역과 시대를 고른 뒤 지도 편집'), notice('① 지역 지도 → ② 시대 기본안 → ③ 지도 준비 순서로 시작하세요. 시대별 배치는 수정할 수 있는 출발점입니다. 지도의 지역을 눌러 소유국·점령·영향권·표식을 바로 고칠 수 있습니다.'));
+    if (current.mapStatus) content.append(notice(current.mapStatus));
+    if (current.mapLoading) content.append(notice('선택한 지역의 지도 파일을 불러오는 중입니다. 현재 지도와 작성한 내용은 유지됩니다.'));
+    async function applyMap(templateId) {
+      const owner = current, request = owner.mapRequest = (owner.mapRequest || 0) + 1;
+      if ((draft.map?.templateId || '') === (templateId || '')) return;
+      if (templateId && !globalThis.MapTemplates?.get(templateId)) {
+        owner.mapLoading = templateId; render();
+        try { await ensureTemplate({ map: { templateId } }); }
+        catch (error) {
+          if (current !== owner || owner.mapRequest !== request) return;
+          owner.mapLoading = ''; render();
+          showReport({ errors: ['지도를 불러오지 못했습니다. 기존 지도와 편집 내용은 유지했습니다. “지도 준비”를 눌러 다시 시도해 주세요.\n' + error.message], warnings: [] }); return;
+        }
+        if (current !== owner || owner.mapRequest !== request) return;
+        owner.mapLoading = ''; render();
       }
-      current.mapProvince = null; current.mapCountry = null; mark(); render();
-    }));
+      const plan = planMapChange(draft, templateId);
+      if (plan.error) { showReport({ errors: [plan.error], warnings: [] }); return; }
+      if (plan.blocked?.length) {
+        const unique = [...new Set(plan.blocked.map(reference => reference.id))];
+        const examples = plan.blocked.slice(0, 4).map(reference => reference.label + ': ' + reference.id).join('\n');
+        showReport({ errors: ['지도 변경을 보류했습니다. 새 지도 바깥의 ' + unique.length + '개 지역을 참조하는 영토 변화·조건이 ' + plan.blocked.length + '곳에 있습니다. 해당 연결을 수정·삭제하거나 더 넓은 지도를 선택하세요.\n' + examples], warnings: [] });
+        return;
+      }
+      if (plan.removed && !confirm('새 지도 범위 밖에 있는 시작 영토·점령·영향권·표식 ' + plan.removed + '개 항목이 제외됩니다. 범위 안의 수정과 사건·선택지·엔딩은 유지합니다. 이 설정을 적용할까요?')) return;
+      if (plan.nextMap) { upgrade(draft); draft.map = plan.nextMap; }
+      else delete draft.map;
+      const newPlayerName = plan.nextMap && allMapCountries(draft).find(country => country.id === draft.map.playerCountry)?.name;
+      current.mapStatus = plan.playerChanged ? '이전 플레이 국가의 영토·점령·영향권이 새 지도 범위에 없어, 플레이 국가를 ' + (newPlayerName || draft.map.playerCountry) + '(으)로 설정했습니다. 아래에서 다른 국가로 바꿀 수 있습니다.' : '';
+      current.mapProvince = null; current.mapCountry = null; current.mapPaintUndo = [];
+      current.mapSetup = globalThis.MapTemplates?.selection?.(templateId) || null;
+      mark(); render();
+    }
+    const regions = globalThis.MapTemplates?.regions?.() || [];
+    if (regions.length) {
+      const applied = draft.map && MapTemplates.selection(draft.map.templateId);
+      if (!current.mapSetup) current.mapSetup = applied ? { ...applied } : { regionId: regions[0].id, eraId: regions[0].defaultEra };
+      const setup = current.mapSetup, region = regions.find(item => item.id === setup.regionId) || regions[0];
+      const eras = MapTemplates.eras(region.id);
+      if (!eras.some(era => era.id === setup.eraId)) setup.eraId = region.defaultEra || eras[0]?.id;
+      const stage = section(current.mapOnly ? '만들 지도의 범위' : '시나리오의 지도 범위'), controls = $('div', 'form-grid regional-map-controls');
+      controls.append(select('① 사용할 지역 지도', region.id, regions.map(item => [item.id, item.name]), value => {
+        const nextRegion = regions.find(item => item.id === value);
+        current.mapRequest = (current.mapRequest || 0) + 1; current.mapLoading = '';
+        current.mapSetup = { regionId: value, eraId: nextRegion.defaultEra }; render();
+      }, { mark: false }), select('② 시대 기본안', setup.eraId, eras.map(era => [era.id, era.name]), value => { current.mapRequest = (current.mapRequest || 0) + 1; current.mapLoading = ''; setup.eraId = value; render(); }, { mark: false }));
+      const era = eras.find(item => item.id === setup.eraId), requested = MapTemplates.regionalId(region.id, setup.eraId);
+      if (era?.notice) stage.append(notice(era.notice));
+      const prepare = button(current.mapLoading === requested ? '선택한 지도를 불러오는 중…' : '③ 이 설정으로 지도 준비', () => applyMap(requested), 'primary');
+      prepare.disabled = draft.map?.templateId === requested || current.mapLoading === requested;
+      const actions = $('div', 'toolbar'); actions.append(prepare);
+      if (draft.map && !current.mapOnly) actions.append(button('지도 사용 안 함', () => applyMap('')));
+      stage.prepend(controls); stage.append(actions, $('p', 'small muted', current.mapLoading === requested ? '선택한 지역 파일을 준비하고 있습니다. 다른 지역을 고르면 마지막으로 요청한 지도가 적용됩니다.' : prepare.disabled ? '현재 적용된 지역과 시대입니다. 아래 지도에서 세부 배치를 편집하세요.' : '준비 버튼을 누르면 선택한 범위의 지도만 사용합니다. 범위 안의 기존 수정은 유지합니다.'));
+      content.append(stage);
+    }
+    const legacy = $('details', 'regional-legacy-maps');
+    legacy.append($('summary', '', regions.length ? '기존 시나리오 지도·호환 템플릿' : '지도 템플릿 선택'));
+    const legacyTemplates = templates.filter(template => !globalThis.MapTemplates?.selection?.(template.id));
+    if (!regions.length || (draft.map && !MapTemplates.selection(draft.map.templateId))) legacy.open = true;
+    const regionalApplied = draft.map && globalThis.MapTemplates?.selection?.(draft.map.templateId);
+    legacy.append(select('지도 템플릿', regionalApplied ? '' : draft.map?.templateId || '', [['', regions.length ? '기존 템플릿을 선택하세요' : '지도 사용 안 함'], ...legacyTemplates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => { if (value || !regions.length) applyMap(value); }));
+    content.append(legacy);
     const config = mapConfig(draft); if (!config) { content.append(notice(templates.length ? '템플릿을 선택하면 지도와 지역 편집기가 열립니다.' : '지도 템플릿 파일을 불러오지 못했습니다.')); return; }
     const countryItems = () => mapConfig(draft).countries.map(country => [country.id, country.name]);
-    content.append(select('플레이어 국가', draft.map.playerCountry, countryItems(), value => { draft.map.playerCountry = value; mark(); render(); }));
+    content.append(select(current.mapOnly ? '중심 국가' : '플레이어 국가', draft.map.playerCountry, countryItems(), value => { draft.map.playerCountry = value; current.mapStatus = ''; mark(); render(); }, { help: current.mapOnly ? '지도 이동 버튼에서 사용할 국가입니다. 시나리오에 넣은 뒤 플레이어 국가를 다시 고를 수 있습니다.' : '지도는 선택한 지역 전체로 시작합니다. 오른쪽 국가 이동 버튼을 누르면 이 국가의 영토로 이동합니다.' }));
+    content.append(button('지역 ID 목록 내려받기', () => {
+      const text = JSON.stringify({ templateId: config.template.id, countries: config.countries,
+        provinces: config.template.provinces.map(({ id, name, owner }) => ({ id, name, owner })) }, null, 2);
+      const blob = new Blob([text + '\n'], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob), link = $('a'); link.href = url;
+      link.download = config.template.id + '-region-ids.json'; document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }));
     if (config.template.notice) content.append(notice(config.template.notice));
-    const preview = $('div', 'v2-editor-map'), panel = $('div', 'editor-card v2-province-panel');
-    content.append(preview, panel);
     const initial = draft.map.initial || (draft.map.initial = {});
     for (const layer of ['owners', 'occupation', 'influence', 'markers']) if (!initial[layer]) initial[layer] = {};
+    const paintTools = section('지도를 누르며 세부 배치 수정', '빠른 칠하기를 켜면 클릭할 때마다 선택한 국가의 시작 영토로 바뀝니다. 끄면 지역별 점령·영향권·표식을 자세히 편집합니다.');
+    current.mapPaintCountry = config.countries.some(country => country.id === current.mapPaintCountry) ? current.mapPaintCountry : draft.map.playerCountry;
+    paintTools.append(grid(checkbox('빠른 칠하기', current.mapPaintEnabled, value => { current.mapPaintEnabled = value; render(); }), select('칠할 시작 소유국', current.mapPaintCountry, countryItems(), value => { current.mapPaintCountry = value; }, { mark: false })));
+    const undoPaint = button('마지막 칠하기 되돌리기', () => {
+      const previous = current.mapPaintUndo?.pop(); if (!previous) return;
+      if (previous.exists) initial.owners[previous.id] = previous.value; else delete initial.owners[previous.id];
+      mark(); render();
+    });
+    undoPaint.disabled = !current.mapPaintUndo?.length; paintTools.append(undoPaint);
+    const preview = $('div', 'v2-editor-map'), panel = $('div', 'editor-card v2-province-panel');
+    content.append(paintTools, preview, panel);
     function redraw() {
-      preview.replaceChildren(); paintMap(preview, draft, id => { current.mapProvince = typeof id === 'string' ? id : id.id; drawProvince(); });
+      paintMap(preview, draft, id => {
+        current.mapProvince = typeof id === 'string' ? id : id.id;
+        if (current.mapPaintEnabled && current.mapPaintCountry) {
+          const province = provinceIndex(config.template).byId.get(current.mapProvince);
+          if (province && (initial.owners[province.id] || province.owner) !== current.mapPaintCountry) {
+            if (!current.mapPaintUndo) current.mapPaintUndo = [];
+            current.mapPaintUndo.push({ id: province.id, exists: Object.prototype.hasOwnProperty.call(initial.owners, province.id), value: initial.owners[province.id] });
+            if (current.mapPaintUndo.length > 100) current.mapPaintUndo.shift();
+            if (province.owner === current.mapPaintCountry) delete initial.owners[province.id]; else initial.owners[province.id] = current.mapPaintCountry;
+            undoPaint.disabled = false; mark(); redraw();
+          }
+        }
+        drawProvince();
+      });
     }
     function drawProvince() {
       panel.replaceChildren();
@@ -361,7 +595,7 @@
     function updateCountry(key, value) {
       if (!draft.map.countries) draft.map.countries = [];
       let override = draft.map.countries.find(item => item.id === country.id);
-      if (!override) { override = { ...country }; draft.map.countries.push(override); }
+      if (!override) { override = { id: country.id, name: country.name, color: country.color }; draft.map.countries.push(override); }
       override[key] = value; mark(); redraw();
     }
     countries.append(grid(input('표시 이름', country.name, value => updateCountry('name', value)), input('색상 #RRGGBB', country.color, value => updateCountry('color', value))));
@@ -803,17 +1037,25 @@
     content.append(details);
   }
 
-  function parseJSON(text) {
+  async function parseJSON(text) {
     let value;
     try { value = JSON.parse(text); }
     catch (error) { return { errors: ['JSON 문법 오류: ' + error.message], warnings: [], value: null }; }
+    try {
+      if (needsTemplate(value)) showReport({ errors: [], warnings: [] }, '선택한 지도의 파일을 불러오는 중입니다. 현재 초안은 준비가 끝난 뒤 반영합니다.');
+      await ensureTemplate(value);
+    }
+    catch (error) { return { errors: ['지도 파일을 불러오지 못했습니다. 편집 내용은 유지했습니다. 다시 시도해 주세요.\n' + error.message], warnings: [], value: null }; }
     const report = validation(value);
     return { ...report, value };
   }
 
-  function acceptJSON(redraw) {
-    const result = parseJSON(current.jsonBuffer);
+  async function acceptJSON(redraw) {
+    const owner = current, text = owner.jsonBuffer;
+    const result = await parseJSON(text);
+    if (current !== owner || owner.jsonBuffer !== text) return false;
     if (result.errors.length) { showReport(result); return false; }
+    cancelMapPreparation();
     current.draft = copy(result.value);
     current.jsonDirty = false;
     current.dirty = true;
@@ -843,10 +1085,12 @@
     content.append(toolbar);
   }
 
-  function exportJSON() {
+  async function exportJSON() {
+    const owner = current, buffer = owner.jsonBuffer;
     let text;
     if (current.jsonDirty) {
-      const result = parseJSON(current.jsonBuffer);
+      const result = await parseJSON(buffer);
+      if (current !== owner || owner.jsonBuffer !== buffer) return;
       if (result.errors.length) { showReport(result); return; }
       text = JSON.stringify(result.value, null, 2);
     } else {
@@ -872,11 +1116,14 @@
     if (file.size > 5 * 1024 * 1024) { showReport({ errors: ['JSON 파일은 5MB 이하로 준비해 주세요.'], warnings: [] }); return; }
     const owner = current;
     const reader = new FileReader();
-    reader.addEventListener('load', () => {
+    const request = owner.importRequest = (owner.importRequest || 0) + 1;
+    reader.addEventListener('load', async () => {
       if (current !== owner) return;
-      const result = parseJSON(String(reader.result).replace(/^\uFEFF/, ''));
+      const result = await parseJSON(String(reader.result).replace(/^\uFEFF/, ''));
+      if (current !== owner || owner.importRequest !== request) return;
       if (result.errors.length) { showReport(result); return; }
       if (current.dirty && !confirm('가져온 파일로 현재 편집 초안을 교체할까요? 아직 내보내지 않은 수정은 사라집니다.')) return;
+      cancelMapPreparation();
       current.draft = copy(result.value);
       current.jsonDirty = false;
       current.eventIndex = 0;
@@ -891,9 +1138,11 @@
     reader.readAsText(file, 'UTF-8');
   }
 
-  function check() {
+  async function check() {
     if (current.jsonDirty) {
-      const parsed = parseJSON(current.jsonBuffer);
+      const owner = current, text = owner.jsonBuffer;
+      const parsed = await parseJSON(text);
+      if (current !== owner || owner.jsonBuffer !== text) return;
       if (parsed.errors.length) { showReport(parsed); return; }
       showReport(playReport(parsed.value), '플레이 검사를 통과했습니다. JSON 내용은 아직 편집 초안에 반영하지 않았습니다.');
       return;
@@ -901,8 +1150,8 @@
     showReport(playReport(current.draft), '플레이 검사를 통과했습니다. “적용하고 새 게임”으로 실행할 수 있습니다.');
   }
 
-  function apply() {
-    if (current.jsonDirty && !acceptJSON(false)) return;
+  async function apply() {
+    if (current.jsonDirty && !await acceptJSON(false)) return;
     const result = playReport(current.draft);
     if (result.errors.length) { showReport(result); return; }
     const owner = current;
@@ -917,8 +1166,8 @@
     }
   }
 
-  function saveDraft() {
-    if (current.jsonDirty && !acceptJSON(false)) return;
+  async function saveDraft() {
+    if (current.jsonDirty && !await acceptJSON(false)) return;
     const saved = copy(current.draft);
     saved.draft = true;
     const result = validation(saved);
@@ -937,6 +1186,7 @@
     if (!confirm('사건·선택지·연결·돌발 사건 규칙·수치·선택 기록·엔딩을 전부 삭제하고 빈 초안으로 시작할까요? 삭제 직전 내용은 이 페이지를 새로고침하기 전까지 한 번 되돌릴 수 있습니다.')) return;
     resetUndo = { draft: copy(current.draft), eventIndex: current.eventIndex, endingIndex: current.endingIndex,
       randomIndex: current.randomIndex, jsonBuffer: current.jsonBuffer, jsonDirty: current.jsonDirty, page: current.page };
+    cancelMapPreparation();
     current.draft = GameEngine.createBlankScenario();
     current.eventIndex = 0;
     current.endingIndex = 0;
@@ -952,6 +1202,7 @@
     if (!resetUndo) return;
     const hasNewContent = current.jsonDirty || JSON.stringify(current.draft) !== JSON.stringify(GameEngine.createBlankScenario());
     if (hasNewContent && !confirm('전체 삭제 직전의 내용으로 되돌릴까요? 삭제 후 새로 작성한 내용은 교체됩니다.')) return;
+    cancelMapPreparation();
     current.draft = copy(resetUndo.draft);
     current.eventIndex = resetUndo.eventIndex;
     current.endingIndex = resetUndo.endingIndex;
@@ -964,50 +1215,112 @@
     showReport({ errors: [], warnings: [] }, '전체 삭제 직전의 편집 내용을 복원했습니다.');
   }
 
-  function navigate(page) {
+  async function navigate(page) {
     if (current.page === 'json' && current.jsonDirty && page !== 'json') {
-      if (!acceptJSON(false)) return;
+      if (!await acceptJSON(false)) return;
     }
     current.page = page;
     render();
   }
 
+  async function runMapAction(action, { saved = false, closeAfter = false } = {}) {
+    const owner = current;
+    if (!owner?.mapOnly || typeof owner.mapActions?.[action] !== 'function') return;
+    try {
+      let result = owner.mapActions[action](copy(owner.draft));
+      if (result && typeof result.then === 'function') result = await result;
+      if (result === false) return;
+      if (current !== owner) return;
+      if (saved) owner.dirty = false;
+      if (closeAfter) close(true);
+      else if (typeof result === 'string') showReport({ errors: [], warnings: [] }, result);
+    } catch (error) {
+      if (current === owner) showReport({ errors: [error.message || '지도 작업을 완료하지 못했습니다.'], warnings: [] });
+    }
+  }
+
+  async function importMapJSON(file) {
+    const owner = current;
+    if (!file || !owner?.mapOnly) return;
+    const request = owner.importRequest = (owner.importRequest || 0) + 1;
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new Error('지도 JSON 파일은 5MB 이하로 준비해 주세요.');
+      const text = await file.text();
+      if (current !== owner || owner.importRequest !== request) return;
+      await owner.mapActions.importText(text);
+    } catch (error) {
+      if (current === owner) showReport({ errors: [error.message || '지도 JSON을 읽지 못했습니다.'], warnings: [] });
+    }
+  }
+
+  function renderMapOnly(content) {
+    const draft = current.draft;
+    content.classList.add('map-maker-content');
+    const workspace = $('div', 'map-maker-workspace'), settings = $('aside', 'map-maker-settings'), board = $('section', 'map-maker-board');
+    settings.setAttribute('aria-label', '지도 설정과 지역 편집');
+    board.setAttribute('aria-label', '편집 중인 지도');
+    settings.append(input('지도 제목', draft.title, value => { draft.title = value; }, { maxLength: 120 }));
+    settings.append(input('지도 설명', draft.description, value => { draft.description = value; }, { multiline: true, rows: 2, maxLength: 1000, help: '시대와 가정, 수정한 국경 등을 적어 두세요.' }));
+    const controls = $('div', 'map-maker-map-settings');
+    renderMap(controls);
+    // Keep the same live nodes and closures, but give the map its own column.
+    // Editing metadata or scrolling settings must never hide the map board.
+    const heading = controls.querySelector('h2'), preview = controls.querySelector('.v2-editor-map');
+    if (heading) { const introduction = heading.nextElementSibling; heading.remove(); if (introduction?.matches('p.notice')) introduction.remove(); }
+    if (preview) board.append(preview);
+    else board.append(notice('왼쪽에서 지역과 시대를 선택하고 “지도 준비”를 누르세요.'));
+    settings.append(controls);
+    workspace.append(settings, board);
+    content.append(workspace);
+  }
+
   function render() {
     if (!current) return;
     if (current.flowchartCleanup) { current.flowchartCleanup(); current.flowchartCleanup = null; }
-    current.dialog.classList.toggle('flowchart-mode', current.page === 'flowchart');
+    current.dialog.classList.toggle('flowchart-mode', current.page === 'flowchart' && !current.mapOnly);
+    current.dialog.classList.toggle('map-maker-mode', Boolean(current.mapOnly));
     const root = document.getElementById('editor-root');
     root.replaceChildren();
     const shell = $('div', 'editor-shell');
     const top = $('header', 'editor-top');
     const title = $('div');
-    title.append($('h2', '', '시나리오 작업실'), $('p', 'small muted', '작성 중에는 초안 저장, 완성하면 적용하고 새 게임을 사용하세요. 수정한 파일은 JSON으로 따로 보관해 두세요.'));
+    title.append($('h2', '', current.mapOnly ? '지도 작업실' : '시나리오 작업실'), $('p', 'small muted', current.mapOnly ? '지도만 만들고 저장하거나 갤러리에 공유하세요. 현재 플레이 중인 이야기는 그대로 보관됩니다.' : '작성 중에는 초안 저장, 완성하면 적용하고 새 게임을 사용하세요. 수정한 파일은 JSON으로 따로 보관해 두세요.'));
     const tools = $('div', 'toolbar');
     const fileInput = $('input');
     fileInput.type = 'file'; fileInput.accept = '.json,application/json'; fileInput.hidden = true;
-    fileInput.addEventListener('change', () => { importJSON(fileInput.files[0]); fileInput.value = ''; });
-    tools.append(button('JSON 가져오기', () => fileInput.click()), button('JSON 내보내기', exportJSON), fileInput,
-      button('전체 삭제', clearAll, 'danger'));
-    if (resetUndo) tools.append(button('전체 삭제 되돌리기', undoClear));
+    fileInput.addEventListener('change', () => { if (current.mapOnly) importMapJSON(fileInput.files[0]); else importJSON(fileInput.files[0]); fileInput.value = ''; });
+    if (current.mapOnly) tools.append(button('지도 JSON 가져오기', () => fileInput.click()), button('지도 JSON 내보내기', () => runMapAction('export')), fileInput, button('새 지도', () => runMapAction('new')));
+    else {
+      tools.append(button('JSON 가져오기', () => fileInput.click()), button('JSON 내보내기', exportJSON), fileInput, button('전체 삭제', clearAll, 'danger'));
+      if (resetUndo) tools.append(button('전체 삭제 되돌리기', undoClear));
+    }
     top.append(title, tools);
     const nav = $('nav', 'editor-nav');
     nav.setAttribute('aria-label', '시나리오 편집 탭');
-    tabs.forEach(([id, label]) => {
+    (current.mapOnly ? [] : tabs).forEach(([id, label]) => {
       const tab = button(label, () => navigate(id), current.page === id ? 'secondary selected' : 'secondary');
       if (current.page === id) tab.setAttribute('aria-current', 'page');
       nav.append(tab);
     });
     const content = $('main', 'editor-content' + (current.page === 'flowchart' ? ' flowchart-content' : ''));
-    if (current.page !== 'flowchart') {
+    if (current.mapOnly) renderMapOnly(content);
+    else if (current.page !== 'flowchart') {
       ({ overview: renderOverview, stats: renderStats, flags: renderFlags, events: renderEventList, map: renderMap, reign: renderReign, randomEvents: renderRandomEvents, endings: renderEndings, json: renderJSON })[current.page](content);
     }
     const report = $('div', 'notice');
     report.id = 'editor-report'; report.hidden = true; report.setAttribute('role', 'status'); report.setAttribute('aria-live', 'polite');
     const footer = $('footer', 'editor-footer');
-    footer.append(button('검사하기', check), button('초안 저장', saveDraft), button('적용하고 새 게임', apply, 'primary'), button('닫기', () => close(false)));
-    shell.append(top, nav, content, report, footer);
+    if (current.mapOnly) {
+      const share=button('갤러리에 공유', () => runMapAction('share', { saved: true }));
+      share.setAttribute('data-community-only','');
+      footer.append(button('지도 검사', () => runMapAction('check')), button('지도 저장', () => runMapAction('save', { saved: true }), 'primary'), share, button('이 지도로 시나리오 만들기', () => runMapAction('createScenario', { saved: true, closeAfter: true })), button('닫기', () => close(false)));
+    }
+    else footer.append(button('검사하기', check), button('초안 저장', saveDraft), button('적용하고 새 게임', apply, 'primary'), button('닫기', () => close(false)));
+    shell.append(top);
+    if (!current.mapOnly) shell.append(nav);
+    shell.append(content, report, footer);
     root.append(shell);
-    if (current.page === 'flowchart') {
+    if (current.page === 'flowchart' && !current.mapOnly) {
       current.flowchartCleanup = ScenarioFlowchart.mount(content, {
         scenario: current.draft,
         onChange: mark,
@@ -1022,11 +1335,14 @@
   }
 
   function close(force) {
-    if (!current) return true;
-    if (!force && current.dirty && !confirm('아직 게임에 적용하지 않은 편집 초안을 닫을까요? 보관하려면 취소하고 JSON으로 내보내세요.')) return false;
+    ++openSequence;
+    if (!current) { globalThis.MapMaker?.cancelPending?.(); return true; }
+    if (!force && current.dirty && !confirm(current.mapOnly ? '아직 저장하지 않은 지도 수정을 닫을까요? 보관하려면 취소하고 “지도 저장” 또는 “지도 JSON 내보내기”를 누르세요.' : '아직 게임에 적용하지 않은 편집 초안을 닫을까요? 보관하려면 취소하고 JSON으로 내보내세요.')) return false;
+    globalThis.MapMaker?.cancelPending?.();
     const dialog = current.dialog;
     if (current.flowchartCleanup) current.flowchartCleanup();
-    dialog.classList.remove('flowchart-mode');
+    dialog.classList.remove('flowchart-mode', 'map-maker-mode');
+    dialog.setAttribute('aria-label', '시나리오 편집');
     current = null;
     if (dialog.open && typeof dialog.close === 'function') dialog.close();
     else dialog.removeAttribute('open');
@@ -1034,13 +1350,21 @@
   }
 
   function open(scenario, onApply, options = {}) {
+    globalThis.MapMaker?.cancelPending?.();
+    const request = ++openSequence;
+    if (needsTemplate(scenario)) return ensureTemplate(scenario).then(() => request === openSequence ? openReady(scenario, onApply, options) : false);
+    return openReady(scenario, onApply, options);
+  }
+
+  function openReady(scenario, onApply, options) {
     const report = validation(scenario);
     if (report.errors.length) throw new Error('편집할 시나리오를 확인해 주세요.\n' + report.errors.map(messageText).join('\n'));
     if (typeof onApply !== 'function') throw new Error('시나리오 적용 함수가 없습니다.');
     if (current && !close(false)) return;
     const dialog = document.getElementById('editor-dialog');
     if (!dialog || !document.getElementById('editor-root')) throw new Error('편집기 dialog 요소가 없습니다.');
-    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: tabs.some(([id]) => id === options.page) ? options.page : 'overview', eventIndex: 0, endingIndex: 0, randomIndex: 0, reignIndex: 0, mapProvince: null, mapCountry: null, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
+    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: options.mapOnly ? 'map' : tabs.some(([id]) => id === options.page) ? options.page : 'overview', mapOnly: Boolean(options.mapOnly), mapActions: options.mapActions || {}, eventIndex: 0, endingIndex: 0, randomIndex: 0, reignIndex: 0, mapProvince: null, mapCountry: null, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
+    dialog.setAttribute('aria-label', current.mapOnly ? '지도 편집' : '시나리오 편집');
     if (!dialog.dataset.editorBound) {
       dialog.dataset.editorBound = 'true';
       dialog.addEventListener('cancel', event => { event.preventDefault(); close(false); });
@@ -1048,9 +1372,10 @@
     if (typeof dialog.showModal === 'function') { if (!dialog.open) dialog.showModal(); }
     else dialog.setAttribute('open', '');
     render();
-    dialog.querySelector('[aria-current="page"]')?.focus({ preventScroll: true });
+    (current.mapOnly ? dialog.querySelector('[aria-label="지도 제목"]') : dialog.querySelector('[aria-current="page"]'))?.focus({ preventScroll: true });
+    return true;
   }
 
-  globalThis.ScenarioEditor = { open, close: () => close(false) };
-  globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences };
+  globalThis.ScenarioEditor = { open, close: () => close(false), cancelPending: () => { ++openSequence; } };
+  globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences, planMapChange, territoryReferences };
 })();

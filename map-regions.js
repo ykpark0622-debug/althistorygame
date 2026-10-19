@@ -1,0 +1,2 @@
+/* Regional metadata is included in the lightweight map-templates.js registry. */
+(function(root){'use strict';const registry=root.MapTemplates||(typeof require==='function'?require('./map-templates.js'):null);if(!registry)throw new Error('map-templates.js must load before map-regions.js');if(typeof module!=='undefined'&&module.exports)module.exports=registry;})(typeof globalThis!=='undefined'?globalThis:this);

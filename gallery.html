@@ -8,14 +8,15 @@
   <title>시나리오 갤러리 · 역사의 갈림길</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="community.css">
+  <link rel="stylesheet" href="map-view.css">
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body class="gallery-page">
   <header class="masthead">
-    <a class="brand" href="index.html" aria-label="역사의 갈림길 처음 화면"><span class="brand-mark" aria-hidden="true">岐</span><div><strong>역사의 갈림길</strong><span>CHRONICLES OF CHOICE</span></div></a>
+    <a class="brand" href="index.html?home=1" aria-label="역사의 갈림길 처음 화면"><span class="brand-mark" aria-hidden="true">岐</span><div><strong>역사의 갈림길</strong><span>CHRONICLES OF CHOICE</span></div></a>
     <nav class="header-actions" aria-label="사이트 메뉴">
-      <a class="btn secondary" href="index.html">만들기 · 플레이</a>
+      <a class="btn secondary" id="maker-link" href="index.html">만들기 · 플레이</a>
       <span id="auth-area" class="auth-area"></span>
     </nav>
   </header>
@@ -24,8 +25,8 @@
     <section class="gallery-hero">
       <div>
         <p class="eyebrow">COMMUNITY CHRONICLES</p>
-        <h1>시나리오 갤러리</h1>
-        <p class="gallery-lead">사건형 이야기부터 지도와 연차별 결정을 담은 통치 시나리오까지 골라 플레이하세요. 마음에 들면 좋아요를, 내 이야기는 직접 올려 나눌 수 있습니다.</p>
+        <h1 id="gallery-title">시나리오 갤러리</h1>
+        <p class="gallery-lead" id="gallery-lead">사건형 이야기부터 지도와 연차별 결정을 담은 통치 시나리오까지 골라 플레이하세요. 마음에 들면 좋아요를, 내 이야기는 직접 올려 나눌 수 있습니다.</p>
       </div>
       <button class="btn primary upload-cta" id="upload-button" type="button"><span aria-hidden="true">↑</span> 내 시나리오 올리기</button>
     </section>
@@ -33,6 +34,7 @@
     <div id="setup-notice" class="setup-notice" hidden></div>
 
     <section id="gallery-app" class="gallery-app" hidden>
+      <label class="gallery-kind"><span>둘러볼 작품</span><select id="kind-select" aria-label="갤러리 작품 종류"><option value="scenario">시나리오</option><option value="map">지도</option></select></label>
       <div class="gallery-tabs" role="tablist" aria-label="목록 종류">
         <button type="button" role="tab" class="gallery-tab" data-tab="all" aria-selected="true">전체</button>
         <button type="button" role="tab" class="gallery-tab" data-tab="liked" aria-selected="false">좋아요한 것</button>
@@ -51,7 +53,7 @@
     </section>
   </main>
 
-  <footer class="site-footer"><span>역사의 갈림길 · 시나리오 갤러리</span><span>올라온 시나리오는 작성자의 책임이며, 신고가 쌓이면 자동으로 숨겨집니다. · <a href="privacy.html">개인정보처리방침</a></span></footer>
+  <footer class="site-footer"><span>역사의 갈림길 · 시나리오·지도 갤러리</span><span>올라온 시나리오·지도는 작성자의 책임이며, 신고가 쌓이면 자동으로 숨겨집니다. · <a href="privacy.html">개인정보처리방침</a></span></footer>
 
   <dialog id="detail-dialog" class="g-dialog detail-dialog" aria-label="시나리오 자세히 보기"><div id="detail-content"></div></dialog>
   <dialog id="upload-dialog" class="g-dialog" aria-label="시나리오 올리기"><div id="upload-content"></div></dialog>
@@ -62,7 +64,10 @@
   <script src="config.js"></script>
   <script src="vendor/supabase.js"></script>
   <script src="map-templates.js"></script>
+  <script src="map-regions.js"></script>
   <script src="engine.js"></script>
+  <script src="map-document.js"></script>
+  <script src="map-view.js"></script>
   <script src="gallery.js"></script>
 </body>
 </html>

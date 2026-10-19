@@ -11,30 +11,33 @@
   <link rel="stylesheet" href="launcher.css">
   <link rel="stylesheet" href="community.css">
   <link rel="stylesheet" href="map-view.css">
+  <link rel="stylesheet" href="map-maker.css">
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
   <header class="masthead">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">岐</span><div><strong>역사의 갈림길</strong><span>CHRONICLES OF CHOICE</span></div></div>
-    <nav class="header-actions" aria-label="게임 도구"><a class="btn secondary" href="gallery.html" data-community-only><span aria-hidden="true">✦</span>&nbsp;갤러리</a><button class="btn secondary" id="open-scenario-button">시나리오 열기</button><button class="btn subtle" id="help-button">사용 안내</button><button class="btn secondary flow-button" id="flow-button"><span aria-hidden="true">⑂</span> 분기 흐름도</button><button class="btn edit-button" id="edit-button"><span aria-hidden="true">✎</span> 시나리오 편집</button></nav>
+    <a class="brand" id="home-link" href="?home=1" aria-label="역사의 갈림길 초기 화면으로"><span class="brand-mark" aria-hidden="true">岐</span><div><strong>역사의 갈림길</strong><span>CHRONICLES OF CHOICE</span></div></a>
+    <nav class="header-actions" aria-label="게임 도구"><a class="btn secondary" href="gallery.html" data-community-only><span aria-hidden="true">✦</span>&nbsp;갤러리</a><button class="btn secondary" id="map-maker-button">지도 만들기</button><button class="btn secondary" id="open-scenario-button">시나리오 열기</button><button class="btn subtle" id="help-button">사용 안내</button><button class="btn secondary flow-button" id="flow-button"><span aria-hidden="true">⑂</span> 분기 흐름도</button><button class="btn edit-button" id="edit-button"><span aria-hidden="true">✎</span> 시나리오 편집</button></nav>
   </header>
   <main class="layout">
-    <div class="main-column">
-      <section class="scenario-heading"><div><p class="eyebrow">A STORY YOU WILL WRITE</p><h1 id="scenario-title"></h1><p id="scenario-subtitle" class="scenario-subtitle"></p></div><span class="fiction-tag">선택형 이야기</span></section>
-      <div id="status-message" class="status-message" role="status" aria-live="polite" hidden></div>
-      <section id="player-map-panel" aria-label="선택으로 바뀌는 지도" hidden><div id="map-reference-tools" class="map-reference-bar"></div><div id="player-map"></div></section>
-      <section id="story-panel" class="story-panel" aria-label="현재 사건" tabindex="-1"></section>
-      <footer class="story-footer"><span class="keyboard-note">숫자 키 <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> 으로도 선택할 수 있습니다.</span><button class="text-button" id="journal-button">지나온 선택 보기 <span aria-hidden="true">↗</span></button></footer>
-      <p class="fiction-note" id="scenario-description"></p>
-    </div>
-    <aside class="sidebar" aria-label="국가 현황">
+    <section class="scenario-heading"><div><p class="eyebrow" id="scenario-mode-label">A STORY YOU WILL WRITE</p><h1 id="scenario-title"></h1><p id="scenario-subtitle" class="scenario-subtitle"></p></div><div class="scenario-actions"><div id="map-reference-tools" class="map-reference-bar" hidden></div><button class="btn secondary" id="restart-button">처음부터</button></div></section>
+    <div id="status-message" class="status-message" role="status" aria-live="polite" hidden></div>
+    <div class="play-workspace">
+      <div class="main-column"><section id="player-map-panel" aria-label="선택으로 바뀌는 지도" hidden><div id="player-map"></div></section></div>
+      <div class="narrative-column">
+        <section id="story-panel" class="story-panel" aria-label="현재 사건" tabindex="-1"></section>
+        <footer class="story-footer"><span class="keyboard-note">숫자 키 <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> 으로도 선택할 수 있습니다.</span><button class="text-button" id="journal-button">전체 선택 기록 <span aria-hidden="true">↗</span></button></footer>
+        <aside class="sidebar" aria-label="국가 현황과 선택 기록">
       <section class="country-card"><div class="small-label">STATE OF THE NATION</div><div class="country-title"><span>국가 현황</span><span class="seal" aria-hidden="true">史</span></div><div class="turn-label" id="turn-label"></div><div id="stats-panel" class="stats-panel"></div><div id="risk-summary" class="risk-summary" hidden></div></section>
+      <section class="timeline-card" aria-labelledby="timeline-heading"><div class="section-label"><h2 id="timeline-heading">갈림길 기록</h2><span id="timeline-count" class="counter">0</span></div><div id="timeline-panel" class="timeline-panel"></div><p class="timeline-note" id="timeline-note"></p></section>
       <section class="memory-card"><div class="section-label"><h2>역사가 기억하는 것</h2><span id="flags-count" class="counter">0</span></div><div id="flags-panel"></div></section>
-      <section class="save-card"><div class="save-buttons"><button class="btn secondary" id="save-button">진행 저장</button><button class="btn secondary" id="load-button">불러오기</button></div><button class="btn restart-button" id="restart-button">처음부터 다시</button><p id="save-status" class="save-caption"></p></section>
+      <section class="save-card"><div class="save-buttons"><button class="btn secondary" id="save-button">진행 저장</button><button class="btn secondary" id="load-button">불러오기</button></div><p id="save-status" class="save-caption"></p></section>
       <section class="collection-card"><button id="collection-button" class="collection-button"><span><span class="small-label">YOUR CHRONICLES</span><strong>발견한 결말</strong></span><span id="ending-count">0 / 0 <span aria-hidden="true">→</span></span></button></section>
-      <p class="sidebar-note">선택에는 대가가 있습니다.<br>어떤 역사를 남길지는 당신의 몫입니다.</p>
-    </aside>
+        </aside>
+      </div>
+    </div>
+    <section class="play-guide" aria-labelledby="play-guide-title"><h2 id="play-guide-title">선택으로 역사를 만들어 갑니다</h2><div id="play-guide-content"></div><p class="fiction-note" id="scenario-description"></p></section>
   </main>
   <footer class="site-footer"><span>역사의 갈림길 · 시나리오 실험실</span><span>당신의 이야기로 다시 쓸 수 있습니다.</span></footer>
   <dialog id="editor-dialog" class="editor-dialog" aria-label="시나리오 편집"><div id="editor-root"></div></dialog>
@@ -44,12 +47,16 @@
   <input id="scenario-import" type="file" accept=".json,application/json" hidden>
   <script src="config.js"></script>
   <script src="map-templates.js"></script>
+  <script src="map-regions.js"></script>
   <script src="map-view.js"></script>
   <script src="engine.js"></script>
+  <script src="map-document.js"></script>
   <script src="bootstrap.js"></script>
   <script src="flowchart.js"></script>
   <script src="editor.js"></script>
+  <script src="map-maker.js"></script>
   <script src="ai-helper.js"></script>
+  <script src="program-download.js"></script>
   <script src="app.js"></script>
   <script src="community-bridge.js"></script>
 </body>

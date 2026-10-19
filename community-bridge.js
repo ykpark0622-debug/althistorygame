@@ -15,16 +15,30 @@
   const read = (store, key) => { try { return JSON.parse(store.getItem(key)); } catch { return null; } };
   const status = (message, error = false) => { const node = document.getElementById('status-message'); if (!node) return; node.textContent = message; node.classList.toggle('error', error); node.hidden = !message; };
 
-  const pending = read(sessionStorage, PENDING_KEY);
-  try { sessionStorage.removeItem(PENDING_KEY); } catch {}
-  if (pending && pending.data && /^[0-9a-f-]{36}$/i.test(String(pending.id || ''))) {
+  async function applyPendingImport() {
+    await api.ready;
+    const pending = read(sessionStorage, PENDING_KEY);
+    if (!pending || !pending.data || !/^[0-9a-f-]{36}$/i.test(String(pending.id || ''))) return;
     try {
-      const same = hash(api.getScenario()) === hash(pending.data);
-      if (!same) api.importScenario(pending.data);
-      try { localStorage.setItem(ORIGIN_KEY, JSON.stringify({ id: pending.id, title: String(pending.title || ''), sig: hash(pending.data) })); } catch {}
+      const sig = hash(pending.data), same = hash(api.getScenario()) === sig;
+      if (!same) {
+        const imported = await api.importScenario(pending.data);
+        if (!imported || hash(api.getScenario()) !== sig) return;
+      } else if (typeof api.resumeScenario === 'function') {
+        const resumed = await api.resumeScenario();
+        if (!resumed || hash(api.getScenario()) !== sig) return;
+      }
+      // Keep the handoff available after a failed map fetch. Only a completed
+      // import may consume it, and never consume a newer gallery handoff.
+      const current = read(sessionStorage, PENDING_KEY);
+      if (current?.id === pending.id && current.data && hash(current.data) === sig) {
+        try { sessionStorage.removeItem(PENDING_KEY); } catch {}
+      }
+      try { localStorage.setItem(ORIGIN_KEY, JSON.stringify({ id: pending.id, title: String(pending.title || ''), sig })); } catch {}
       if (same) status(`갤러리의 「${pending.title}」을(를) 이어서 플레이합니다. 처음부터 하려면 ‘처음부터 다시’를 누르세요.`);
+      renderOrigin();
     } catch (error) {
-      status('갤러리 시나리오를 열지 못했습니다: ' + String(error.message || error).split('\n')[0], true);
+      status('갤러리 시나리오를 열지 못했습니다. 현재 작업과 갤러리 원고는 보존했습니다. 새로고침하면 다시 시도합니다: ' + String(error.message || error).split('\n')[0], true);
     }
   }
 
@@ -42,4 +56,5 @@
   renderOrigin();
   const title = document.getElementById('scenario-title');
   if (title) new MutationObserver(renderOrigin).observe(title, { childList: true, characterData: true, subtree: true });
+  void applyPendingImport().catch(error => status('갤러리 시나리오를 준비하지 못했습니다: ' + String(error.message || error).split('\n')[0], true));
 })();

@@ -108,18 +108,51 @@
     const templateId = typeof id === 'string' ? id : '';
     const template = templateId && root.MapTemplates && typeof root.MapTemplates.get === 'function' ? root.MapTemplates.get(templateId) : null;
     if (templateId && !template) throw new Error('선택한 지도 틀을 찾을 수 없습니다: ' + templateId);
-    return { mode, template, version: mode === 'reign' || template || base.schemaVersion === 2 ? 2 : 1 };
+    return { mode, template, countryId: options.mapCountryId || base.map?.playerCountry || '', version: mode === 'reign' || template || base.schemaVersion === 2 ? 2 : 1 };
   }
 
-  function mapInstructions(template) {
+  function promptProvinces(template, countryId, base) {
+    const limit = 300;
+    if (template.provinces.length <= limit) return template.provinces;
+    const byId = new Map(template.provinces.map(province => [province.id, province])), selected = new Map();
+    const add = province => { if (province && selected.size < limit) selected.set(province.id, province); };
+    // Keep the existing scenario's actual targets ahead of optional examples.
+    add(template.provinces[0]);
+    if (base?.map?.templateId === template.id) {
+      for (const values of Object.values(base.map.initial || {})) for (const id of Object.keys(values || {})) add(byId.get(id));
+      const visit = value => {
+        if (!value || typeof value !== 'object' || selected.size >= limit) return;
+        if (value.prov) add(byId.get(value.prov));
+        if (value.kind === 'territory') add(byId.get(value.key));
+        for (const child of Object.values(value)) if (child && typeof child === 'object') visit(child);
+      };
+      visit(base.events); visit(base.reign); visit(base.endings);
+    }
+    if (countryId) {
+      for (const province of template.provinces) if ((base?.map?.initial?.owners?.[province.id] || province.owner) === countryId) add(province);
+    } else {
+      // Give a new world scenario real IDs from different countries, rather
+      // than filling the prompt with the first alphabetic country's districts.
+      const owners = new Set();
+      for (const province of template.provinces) if (!owners.has(province.owner)) { owners.add(province.owner); add(province); }
+    }
+    for (const province of template.provinces) add(province);
+    return [...selected.values()];
+  }
+
+  function mapInstructions(template, countryId, base) {
     if (!template) return '[지도 선택]\n- 지도를 사용하지 않는다. map과 territory 및 kind:"territory" 조건을 새로 만들지 마라.';
+    const provinces = promptProvinces(template, countryId, base), limited = provinces.length < template.provinces.length;
     return [
       '[선택한 기본 지도]',
       '- templateId: ' + template.id + ' / 이름: ' + template.name,
       '- 아래의 지역·국가 id를 그대로 사용해라. 지도 그림이나 SVG path를 생성하지 마라.',
       template.notice ? '- 지도 안내: ' + template.notice : '',
-      '국가 목록: ' + JSON.stringify(template.countries.map(({ id, name, color }) => ({ id, name, color }))),
-      '지역 목록: ' + JSON.stringify(template.provinces.map(({ id, name, owner }) => ({ id, name, owner }))),
+      template.regionId ? '- 지도 범위: '+template.regionId+' / 시대 기본안: '+template.eraId+'. 이 지도 밖의 지역 ID를 쓰지 마라. 기본 소유국은 이미 시대 기본안을 반영하므로 바꿀 지역만 initial에 넣어라.' : '',
+      '국가 목록: ' + JSON.stringify(template.countries.filter(c=>c.available!==false||c.id===countryId).map(({ id, name, color }) => ({ id, name, color }))),
+      limited ? '- 촘촘한 지도: 전체 ' + template.provinces.length.toLocaleString() + '개 중 실제 ID ' + provinces.length + '개만 아래에 싣는다.' + (countryId ? ' 현재 플레이 국가 ' + countryId + '와 기존 시나리오에서 참조한 지역을 우선한다.' : ' 국가별 대표 지역을 우선한다.') : '',
+      '지역 목록: ' + JSON.stringify(provinces.map(({ id, name, owner }) => ({ id, name, owner }))),
+      limited ? '- 아래 목록과 [현재 시나리오]에 없는 지역 ID를 추측하거나 새로 만들지 마라. 더 필요한 지역은 편집기의 지역 검색 또는 지도·초기 영토 탭의 "지역 ID 목록 내려받기"에서 확인한 ID 목록을 사용자에게 받아 사용해라. 지도 전체를 initial.owners에 복사하지 말고 변경할 지역만 지정해라.' : '',
       '- map 형식: {"templateId":"' + template.id + '","playerCountry":"위 국가 id","countries":[],"initial":{"owners":{},"occupation":{},"influence":{},"markers":{}}}. countries는 기본 국가를 덮어쓸 때만 id/name/color를 넣는다.',
       '- initial.owners의 키는 지역 id, 값은 국가 id다. 지정하지 않은 소유권은 기본 지도를 따른다. occupation(점령)·influence(영향권)는 지역→국가, markers(주석)는 지역→짧은 문장이다.',
       '- 선택지 territory: [{"prov":"지역 id","to":"소유 국가 id","occupation":"점령 국가 id 또는 null","influence":"영향 국가 id 또는 null","marker":"짧은 문장 또는 null"}]. 바꿀 필드만 적어라. null은 소유권 이외 층을 지운다. to에는 null을 쓰지 마라.',
@@ -163,7 +196,7 @@
       const province = template.provinces[0];
       const country = template.countries.find(item => item.id === province?.owner) || template.countries[0];
       if (!province || !country) throw new Error('기본 지도에 지역과 국가가 필요합니다.');
-      const other = template.countries.find(item => item.id !== country.id) || country;
+      const other = template.countries.find(item => item.id !== country.id&&item.available!==false) || country;
       example.map = { templateId: template.id, playerCountry: country.id, countries: [], initial: { owners: {}, occupation: {}, influence: {}, markers: {} } };
       example.events[0].choices[0].territory = [{ prov: province.id, influence: country.id, marker: '구호품 도착' }];
       example.events[0].choices[1].territory = [{ prov: province.id, to: other.id, occupation: other.id }];
@@ -206,7 +239,7 @@
     const selected = settings(options);
     const featureRules = '[선택한 형식]\n- schemaVersion:' + selected.version + ', mode:"' + selected.mode + '". 이 선택을 기준으로 전체 원고를 작성해라.' +
       (selected.version === 2 ? '\n- 선택지 result에는 결정 직후의 결과 문장을 적을 수 있다. historical:true는 실제 역사에서 이루어진 선택으로 확인한 경우에만 표시한다. 첫 선택지를 일괄적으로 실제 역사라고 표시하지 마라.' : '') +
-      '\n\n' + reignInstructions(selected.mode) + '\n\n' + mapInstructions(selected.template);
+      '\n\n' + reignInstructions(selected.mode) + '\n\n' + mapInstructions(selected.template, selected.countryId, base);
     const head = '너는 선택형 텍스트 게임 「역사의 갈림길」의 시나리오 작가다.';
     if (base) {
       return [
