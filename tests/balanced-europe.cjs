@@ -1,0 +1,35 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),maps=require('../map-templates.js');
+globalThis.MapTemplates=maps;const E=require('../engine.js');globalThis.GameEngine=E;const D=require('../map-document.js');
+const t=maps.get('europe-balanced'),ids=new Set(),countryIds=new Set(t.countries.map(c=>c.id));
+assert.equal(t.recommended,true);assert.ok(t.provinces.length<3000&&t.provinces.length>1000);
+for(const p of t.provinces){
+ assert.ok(!ids.has(p.id));ids.add(p.id);assert.ok(countryIds.has(p.owner));
+ assert.ok(p.path&&!/NaN|Infinity/.test(p.path));assert.ok([p.cx,p.cy,p.area,...p.bbox].every(Number.isFinite));
+ assert.ok(p.cx>=0&&p.cy>=0&&p.cx<=t.width&&p.cy<=t.height,'local visible center '+p.id);
+ assert.ok(p.bbox[0]>=0&&p.bbox[1]>=0&&p.bbox[2]<=t.width&&p.bbox[3]<=t.height,'local clipped bounds '+p.id);
+ assert.ok(p.area<t.width*t.height*.49,'winding '+p.id);assert.ok(p.name);
+}
+const counts=Object.fromEntries(['fra','deu','che','ita','esp'].map(id=>[id,t.provinces.filter(p=>p.owner===id).length]));
+assert.deepEqual(counts,{fra:96,deu:108,che:26,ita:107,esp:52});
+assert.ok(t.provinces.filter(p=>p.owner==='deu'&&p.mergedAreas>1).length>40);
+assert.ok(t.provinces.some(p=>p.owner==='ita'&&/Firenze|Florence/i.test(p.name)),'Florence is separately editable');
+assert.ok(t.provinces.some(p=>p.owner==='ita'&&/Roma|Rome/i.test(p.name)),'Rome is separately editable');
+console.log('PASS balanced density, editable Italian provinces, crop coordinates and geometry invariants');
+const sample=JSON.parse(fs.readFileSync(path.join(root,'examples/europe-balanced.map.json'),'utf8'));
+assert.deepEqual(D.validate(sample).errors,[]);const province=t.provinces.find(p=>p.owner==='ita');
+sample.map.initial={owners:{[province.id]:'fra'},occupation:{},influence:{},markers:{}};assert.deepEqual(D.normalize(JSON.parse(JSON.stringify(sample))),sample);
+const scenario=D.toScenario(sample);Object.assign(scenario,{draft:false,start:'first',stats:[{id:'funds',name:'재정',initial:50,min:0,max:100}],events:[{id:'first',title:'지도 검사',body:'지도를 선택 결과에 연결합니다.',next:'END',choices:[{text:'영토 변경',territory:[{prov:province.id,to:'ita'}]}]}],endings:[{id:'normal',title:'확인',body:'지도 변경을 마쳤습니다.',kind:'mixed',priority:0,immediate:false,when:[]}],defaultEnding:'normal'});
+assert.deepEqual(E.validateScenario(scenario).errors,[]);const state=E.createState(scenario,{seed:12});assert.equal(state.map.owners[province.id],'fra');
+const next=E.choose(scenario,state,0);assert.equal(next.map.owners[province.id],'ita');assert.deepEqual(E.restoreState(scenario,JSON.parse(JSON.stringify(next))),next);
+console.log('PASS map JSON import/export and engine initial ownership share the new template');
+const report=JSON.parse(fs.readFileSync(path.join(root,'tools/map-source/licenses/europe-balanced-build.json'),'utf8'));
+assert.equal(report.regions,t.provinces.length);assert.equal(report.sha256,crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'tools/map-source/europe-balanced.json'))).digest('hex'));
+for(const country of report.countries)assert.ok(country.areaChangeRatio<0.003,'source area conserved '+country.iso);
+const prior=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v241-map-manifest.json'),'utf8'));
+const current=JSON.parse(fs.readFileSync(path.join(root,'assets/maps/manifest.json'),'utf8'));
+for(const entry of prior.templates)assert.deepEqual(current.templates.find(item=>item.id===entry.id),entry,'unchanged template '+entry.id);
+for(const asset of prior.assets)assert.deepEqual(current.assets.find(item=>item.id===asset.id),asset,'unchanged source asset '+asset.id);
+assert.deepEqual(current.regions,prior.regions);assert.deepEqual(current.eras,prior.eras);
+console.log('PASS all 17 previous templates retain exact asset hashes, IDs, sizes and region/era metadata');

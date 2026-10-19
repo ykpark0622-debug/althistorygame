@@ -3,6 +3,10 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const root = path.resolve(__dirname, '..'), sourceDir = path.join(__dirname, 'map-source'), output = path.join(root, 'assets/maps');
 const createRegistry = require('./map-loader-runtime.cjs');
 const sources = JSON.parse(fs.readFileSync(path.join(sourceDir, 'legacy-templates.json'), 'utf8'));
+// New authoring presets have their own IDs; saved scenarios keep their original
+// geometry and province IDs when a more readable template is introduced.
+const balancedSource = path.join(sourceDir, 'europe-balanced.json');
+if (fs.existsSync(balancedSource)) sources.push(JSON.parse(fs.readFileSync(balancedSource, 'utf8')));
 // Development may keep the processed world source separately. Distribution ZIPs
 // use its identical hashed base asset, avoiding an extra 24.5 MB copy.
 const detailedSource = path.join(sourceDir, 'world-detailed.json');
@@ -18,7 +22,7 @@ if (fs.existsSync(detailedSource)) {
   const previousRegistry = createRegistry({}, previousManifest, id => id === 'node:fs' ? fs : require(id), root);
   sources.push(previousRegistry.get('world-detailed'));
 }
-const sourceApi = {get: id => sources.find(template => template.id === id) || null, list: () => sources.map(template => ({id:template.id,name:template.name,provinceCount:template.provinces.length}))};
+const sourceApi = {get: id => sources.find(template => template.id === id) || null, list: () => sources.map(template => ({id:template.id,name:template.name,provinceCount:template.provinces.length,...(template.recommended ? {recommended:true} : {})}))};
 const sandbox = {MapTemplates: sourceApi};
 vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'regional-presets.cjs'), 'utf8'), sandbox, {filename:'regional-presets.cjs'});
 const original = sandbox.MapTemplates;
@@ -74,6 +78,7 @@ for(const template of all) {
     descriptor=save(template.id,'patch',{format:'hc-map-era-v1',id:template.id,baseId,metadata,changes},baseId);
   }
   const entry={id:template.id,name:template.name,provinceCount:template.provinces.length,asset:descriptor.path,downloadBytes:downloadBytes(descriptor)+(baseId?downloadBytes(bases.get(baseId)):0)};
+  if(template.recommended)entry.recommended=true;
   if(template.regionId){entry.regionId=template.regionId;entry.eraId=template.eraId;}
   if(baseId)entry.baseId=baseId;
   manifest.templates.push(entry);

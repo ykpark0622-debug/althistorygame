@@ -1,0 +1,13 @@
+{
+  "type": "map",
+  "schemaVersion": 1,
+  "id": "europe_balanced",
+  "title": "유럽 균형 지도",
+  "description": "현대 행정 경계를 바탕으로 국가별 구획 수를 조정한 편집용 지도. 소유국·국가명·색상·영향권을 편집해 사용하세요. 독일 등 일부 지역은 인접 행정구역을 묶었습니다. 역사적 국경 복원 자료가 아닙니다.",
+  "map": {
+    "templateId": "europe-balanced",
+    "playerCountry": "ita",
+    "countries": [],
+    "initial": {}
+  }
+}

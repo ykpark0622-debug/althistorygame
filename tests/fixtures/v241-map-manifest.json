@@ -1,0 +1,807 @@
+{
+  "format": "hc-map-manifest-v1",
+  "regions": [
+    {
+      "id": "eastasia",
+      "name": "동아시아",
+      "defaultEra": "1592"
+    },
+    {
+      "id": "europe_med",
+      "name": "유럽과 지중해",
+      "defaultEra": "1754"
+    },
+    {
+      "id": "asia",
+      "name": "아시아 전체",
+      "defaultEra": "modern"
+    },
+    {
+      "id": "north_america",
+      "name": "북아메리카",
+      "defaultEra": "1754"
+    },
+    {
+      "id": "south_america",
+      "name": "남아메리카",
+      "defaultEra": "1754"
+    },
+    {
+      "id": "world",
+      "name": "세계",
+      "defaultEra": "modern"
+    }
+  ],
+  "eras": {
+    "eastasia": [
+      {
+        "id": "1419",
+        "name": "1419년 무렵 · 조선 전기",
+        "notice": "현대 행정구역에 조선 전기 세력권을 대략 칠한 편집용 초안입니다. 4군·6진 개척 전 북방은 여진 세력으로 구분하며, 자료가 없는 곳은 미설정입니다."
+      },
+      {
+        "id": "1592",
+        "name": "1592년 무렵 · 임진왜란 직전",
+        "notice": "조선·명·일본과 주변 세력을 대략 구분한 편집용 초안입니다. 전쟁 개시 전 상태이며, 당시 국경·번·부족 영역을 정확히 재현하지 않습니다."
+      },
+      {
+        "id": "1754",
+        "name": "1754년 무렵 · 18세기 중엽",
+        "notice": "기존 1754년 시연 지도의 대략적인 세력 구분을 세부 행정구역에 옮겼습니다. 식민지의 색은 넓은 주장·활동권의 근사이며, 내륙의 실효 지배나 원주민 사회의 소멸을 뜻하지 않습니다."
+      },
+      {
+        "id": "modern",
+        "name": "현대 · 원자료 기준",
+        "notice": "Natural Earth·geoBoundaries의 현대 행정구역과 원자료의 국가 구분입니다. 자료 기준 연도는 지역마다 다릅니다."
+      }
+    ],
+    "europe_med": [
+      {
+        "id": "1754",
+        "name": "1754년 무렵 · 18세기 중엽",
+        "notice": "기존 1754년 시연 지도의 대략적인 세력 구분을 세부 행정구역에 옮겼습니다. 식민지의 색은 넓은 주장·활동권의 근사이며, 내륙의 실효 지배나 원주민 사회의 소멸을 뜻하지 않습니다."
+      },
+      {
+        "id": "modern",
+        "name": "현대 · 원자료 기준",
+        "notice": "Natural Earth·geoBoundaries의 현대 행정구역과 원자료의 국가 구분입니다. 자료 기준 연도는 지역마다 다릅니다."
+      }
+    ],
+    "asia": [
+      {
+        "id": "1754",
+        "name": "1754년 무렵 · 18세기 중엽",
+        "notice": "기존 1754년 시연 지도의 대략적인 세력 구분을 세부 행정구역에 옮겼습니다. 식민지의 색은 넓은 주장·활동권의 근사이며, 내륙의 실효 지배나 원주민 사회의 소멸을 뜻하지 않습니다."
+      },
+      {
+        "id": "modern",
+        "name": "현대 · 원자료 기준",
+        "notice": "Natural Earth·geoBoundaries의 현대 행정구역과 원자료의 국가 구분입니다. 자료 기준 연도는 지역마다 다릅니다."
+      }
+    ],
+    "north_america": [
+      {
+        "id": "1754",
+        "name": "1754년 무렵 · 18세기 중엽",
+        "notice": "기존 1754년 시연 지도의 대략적인 세력 구분을 세부 행정구역에 옮겼습니다. 식민지의 색은 넓은 주장·활동권의 근사이며, 내륙의 실효 지배나 원주민 사회의 소멸을 뜻하지 않습니다."
+      },
+      {
+        "id": "modern",
+        "name": "현대 · 원자료 기준",
+        "notice": "Natural Earth·geoBoundaries의 현대 행정구역과 원자료의 국가 구분입니다. 자료 기준 연도는 지역마다 다릅니다."
+      }
+    ],
+    "south_america": [
+      {
+        "id": "1754",
+        "name": "1754년 무렵 · 18세기 중엽",
+        "notice": "기존 1754년 시연 지도의 대략적인 세력 구분을 세부 행정구역에 옮겼습니다. 식민지의 색은 넓은 주장·활동권의 근사이며, 내륙의 실효 지배나 원주민 사회의 소멸을 뜻하지 않습니다."
+      },
+      {
+        "id": "modern",
+        "name": "현대 · 원자료 기준",
+        "notice": "Natural Earth·geoBoundaries의 현대 행정구역과 원자료의 국가 구분입니다. 자료 기준 연도는 지역마다 다릅니다."
+      }
+    ],
+    "world": [
+      {
+        "id": "1754",
+        "name": "1754년 무렵 · 18세기 중엽",
+        "notice": "기존 1754년 시연 지도의 대략적인 세력 구분을 세부 행정구역에 옮겼습니다. 식민지의 색은 넓은 주장·활동권의 근사이며, 내륙의 실효 지배나 원주민 사회의 소멸을 뜻하지 않습니다."
+      },
+      {
+        "id": "modern",
+        "name": "현대 · 원자료 기준",
+        "notice": "Natural Earth·geoBoundaries의 현대 행정구역과 원자료의 국가 구분입니다. 자료 기준 연도는 지역마다 다릅니다."
+      }
+    ]
+  },
+  "templates": [
+    {
+      "id": "eastasia1419",
+      "name": "동아시아 1419년",
+      "provinceCount": 124,
+      "asset": "assets/maps/eastasia1419.d6e5b2872949754d.json",
+      "downloadBytes": 182035
+    },
+    {
+      "id": "world1754",
+      "name": "세계 1754년",
+      "provinceCount": 167,
+      "asset": "assets/maps/world1754.421cfd05b8f43bbb.json",
+      "downloadBytes": 297815
+    },
+    {
+      "id": "world-detailed",
+      "name": "세계 세부 지도 · 현대 행정구역",
+      "provinceCount": 61940,
+      "asset": "assets/maps/world-detailed.c0c8a23fede0e770.json",
+      "downloadBytes": 24504948
+    },
+    {
+      "id": "regional_eastasia_1419",
+      "name": "동아시아 · 1419년 무렵 · 조선 전기",
+      "provinceCount": 5591,
+      "asset": "assets/maps/regional_eastasia_1419.ace4b703d16de632.json",
+      "downloadBytes": 3215334,
+      "regionId": "eastasia",
+      "eraId": "1419",
+      "baseId": "regional_eastasia_modern"
+    },
+    {
+      "id": "regional_eastasia_1592",
+      "name": "동아시아 · 1592년 무렵 · 임진왜란 직전",
+      "provinceCount": 5591,
+      "asset": "assets/maps/regional_eastasia_1592.f8ab993d1a1ca9bc.json",
+      "downloadBytes": 3214460,
+      "regionId": "eastasia",
+      "eraId": "1592",
+      "baseId": "regional_eastasia_modern"
+    },
+    {
+      "id": "regional_eastasia_1754",
+      "name": "동아시아 · 1754년 무렵 · 18세기 중엽",
+      "provinceCount": 5591,
+      "asset": "assets/maps/regional_eastasia_1754.110fc598187b2da1.json",
+      "downloadBytes": 3209118,
+      "regionId": "eastasia",
+      "eraId": "1754",
+      "baseId": "regional_eastasia_modern"
+    },
+    {
+      "id": "regional_eastasia_modern",
+      "name": "동아시아 · 현대 · 원자료 기준",
+      "provinceCount": 5591,
+      "asset": "assets/maps/regional_eastasia_modern.b6cc78c4015a5551.json",
+      "downloadBytes": 2948696,
+      "regionId": "eastasia",
+      "eraId": "modern"
+    },
+    {
+      "id": "regional_europe_med_1754",
+      "name": "유럽과 지중해 · 1754년 무렵 · 18세기 중엽",
+      "provinceCount": 26641,
+      "asset": "assets/maps/regional_europe_med_1754.cb3e632102e5c362.json",
+      "downloadBytes": 14198098,
+      "regionId": "europe_med",
+      "eraId": "1754",
+      "baseId": "regional_europe_med_modern"
+    },
+    {
+      "id": "regional_europe_med_modern",
+      "name": "유럽과 지중해 · 현대 · 원자료 기준",
+      "provinceCount": 26641,
+      "asset": "assets/maps/regional_europe_med_modern.9a725e44478a74ae.json",
+      "downloadBytes": 13300698,
+      "regionId": "europe_med",
+      "eraId": "modern"
+    },
+    {
+      "id": "regional_asia_1754",
+      "name": "아시아 전체 · 1754년 무렵 · 18세기 중엽",
+      "provinceCount": 15841,
+      "asset": "assets/maps/regional_asia_1754.98b0a77511fa0f6b.json",
+      "downloadBytes": 7673804,
+      "regionId": "asia",
+      "eraId": "1754",
+      "baseId": "regional_asia_modern"
+    },
+    {
+      "id": "regional_asia_modern",
+      "name": "아시아 전체 · 현대 · 원자료 기준",
+      "provinceCount": 15841,
+      "asset": "assets/maps/regional_asia_modern.5c9368fcd7a3d8b2.json",
+      "downloadBytes": 7088137,
+      "regionId": "asia",
+      "eraId": "modern"
+    },
+    {
+      "id": "regional_north_america_1754",
+      "name": "북아메리카 · 1754년 무렵 · 18세기 중엽",
+      "provinceCount": 8895,
+      "asset": "assets/maps/regional_north_america_1754.99ed81822ed61e87.json",
+      "downloadBytes": 3856085,
+      "regionId": "north_america",
+      "eraId": "1754",
+      "baseId": "regional_north_america_modern"
+    },
+    {
+      "id": "regional_north_america_modern",
+      "name": "북아메리카 · 현대 · 원자료 기준",
+      "provinceCount": 8895,
+      "asset": "assets/maps/regional_north_america_modern.7e9c6180a0dec8ca.json",
+      "downloadBytes": 3494270,
+      "regionId": "north_america",
+      "eraId": "modern"
+    },
+    {
+      "id": "regional_south_america_1754",
+      "name": "남아메리카 · 1754년 무렵 · 18세기 중엽",
+      "provinceCount": 8590,
+      "asset": "assets/maps/regional_south_america_1754.2a4cef542289195b.json",
+      "downloadBytes": 4580947,
+      "regionId": "south_america",
+      "eraId": "1754",
+      "baseId": "regional_south_america_modern"
+    },
+    {
+      "id": "regional_south_america_modern",
+      "name": "남아메리카 · 현대 · 원자료 기준",
+      "provinceCount": 8590,
+      "asset": "assets/maps/regional_south_america_modern.aa3ea03ff0b01de6.json",
+      "downloadBytes": 4218082,
+      "regionId": "south_america",
+      "eraId": "modern"
+    },
+    {
+      "id": "regional_world_1754",
+      "name": "세계 · 1754년 무렵 · 18세기 중엽",
+      "provinceCount": 61940,
+      "asset": "assets/maps/regional_world_1754.0c884d35900bc5de.json",
+      "downloadBytes": 26498771,
+      "regionId": "world",
+      "eraId": "1754",
+      "baseId": "world-detailed"
+    },
+    {
+      "id": "regional_world_modern",
+      "name": "세계 · 현대 · 원자료 기준",
+      "provinceCount": 61940,
+      "asset": "assets/maps/regional_world_modern.82eb5de61eb980e5.json",
+      "downloadBytes": 24620851,
+      "regionId": "world",
+      "eraId": "modern",
+      "baseId": "world-detailed"
+    }
+  ],
+  "assets": [
+    {
+      "id": "eastasia1419",
+      "type": "base",
+      "path": "assets/maps/eastasia1419.d6e5b2872949754d.json",
+      "bytes": 182035,
+      "gzipBytes": 62206,
+      "sha256": "d6e5b2872949754dd77e3dc71a38ef10b38d2fd4a1b3f5961f708025308f782e"
+    },
+    {
+      "id": "world1754",
+      "type": "base",
+      "path": "assets/maps/world1754.421cfd05b8f43bbb.json",
+      "bytes": 297815,
+      "gzipBytes": 104818,
+      "sha256": "421cfd05b8f43bbbd9912280c4f6587aa132e892532e96e6e1e409098b9dacfc"
+    },
+    {
+      "id": "world-detailed",
+      "type": "base",
+      "path": "assets/maps/world-detailed.c0c8a23fede0e770.json",
+      "bytes": 4885,
+      "gzipBytes": 5621732,
+      "sha256": "c0c8a23fede0e770b40885a083c0bab837fb421501cfa6cb2ce570e54abaaf51",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 24500063,
+      "contentSha256": "5d30659d78804357155984a15181142f4e4abc397e86ed6bda903d0965c3df82",
+      "parts": [
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-001.8e7e0187bcc46e48.txt",
+          "bytes": 1048576,
+          "gzipBytes": 286971,
+          "sha256": "8e7e0187bcc46e48f4bb57fe6f9620bcc4ade2d5ba0c672dd16e3d49cb7f1b52"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-002.c6767b1241a6bac9.txt",
+          "bytes": 1048576,
+          "gzipBytes": 275354,
+          "sha256": "c6767b1241a6bac9847d37ea0ce8336cff60d55f3dffbd29a4f6461f0bc73cfc"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-003.1a51c458a79c4ad4.txt",
+          "bytes": 1048576,
+          "gzipBytes": 269727,
+          "sha256": "1a51c458a79c4ad4622fabdfe0e9f095abe6d0bc491f9b054c6e0ca8d5c3d0cd"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-004.802a850c5e585b8f.txt",
+          "bytes": 1048576,
+          "gzipBytes": 269581,
+          "sha256": "802a850c5e585b8fd65e7bb29fc4c2c5cc74c01e652b558e10b624e565e4d954"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-005.f1bac5110c42a69a.txt",
+          "bytes": 1048576,
+          "gzipBytes": 273462,
+          "sha256": "f1bac5110c42a69a61aad1e6ef52b5c09ac60bc83c7c6a98f041db97cbdb7682"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-006.cd839334ac04a28b.txt",
+          "bytes": 1048576,
+          "gzipBytes": 247248,
+          "sha256": "cd839334ac04a28bd33d9c0aefafa45e47b0c5af9c1cc8fa74f9a11fec76cb3b"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-007.c192fe22bf0d0221.txt",
+          "bytes": 1048576,
+          "gzipBytes": 259092,
+          "sha256": "c192fe22bf0d0221c4cfba3682ad23e41a04190c99b2ee028744a9b8485569b1"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-008.4e0b7d8b535f38fc.txt",
+          "bytes": 1048576,
+          "gzipBytes": 260759,
+          "sha256": "4e0b7d8b535f38fc21bd156992ee55d6b90f21047614fe153bb77b96cc110006"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-009.8967aa605f6bb785.txt",
+          "bytes": 1048576,
+          "gzipBytes": 240480,
+          "sha256": "8967aa605f6bb7855c2cb314a9f461de0a88ae1ed0cd3de0eb80db16fdd5d105"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-010.da7e4a7df9d71a76.txt",
+          "bytes": 1048576,
+          "gzipBytes": 253685,
+          "sha256": "da7e4a7df9d71a76a78ddfc4c4dfb167876cfea3e8cf3eaef9742b1273a674ce"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-011.653b4635d1b4153a.txt",
+          "bytes": 1048576,
+          "gzipBytes": 240663,
+          "sha256": "653b4635d1b4153acef0653f5f12e0dc226657df9b2674461e4850e4a56f1b87"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-012.34e241893ccd25cf.txt",
+          "bytes": 1048576,
+          "gzipBytes": 298656,
+          "sha256": "34e241893ccd25cf0fbadd5ad1f62caefe042f7c1a509c0ecbb363bc1afab8e7"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-013.c9af11f618a1d611.txt",
+          "bytes": 1048576,
+          "gzipBytes": 266991,
+          "sha256": "c9af11f618a1d611f5140d152b62eeb8da753103f6b0e3d093d4fe6e8a6f150a"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-014.6c48f9289467ad7b.txt",
+          "bytes": 1048576,
+          "gzipBytes": 255698,
+          "sha256": "6c48f9289467ad7bd943adb34d447cdcae694ddb4a2681f06f00e0c457c1dc89"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-015.6bc1374ac5334fa0.txt",
+          "bytes": 1048576,
+          "gzipBytes": 258169,
+          "sha256": "6bc1374ac5334fa09c5bf8e89950c3f5be589aeec3ec3160743e2eededc45b75"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-016.1684a612efe60cd0.txt",
+          "bytes": 1048576,
+          "gzipBytes": 205916,
+          "sha256": "1684a612efe60cd0088ffeadf54e117c11e4c6ff53c9ddd09d2b194edcf00229"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-017.274b4276945b79db.txt",
+          "bytes": 1048576,
+          "gzipBytes": 143964,
+          "sha256": "274b4276945b79dbcf55e85d360a3a3cada8bee02afbe027aa8038ac6291f004"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-018.67ef503c66fe916b.txt",
+          "bytes": 1048576,
+          "gzipBytes": 145507,
+          "sha256": "67ef503c66fe916b4dcdbe01754ac61f41290e26316b917dedcdd534afaeca60"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-019.177a8129d8ab39ee.txt",
+          "bytes": 1048576,
+          "gzipBytes": 198184,
+          "sha256": "177a8129d8ab39ee259826a807c528117885975ff83d5fbb364c4547f3be7f33"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-020.b9d3076d4987d788.txt",
+          "bytes": 1048576,
+          "gzipBytes": 199702,
+          "sha256": "b9d3076d4987d788e2614237a7421255e96ae2d34d39fd1dbe113938c5c8891c"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-021.e76c47dbfba99d29.txt",
+          "bytes": 1048576,
+          "gzipBytes": 201712,
+          "sha256": "e76c47dbfba99d29dc377d4cf7ba7b9b494f52e7cd4edd821421e90efeeebbfc"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-022.ee7e8d4e18c9d757.txt",
+          "bytes": 1048576,
+          "gzipBytes": 187274,
+          "sha256": "ee7e8d4e18c9d757fc9e6e227a953457acc688567307d01d6116532ec2c76cf8"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-023.aff8854dd446008d.txt",
+          "bytes": 1048576,
+          "gzipBytes": 266934,
+          "sha256": "aff8854dd446008d08c5a12adced555c87015deab810adfd8c04f5d8deffc33a"
+        },
+        {
+          "path": "assets/maps/world-detailed.5d30659d78804357.part-024.e3d498df6631c058.txt",
+          "bytes": 382815,
+          "gzipBytes": 114629,
+          "sha256": "e3d498df6631c0588ee0b960ca9c49556c17abf252fded4f7e6ef7a13aad738d"
+        }
+      ]
+    },
+    {
+      "id": "regional_eastasia_modern",
+      "type": "base",
+      "path": "assets/maps/regional_eastasia_modern.b6cc78c4015a5551.json",
+      "bytes": 808,
+      "gzipBytes": 739781,
+      "sha256": "b6cc78c4015a55519815f90079d79f0b46bb2955fdc0887c727b7a19db0c78e5",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 2947888,
+      "contentSha256": "b8ead26ab6b23f145c371d5516ce95204d9c0d77a45682ff01569239c0979742",
+      "parts": [
+        {
+          "path": "assets/maps/regional_eastasia_modern.b8ead26ab6b23f14.part-001.d759a6d9e9b3be9a.txt",
+          "bytes": 1048576,
+          "gzipBytes": 225347,
+          "sha256": "d759a6d9e9b3be9a8ca8e6d2bf838cc8156f571c3043c5de5ea6b84f7b9c83c2"
+        },
+        {
+          "path": "assets/maps/regional_eastasia_modern.b8ead26ab6b23f14.part-002.85b9bd11592bdfcf.txt",
+          "bytes": 1048576,
+          "gzipBytes": 236100,
+          "sha256": "85b9bd11592bdfcfa2db8f5d2ce253a7504f8ac279ff24dc87db9e752830c0bd"
+        },
+        {
+          "path": "assets/maps/regional_eastasia_modern.b8ead26ab6b23f14.part-003.e3103d434e57de7a.txt",
+          "bytes": 850736,
+          "gzipBytes": 277947,
+          "sha256": "e3103d434e57de7a1e4f5d75d27cc44b15da219442e48a369b3583258e7597bb"
+        }
+      ]
+    },
+    {
+      "id": "regional_europe_med_modern",
+      "type": "base",
+      "path": "assets/maps/regional_europe_med_modern.9a725e44478a74ae.json",
+      "bytes": 2897,
+      "gzipBytes": 2574512,
+      "sha256": "9a725e44478a74ae0b10754fd8049ed37fb046b7e44982085cce037acbe12686",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 13297801,
+      "contentSha256": "d6764a6aa8aed1c90fadf5a5a1bd61a4c4f092f7a10e680bbd6dd87bd5f7eb0d",
+      "parts": [
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-001.aa3656f14e05f1ad.txt",
+          "bytes": 1048576,
+          "gzipBytes": 220171,
+          "sha256": "aa3656f14e05f1ad79d8b98fd0300d6b729e0a795413a49d76fffbc7bab50a8d"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-002.be9740ae2007a1b9.txt",
+          "bytes": 1048576,
+          "gzipBytes": 239134,
+          "sha256": "be9740ae2007a1b945a95d41252820e149969b8c678deb31cf07a9cd26a80ff7"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-003.4bde3a0327892149.txt",
+          "bytes": 1048576,
+          "gzipBytes": 204878,
+          "sha256": "4bde3a0327892149fb4a003e5e94719ce4cf6d1a16e31942239b3205abe5828c"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-004.7147bc79da838ebd.txt",
+          "bytes": 1048576,
+          "gzipBytes": 255913,
+          "sha256": "7147bc79da838ebdc253338fdacb5ce1770ebed1a903c2694e17c1005e39276b"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-005.e62ccf3b444e5cfd.txt",
+          "bytes": 1048576,
+          "gzipBytes": 180869,
+          "sha256": "e62ccf3b444e5cfd45f2b94b3eeea62a9f98ed067bcea937d35506806414c019"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-006.a41adace21a00ff8.txt",
+          "bytes": 1048576,
+          "gzipBytes": 143450,
+          "sha256": "a41adace21a00ff8f1ff65e06088e302ccc981ef0f65114bc4401aa9e2f724c1"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-007.95db99cdd589cdb3.txt",
+          "bytes": 1048576,
+          "gzipBytes": 149584,
+          "sha256": "95db99cdd589cdb3a3836db2409beda681f54be7a7a5fa6da00d1f75eb041a1e"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-008.36639be4f7e6a4a2.txt",
+          "bytes": 1048576,
+          "gzipBytes": 186003,
+          "sha256": "36639be4f7e6a4a242547013200138ea4a2c59ec2947ba139325863e88937386"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-009.8646fd47b0219941.txt",
+          "bytes": 1048576,
+          "gzipBytes": 188931,
+          "sha256": "8646fd47b0219941fc02203d1b79fea87725a8df2c24037800ec27f59dd4c23d"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-010.9f9aca2429cded31.txt",
+          "bytes": 1048576,
+          "gzipBytes": 187793,
+          "sha256": "9f9aca2429cded31950df88392d3e3d36511bc828d88749c1dfba514f6414dd5"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-011.337a6003ee23b696.txt",
+          "bytes": 1048576,
+          "gzipBytes": 193446,
+          "sha256": "337a6003ee23b69625946d88920274c661d5bee64061c579067b059d5a2fe7a0"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-012.8d976077d38b90a6.txt",
+          "bytes": 1048576,
+          "gzipBytes": 192925,
+          "sha256": "8d976077d38b90a64d092f12e1bd455c886d5b1d816a1ed49d12db0e26ec4484"
+        },
+        {
+          "path": "assets/maps/regional_europe_med_modern.d6764a6aa8aed1c9.part-013.8bac1fdde8b25222.txt",
+          "bytes": 714889,
+          "gzipBytes": 230543,
+          "sha256": "8bac1fdde8b252221395e25a5d8f394d37c84144130d0b40bbd3507765c902fe"
+        }
+      ]
+    },
+    {
+      "id": "regional_asia_modern",
+      "type": "base",
+      "path": "assets/maps/regional_asia_modern.5c9368fcd7a3d8b2.json",
+      "bytes": 1600,
+      "gzipBytes": 1823961,
+      "sha256": "5c9368fcd7a3d8b229b58e16f87a0775733dcdf27153f12e7a0911c962393040",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 7086537,
+      "contentSha256": "dedd38d309e6b0438ab2c6357be8c34d2a872b488af91ef6cdb2bcfeb3631d6c",
+      "parts": [
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-001.b8cf6df597a60c89.txt",
+          "bytes": 1048576,
+          "gzipBytes": 242465,
+          "sha256": "b8cf6df597a60c8924d2ab9e12300d5108bada24c8266be2219e319a811fbb45"
+        },
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-002.588b42e29e1625a1.txt",
+          "bytes": 1048576,
+          "gzipBytes": 252939,
+          "sha256": "588b42e29e1625a152efc3d64346ca15059d89dea171ea8e7f960b42e8fcdb76"
+        },
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-003.27bfe4191b62f682.txt",
+          "bytes": 1048576,
+          "gzipBytes": 255255,
+          "sha256": "27bfe4191b62f682749e4f38c384fe47c6db9011151b1c77c2ae42356e7a2cf8"
+        },
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-004.c9303b6be5d820a8.txt",
+          "bytes": 1048576,
+          "gzipBytes": 304997,
+          "sha256": "c9303b6be5d820a83194bfe45ee474ea0f67934048abf1a7e8a8041b51a297a3"
+        },
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-005.3ea49d4046fecaa0.txt",
+          "bytes": 1048576,
+          "gzipBytes": 247481,
+          "sha256": "3ea49d4046fecaa06d60698e631d35168096288340fc0e684361706010ac515f"
+        },
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-006.1f14e0c9681ba5da.txt",
+          "bytes": 1048576,
+          "gzipBytes": 262715,
+          "sha256": "1f14e0c9681ba5dabc10ef277d378a188b8a70369df3d7b62b50c968203925fd"
+        },
+        {
+          "path": "assets/maps/regional_asia_modern.dedd38d309e6b043.part-007.ef3bd056253384b4.txt",
+          "bytes": 795081,
+          "gzipBytes": 257525,
+          "sha256": "ef3bd056253384b40c911d24e95b1b63b88c882f43a122ebb9688a2816ec2c91"
+        }
+      ]
+    },
+    {
+      "id": "regional_north_america_modern",
+      "type": "base",
+      "path": "assets/maps/regional_north_america_modern.7e9c6180a0dec8ca.json",
+      "bytes": 1039,
+      "gzipBytes": 957114,
+      "sha256": "7e9c6180a0dec8caae1b1a4049f258aa905ed627a2a0f3b3c12cd877cd71607e",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 3493231,
+      "contentSha256": "9b10ed33d07dc4735c6ce2013f41e89d10a09afb8734841861182f2ba487babd",
+      "parts": [
+        {
+          "path": "assets/maps/regional_north_america_modern.9b10ed33d07dc473.part-001.a7794e89a2da15f3.txt",
+          "bytes": 1048576,
+          "gzipBytes": 300598,
+          "sha256": "a7794e89a2da15f37ac0a38bc166fab315eef2a85fb1cac48752e5f88c53c5e5"
+        },
+        {
+          "path": "assets/maps/regional_north_america_modern.9b10ed33d07dc473.part-002.60ccd5fe32bf19ff.txt",
+          "bytes": 1048576,
+          "gzipBytes": 254324,
+          "sha256": "60ccd5fe32bf19ffcbc8a3b6424d6995980be1a2eb8119814610d8f36e01773f"
+        },
+        {
+          "path": "assets/maps/regional_north_america_modern.9b10ed33d07dc473.part-003.5c27e8a8cdd9d653.txt",
+          "bytes": 1048576,
+          "gzipBytes": 298858,
+          "sha256": "5c27e8a8cdd9d653280aa1f005dc53f19b7a61c5730d32b0887f1f6d7e6c37d1"
+        },
+        {
+          "path": "assets/maps/regional_north_america_modern.9b10ed33d07dc473.part-004.9b5a78a83beaa56e.txt",
+          "bytes": 347503,
+          "gzipBytes": 102891,
+          "sha256": "9b5a78a83beaa56e935a9f0a800894e7b262f000811d36ff460c740424f59e87"
+        }
+      ]
+    },
+    {
+      "id": "regional_south_america_modern",
+      "type": "base",
+      "path": "assets/maps/regional_south_america_modern.aa3ea03ff0b01de6.json",
+      "bytes": 1247,
+      "gzipBytes": 1082752,
+      "sha256": "aa3ea03ff0b01de6220902f8400aab37bc40bbad1217054133db3002276ef8f3",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 4216835,
+      "contentSha256": "52506f35b5096f7b51d0e39a9c1313d76495e024f7def57860b28146761d50e4",
+      "parts": [
+        {
+          "path": "assets/maps/regional_south_america_modern.52506f35b5096f7b.part-001.62792a8a122c18d7.txt",
+          "bytes": 1048576,
+          "gzipBytes": 258938,
+          "sha256": "62792a8a122c18d7b1ff5e81cb495d46d6f3f224ec3a2110b2735f2d274c9143"
+        },
+        {
+          "path": "assets/maps/regional_south_america_modern.52506f35b5096f7b.part-002.01a7f18c2e9cd27f.txt",
+          "bytes": 1048576,
+          "gzipBytes": 237962,
+          "sha256": "01a7f18c2e9cd27f9b4e0be2b49adaa77778d9a8289fc3593492e306a65451dd"
+        },
+        {
+          "path": "assets/maps/regional_south_america_modern.52506f35b5096f7b.part-003.15db27ec2dc2a091.txt",
+          "bytes": 1048576,
+          "gzipBytes": 250690,
+          "sha256": "15db27ec2dc2a091f672e7ed571b64ee3ef6ddf40a236ce0bbda562052d11bcb"
+        },
+        {
+          "path": "assets/maps/regional_south_america_modern.52506f35b5096f7b.part-004.e73d0e43d976884a.txt",
+          "bytes": 1048576,
+          "gzipBytes": 330699,
+          "sha256": "e73d0e43d976884a10669e7fb2b9d5bcf7ca7ec961259d623e67199c78b491a2"
+        },
+        {
+          "path": "assets/maps/regional_south_america_modern.52506f35b5096f7b.part-005.dfff71c13a00ba71.txt",
+          "bytes": 22531,
+          "gzipBytes": 3973,
+          "sha256": "dfff71c13a00ba71c72659ae2207091855bedddb5a0470769cc84c815dc1a3e4"
+        }
+      ]
+    },
+    {
+      "id": "regional_eastasia_1419",
+      "type": "patch",
+      "path": "assets/maps/regional_eastasia_1419.ace4b703d16de632.json",
+      "bytes": 266638,
+      "gzipBytes": 33917,
+      "sha256": "ace4b703d16de6327738ba61116df00bd6b32845fb02f529dda9d4ef5ecf4989",
+      "baseId": "regional_eastasia_modern"
+    },
+    {
+      "id": "regional_eastasia_1592",
+      "type": "patch",
+      "path": "assets/maps/regional_eastasia_1592.f8ab993d1a1ca9bc.json",
+      "bytes": 265764,
+      "gzipBytes": 33584,
+      "sha256": "f8ab993d1a1ca9bca6e21edcd3142fd7fa8ba5a0962a5499e7ed28942ffcd3e9",
+      "baseId": "regional_eastasia_modern"
+    },
+    {
+      "id": "regional_eastasia_1754",
+      "type": "patch",
+      "path": "assets/maps/regional_eastasia_1754.110fc598187b2da1.json",
+      "bytes": 260422,
+      "gzipBytes": 33425,
+      "sha256": "110fc598187b2da19feeb29f4c4d25f56a8b58105b879068d8f26e787dd07e36",
+      "baseId": "regional_eastasia_modern"
+    },
+    {
+      "id": "regional_europe_med_1754",
+      "type": "patch",
+      "path": "assets/maps/regional_europe_med_1754.cb3e632102e5c362.json",
+      "bytes": 897400,
+      "gzipBytes": 88621,
+      "sha256": "cb3e632102e5c36290ae2b7afd45ed2401badd0c0066d78c98dffd0ef97d8a0d",
+      "baseId": "regional_europe_med_modern"
+    },
+    {
+      "id": "regional_asia_1754",
+      "type": "patch",
+      "path": "assets/maps/regional_asia_1754.98b0a77511fa0f6b.json",
+      "bytes": 585667,
+      "gzipBytes": 61230,
+      "sha256": "98b0a77511fa0f6bd0f5fd7c4476260ec6982d4c49bff25a57c56a3eeeeee4ad",
+      "baseId": "regional_asia_modern"
+    },
+    {
+      "id": "regional_north_america_1754",
+      "type": "patch",
+      "path": "assets/maps/regional_north_america_1754.99ed81822ed61e87.json",
+      "bytes": 361815,
+      "gzipBytes": 42590,
+      "sha256": "99ed81822ed61e876a5b0e03e68b6cc33c739842e9791154a6de8ea2197f1857",
+      "baseId": "regional_north_america_modern"
+    },
+    {
+      "id": "regional_south_america_1754",
+      "type": "patch",
+      "path": "assets/maps/regional_south_america_1754.2a4cef542289195b.json",
+      "bytes": 362865,
+      "gzipBytes": 40981,
+      "sha256": "2a4cef542289195bdf56e36240036eeceb15dcafeb2495eb80d7dc8d35735b96",
+      "baseId": "regional_south_america_modern"
+    },
+    {
+      "id": "regional_world_1754",
+      "type": "patch",
+      "path": "assets/maps/regional_world_1754.0c884d35900bc5de.json",
+      "bytes": 587,
+      "gzipBytes": 184601,
+      "sha256": "0c884d35900bc5de544ef240c5b72acec8cbb37b32e1d58ebcbc4c439def6040",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 1993236,
+      "contentSha256": "cd9dfd9673983b8a162af7aae8c7de950ce9ba1ced0bfa8a4eab3e604d766d1d",
+      "parts": [
+        {
+          "path": "assets/maps/regional_world_1754.cd9dfd9673983b8a.part-001.33f3c6734726c6c3.txt",
+          "bytes": 1048576,
+          "gzipBytes": 101223,
+          "sha256": "33f3c6734726c6c3c0877a092d1ed63be7d8ed8d7e5511c977987c7e3da3c36e"
+        },
+        {
+          "path": "assets/maps/regional_world_1754.cd9dfd9673983b8a.part-002.07d6a02c9fe34966.txt",
+          "bytes": 944660,
+          "gzipBytes": 83046,
+          "sha256": "07d6a02c9fe3496695f1f572ad6a8b2670c1ffe2e1be5fbeb68e22af7bf1808a"
+        }
+      ],
+      "baseId": "world-detailed"
+    },
+    {
+      "id": "regional_world_modern",
+      "type": "patch",
+      "path": "assets/maps/regional_world_modern.82eb5de61eb980e5.json",
+      "bytes": 115903,
+      "gzipBytes": 20700,
+      "sha256": "82eb5de61eb980e59668b15d5b9c1e6ced88109367bb5c9e82f013036fae725f",
+      "baseId": "world-detailed"
+    }
+  ]
+}

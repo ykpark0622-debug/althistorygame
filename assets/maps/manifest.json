@@ -132,6 +132,14 @@
       "downloadBytes": 297815
     },
     {
+      "id": "europe-balanced",
+      "name": "유럽과 지중해 · 균형 지도",
+      "provinceCount": 2431,
+      "asset": "assets/maps/europe-balanced.8de94c02725f3504.json",
+      "downloadBytes": 1849164,
+      "recommended": true
+    },
+    {
       "id": "world-detailed",
       "name": "세계 세부 지도 · 현대 행정구역",
       "provinceCount": 61940,
@@ -290,6 +298,31 @@
       "bytes": 297815,
       "gzipBytes": 104818,
       "sha256": "421cfd05b8f43bbbd9912280c4f6587aa132e892532e96e6e1e409098b9dacfc"
+    },
+    {
+      "id": "europe-balanced",
+      "type": "base",
+      "path": "assets/maps/europe-balanced.8de94c02725f3504.json",
+      "bytes": 575,
+      "gzipBytes": 475298,
+      "sha256": "8de94c02725f3504c10cd1d619ffdad33e2e58cebfddc8b1dac1ba0633f91665",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 1848589,
+      "contentSha256": "f6dc9386d61c1c3c8e07875129c2f96cbe16f1cad11583a38558e359ceffdc81",
+      "parts": [
+        {
+          "path": "assets/maps/europe-balanced.f6dc9386d61c1c3c.part-001.899324450d418b96.txt",
+          "bytes": 1048574,
+          "gzipBytes": 263775,
+          "sha256": "899324450d418b96fe6b03baf9c1e2affe921ba7804509723f62632e0eeef663"
+        },
+        {
+          "path": "assets/maps/europe-balanced.f6dc9386d61c1c3c.part-002.d59f6cc7714f5ef9.txt",
+          "bytes": 800015,
+          "gzipBytes": 211196,
+          "sha256": "d59f6cc7714f5ef9c8505053697d06d6c74230a992f9f0f986010ad0dea0961e"
+        }
+      ]
     },
     {
       "id": "world-detailed",

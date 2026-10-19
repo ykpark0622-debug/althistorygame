@@ -1,0 +1,722 @@
+{
+  "templateId": "europe-balanced",
+  "regions": 2431,
+  "countryCount": 84,
+  "bytes": 1848550,
+  "sha256": "cc68b26572fe209bc74b9a992bad9f30cd799964fc7cd4d0e3a66a2f31e9d9f4",
+  "bounds": [
+    -25,
+    20,
+    50,
+    72
+  ],
+  "projection": "Equirectangular 2160x1080, 0.1 px SVG paths; world paths with local crop bounds/centroids",
+  "countries": [
+    {
+      "iso": "ALB",
+      "sourceType": "ADM2",
+      "input": 36,
+      "regions": 20,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "AND",
+      "sourceType": "ADM1",
+      "input": 7,
+      "regions": 7,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ARM",
+      "sourceType": "ADM2",
+      "input": 39,
+      "regions": 39,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "AUT",
+      "sourceType": "ADM2",
+      "input": 94,
+      "regions": 35,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "AZE",
+      "sourceType": "ADM2",
+      "input": 79,
+      "regions": 79,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "BEL",
+      "sourceType": "ADM2",
+      "input": 11,
+      "regions": 11,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "BGR",
+      "sourceType": "ADM2",
+      "input": 265,
+      "regions": 28,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "BIH",
+      "sourceType": "ADM2",
+      "input": 12,
+      "regions": 12,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "BLR",
+      "sourceType": "ADM2",
+      "input": 118,
+      "regions": 40,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "CHE",
+      "sourceType": "ADM1",
+      "input": 26,
+      "regions": 26,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "CYP",
+      "sourceType": "ADM2",
+      "input": 609,
+      "regions": 8,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "CZE",
+      "sourceType": "ADM2",
+      "input": 77,
+      "regions": 35,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "DEU",
+      "sourceType": "ADM3",
+      "input": 428,
+      "regions": 108,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "DNK",
+      "sourceType": "ADM2",
+      "input": 98,
+      "regions": 25,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "DZA",
+      "sourceType": "ADM2",
+      "input": 48,
+      "regions": 48,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "EGY",
+      "sourceType": "ADM2",
+      "input": 364,
+      "regions": 80,
+      "merged": true,
+      "areaChangeRatio": 9.304634923305376e-7
+    },
+    {
+      "iso": "ESP",
+      "sourceType": "ADM2",
+      "input": 52,
+      "regions": 52,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "EST",
+      "sourceType": "ADM2",
+      "input": 214,
+      "regions": 15,
+      "merged": true,
+      "areaChangeRatio": 1.7180546388536546e-7
+    },
+    {
+      "iso": "FIN",
+      "sourceType": "ADM2",
+      "input": 70,
+      "regions": 30,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "FRA",
+      "sourceType": "ADM2",
+      "input": 96,
+      "regions": 96,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "GBR",
+      "sourceType": "ADM2",
+      "input": 216,
+      "regions": 85,
+      "merged": true,
+      "areaChangeRatio": 6.283841427045865e-9
+    },
+    {
+      "iso": "GEO",
+      "sourceType": "ADM2",
+      "input": 68,
+      "regions": 68,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "GRC",
+      "sourceType": "ADM2",
+      "input": 14,
+      "regions": 14,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "GRL",
+      "sourceType": "ADM1",
+      "input": 2,
+      "regions": 2,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "HRV",
+      "sourceType": "ADM2",
+      "input": 545,
+      "regions": 21,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "HUN",
+      "sourceType": "ADM2",
+      "input": 198,
+      "regions": 25,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "IRL",
+      "sourceType": "ADM2",
+      "input": 166,
+      "regions": 26,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "IRN",
+      "sourceType": "ADM2",
+      "input": 169,
+      "regions": 80,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "IRQ",
+      "sourceType": "ADM2",
+      "input": 101,
+      "regions": 40,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ISL",
+      "sourceType": "ADM2",
+      "input": 73,
+      "regions": 15,
+      "merged": true,
+      "areaChangeRatio": 7.102969356384659e-10
+    },
+    {
+      "iso": "ISR",
+      "sourceType": "ADM2",
+      "input": 15,
+      "regions": 15,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ITA",
+      "sourceType": "ADM3",
+      "input": 107,
+      "regions": 107,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "JOR",
+      "sourceType": "ADM2",
+      "input": 52,
+      "regions": 15,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "KAZ",
+      "sourceType": "ADM2",
+      "input": 9,
+      "regions": 9,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "KWT",
+      "sourceType": "ADM2",
+      "input": 137,
+      "regions": 6,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "LBN",
+      "sourceType": "ADM2",
+      "input": 26,
+      "regions": 26,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "LBY",
+      "sourceType": "ADM1",
+      "input": 22,
+      "regions": 22,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "LIE",
+      "sourceType": "ADM1",
+      "input": 11,
+      "regions": 1,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "LTU",
+      "sourceType": "ADM2",
+      "input": 60,
+      "regions": 20,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "LUX",
+      "sourceType": "ADM2",
+      "input": 105,
+      "regions": 12,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "LVA",
+      "sourceType": "ADM2",
+      "input": 589,
+      "regions": 20,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MAR",
+      "sourceType": "ADM2",
+      "input": 72,
+      "regions": 72,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MCO",
+      "sourceType": "ADM2",
+      "input": 9,
+      "regions": 1,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MDA",
+      "sourceType": "ADM1",
+      "input": 37,
+      "regions": 37,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MKD",
+      "sourceType": "ADM2",
+      "input": 84,
+      "regions": 20,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MLI",
+      "sourceType": "ADM2",
+      "input": 4,
+      "regions": 4,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MLT",
+      "sourceType": "ADM1",
+      "input": 68,
+      "regions": 3,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MNE",
+      "sourceType": "ADM1",
+      "input": 23,
+      "regions": 23,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "MRT",
+      "sourceType": "ADM2",
+      "input": 12,
+      "regions": 12,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "NER",
+      "sourceType": "ADM2",
+      "input": 3,
+      "regions": 3,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "NLD",
+      "sourceType": "ADM2",
+      "input": 344,
+      "regions": 25,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "NOR",
+      "sourceType": "ADM2",
+      "input": 424,
+      "regions": 40,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "POL",
+      "sourceType": "ADM2",
+      "input": 380,
+      "regions": 80,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "PRT",
+      "sourceType": "ADM2",
+      "input": 292,
+      "regions": 30,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ROU",
+      "sourceType": "ADM2",
+      "input": 3235,
+      "regions": 42,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "RUS",
+      "sourceType": "ADM2",
+      "input": 1303,
+      "regions": 150,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SAU",
+      "sourceType": "ADM2",
+      "input": 103,
+      "regions": 40,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SDN",
+      "sourceType": "ADM2",
+      "input": 8,
+      "regions": 8,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SMR",
+      "sourceType": "ADM1",
+      "input": 9,
+      "regions": 1,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SRB",
+      "sourceType": "ADM2",
+      "input": 145,
+      "regions": 30,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SVK",
+      "sourceType": "ADM2",
+      "input": 79,
+      "regions": 25,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SVN",
+      "sourceType": "ADM2",
+      "input": 213,
+      "regions": 20,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SWE",
+      "sourceType": "ADM2",
+      "input": 290,
+      "regions": 45,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "SYR",
+      "sourceType": "ADM2",
+      "input": 61,
+      "regions": 61,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "TCD",
+      "sourceType": "ADM2",
+      "input": 4,
+      "regions": 4,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "TUN",
+      "sourceType": "ADM2",
+      "input": 264,
+      "regions": 24,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "TUR",
+      "sourceType": "ADM2",
+      "input": 972,
+      "regions": 75,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "UKR",
+      "sourceType": "ADM2",
+      "input": 494,
+      "regions": 80,
+      "merged": true,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "VAT",
+      "sourceType": "ADM0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "XKX",
+      "sourceType": "ADM2",
+      "input": 38,
+      "regions": 38,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ESB",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "PSE",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ESH",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "KOS",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "GIB",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "CYN",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "CNM",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "WSB",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "BRT",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "JEY",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "GGY",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "IMN",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "ALA",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    },
+    {
+      "iso": "FRO",
+      "sourceType": "Natural Earth admin-0",
+      "input": 1,
+      "regions": 1,
+      "merged": false,
+      "areaChangeRatio": 0
+    }
+  ],
+  "sources": [
+    {
+      "filename": "balanced-CHE-ADM1.geojson",
+      "sha256": "c0a78aa1cc5ce4a50e08e72d6424d4744024eb7421b13aedd8c3dd1139285cef"
+    },
+    {
+      "filename": "balanced-ITA-ADM3.geojson",
+      "sha256": "6ebb3baf5744d16fcc37ed417ce4b62321833577b62b8b927d0bc71d640b6e87"
+    },
+    {
+      "filename": "cgaz-adm2-simplified.geojson",
+      "sha256": "6fc3e5940155f28143961a3c739560a2efefdfaf4b64a0b72425d6b79bf6eb90"
+    },
+    {
+      "filename": "extra-DEU.geojson",
+      "sha256": "d59b27025076e9bb73b58df4490cb9b16524dbba9a99984ebee02e8b213ab69a"
+    },
+    {
+      "filename": "ne-countries.geojson",
+      "sha256": "f1326057372df0661eae8d22e0c205cedab7d9f72b41b1dcd51be8c913974309"
+    },
+    {
+      "filename": "ne-lakes.geojson",
+      "sha256": "d26f85631f9243f8cdaabb5e7ddcf0816f97dfbe8ca1242bd1face83018ec49b"
+    },
+    {
+      "filename": "ne-land.geojson",
+      "sha256": "a86238cc55b0ecd6892f5dc0cc0296a1f4f18b14285697187c7d69829d58ecfe"
+    },
+    {
+      "filename": "ne-rivers.geojson",
+      "sha256": "9c0ad427739f6a2659027a0ef610f12fc43d975356cb2d4134d783c520cb3e38"
+    }
+  ]
+}
