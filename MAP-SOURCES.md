@@ -224,3 +224,7 @@
 ## 유럽 균형 지도 추가
 
 새 europe-balanced 템플릿의 단계 선택·인접 구역 병합과 신규 이탈리아·스위스 원자료는 [BALANCED-MAP-SOURCES.md](BALANCED-MAP-SOURCES.md)를 참고하세요. 기존 템플릿과 원자료의 이용 조건은 유지됩니다.
+
+## 세계 균형 지도 추가
+
+새 world-balanced 템플릿은 국가별 인접 구역을 합친 세계용 편집 지도입니다. 가공 내용과 원자료 조건은 [WORLD-MAP-SOURCES.md](WORLD-MAP-SOURCES.md), 실제 국가별 구역 수와 원본 체크섬은 tools/map-source/licenses/world-balanced-build.json을 함께 보관하세요.

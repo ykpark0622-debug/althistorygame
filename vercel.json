@@ -68,6 +68,78 @@
       ]
     },
     {
+      "source": "/assets/maps/world-balanced.8a7ada898ebc3515.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-001.437ef263d6d79c33.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-002.65625db6c0b0e47b.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-003.f7a8002691c4b092.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-004.22f08e3086a58db5.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-005.044b4a695ae9b1e8.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-006.7781eff697467a94.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/world-balanced.a059c744e9d558c1.part-007.5485936d05e09775.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/maps/world-detailed.c0c8a23fede0e770.json",
       "headers": [
         {
@@ -950,7 +1022,7 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.026.ce4002245ea477f8.txt",
+      "source": "/assets/program/standalone.026.476a2531da0ec50b.txt",
       "headers": [
         {
           "key": "Cache-Control",
@@ -959,7 +1031,61 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.027.2a077d3cdab82d4e.txt",
+      "source": "/assets/program/standalone.027.56ba285720784859.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.028.47ffe35c50955a7b.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.029.55ef76193d8d382d.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.030.4e4a7f9ab01e98d7.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.031.d5e7620aae660790.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.032.c3942629b4943a3f.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.033.f26b11a927310de3.txt",
       "headers": [
         {
           "key": "Cache-Control",

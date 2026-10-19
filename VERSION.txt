@@ -1,4 +1,4 @@
-역사의 갈림길 — 유럽 균형 지도 · 지역별 지도 지연 로딩 · 지도 제작·공유
-Version: 2.5.0-community
+역사의 갈림길 — 세계·유럽 균형 지도 · 지역별 지도 지연 로딩 · 지도 제작·공유
+Version: 2.6.0-community
 Build date: 2026-10-20
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)
