@@ -1,0 +1,762 @@
+{
+  "schemaVersion": 2,
+  "id": "reign_france_v2",
+  "title": "루이 15세의 치세",
+  "subtitle": "지도·모드 기능 예시",
+  "description": "역사 소재를 단순화한 기능 예시입니다. 수치·지도 효과와 대체 경로는 창작이며, 기준 역사는 이 예시에서 작성자가 지정한 비교 경로입니다.",
+  "start": "war_1733",
+  "stats": [
+    {
+      "id": "treasury",
+      "name": "재정",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#bb9b52"
+    },
+    {
+      "id": "morale",
+      "name": "민심",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#648d75"
+    },
+    {
+      "id": "military",
+      "name": "군사",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#ad705e"
+    },
+    {
+      "id": "diplomacy",
+      "name": "외교",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#6c91b0"
+    }
+  ],
+  "flags": [
+    {
+      "id": "italy",
+      "name": "이탈리아 원정",
+      "initial": false
+    },
+    {
+      "id": "allies",
+      "name": "사르데냐·스페인 협력",
+      "initial": false
+    },
+    {
+      "id": "lorraine_deal",
+      "name": "로렌 협정",
+      "initial": false
+    },
+    {
+      "id": "flanders",
+      "name": "플랑드르 공세",
+      "initial": false
+    },
+    {
+      "id": "taxed",
+      "name": "전쟁세 부과",
+      "initial": false
+    },
+    {
+      "id": "keep_flanders",
+      "name": "점령지 유지 요구",
+      "initial": false
+    }
+  ],
+  "events": [
+    {
+      "id": "war_1733",
+      "title": "폴란드 왕위 계승 전쟁",
+      "body": "전쟁의 방향을 정합니다. 같은 해의 정치와 외교 결정이 원정의 결과를 바꿉니다.",
+      "choices": [
+        {
+          "text": "라인강 방면에 힘을 쏟는다",
+          "effects": {
+            "treasury": -7,
+            "military": 5
+          },
+          "historical": true,
+          "result": "라인강 전선에 병력이 배치됩니다."
+        },
+        {
+          "text": "이탈리아로 원정한다",
+          "effects": {
+            "treasury": -12,
+            "military": 8
+          },
+          "setFlags": {
+            "italy": true
+          },
+          "result": "알프스 너머의 전쟁은 동맹의 협력이 필요합니다."
+        },
+        {
+          "text": "출병을 줄인다",
+          "effects": {
+            "treasury": 8,
+            "military": -5
+          },
+          "result": "재정은 회복되지만 협상에서 내세울 전과는 줄었습니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "war"
+    },
+    {
+      "id": "politics_1733",
+      "title": "플뢰리의 장부",
+      "body": "전쟁 비용을 어디서 조달하시겠습니까?",
+      "choices": [
+        {
+          "text": "플뢰리의 긴축을 유지한다",
+          "effects": {
+            "treasury": 5,
+            "military": -2
+          },
+          "historical": true,
+          "result": "궁정 지출을 줄여 전쟁을 뒷받침합니다."
+        },
+        {
+          "text": "전쟁세를 부과한다",
+          "effects": {
+            "treasury": 18,
+            "morale": -18
+          },
+          "setFlags": {
+            "taxed": true
+          },
+          "result": "창고는 채웠지만 백성의 부담이 커졌습니다."
+        },
+        {
+          "text": "국채로 시간을 번다",
+          "effects": {
+            "treasury": 10,
+            "diplomacy": -4
+          },
+          "result": "당장의 비용은 마련했습니다. 빚은 이후의 부담이 됩니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "politics"
+    },
+    {
+      "id": "diplomacy_1733",
+      "title": "누구와 손잡을 것인가",
+      "body": "군사 결정과 동맹이 합쳐져 정산 때 지도를 바꿉니다.",
+      "choices": [
+        {
+          "text": "사르데냐·스페인과 협력한다",
+          "effects": {
+            "diplomacy": 8,
+            "treasury": -3
+          },
+          "historical": true,
+          "setFlags": {
+            "allies": true
+          },
+          "result": "동맹군의 협력을 얻었습니다."
+        },
+        {
+          "text": "오스트리아와 별도로 교섭한다",
+          "effects": {
+            "diplomacy": 5,
+            "military": -3
+          },
+          "result": "독자적인 화평의 길을 찾습니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "diplomacy"
+    },
+    {
+      "id": "war_1735",
+      "title": "전과를 지킬 것인가",
+      "body": "전쟁을 더 이어가면 협상력과 비용이 함께 늘어납니다.",
+      "choices": [
+        {
+          "text": "공세를 멈추고 협상한다",
+          "effects": {
+            "treasury": 5,
+            "military": -2
+          },
+          "historical": true,
+          "result": "전쟁을 조약으로 마무리할 준비를 합니다."
+        },
+        {
+          "text": "점령지를 더 요구한다",
+          "effects": {
+            "treasury": -10,
+            "military": 6,
+            "diplomacy": -6
+          },
+          "territory": [
+            {
+              "prov": "milan",
+              "occupation": "france"
+            }
+          ],
+          "result": "밀라노에 점령 표시가 남습니다. 소유권 확정은 아직입니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "war"
+    },
+    {
+      "id": "politics_1735",
+      "title": "전쟁 뒤의 부담",
+      "body": "승리의 소식만으로 세금과 징발의 불만이 사라지지는 않습니다.",
+      "choices": [
+        {
+          "text": "구휼과 군량 정리를 병행한다",
+          "effects": {
+            "treasury": -8,
+            "morale": 12
+          },
+          "historical": true,
+          "result": "전후의 부담을 줄입니다."
+        },
+        {
+          "text": "지출을 묶고 회복을 기다린다",
+          "effects": {
+            "treasury": 9,
+            "morale": -6
+          },
+          "result": "재정을 아꼈지만 지역의 불만은 남았습니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "politics"
+    },
+    {
+      "id": "diplomacy_1735",
+      "title": "로렌을 둘러싼 거래",
+      "body": "스타니스와프의 지위와 로렌의 미래를 협상합니다.",
+      "choices": [
+        {
+          "text": "로렌의 장래 귀속을 약속받는다",
+          "effects": {
+            "diplomacy": 9
+          },
+          "historical": true,
+          "setFlags": {
+            "lorraine_deal": true
+          },
+          "territory": [
+            {
+              "prov": "lorraine",
+              "influence": "france"
+            }
+          ],
+          "result": "당장 영토가 되지는 않지만 프랑스의 영향권으로 표시됩니다."
+        },
+        {
+          "text": "현재의 군사 점령을 고수한다",
+          "effects": {
+            "military": 4,
+            "diplomacy": -10
+          },
+          "result": "협상을 거부했습니다. 동맹국도 전쟁의 지속을 달가워하지 않습니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "diplomacy"
+    },
+    {
+      "id": "war_1741",
+      "title": "새로운 계승 전쟁",
+      "body": "다시 전쟁이 일어났습니다. 네덜란드 방면의 공세를 결정합니다.",
+      "choices": [
+        {
+          "text": "오스트리아령 네덜란드를 압박한다",
+          "effects": {
+            "treasury": -12,
+            "military": 12
+          },
+          "historical": true,
+          "setFlags": {
+            "flanders": true
+          },
+          "result": "장기적인 공세를 준비합니다. 이후의 정산에서 점령을 반영합니다."
+        },
+        {
+          "text": "국경을 지키고 내정을 돌본다",
+          "effects": {
+            "treasury": 9,
+            "military": -4,
+            "morale": 6
+          },
+          "result": "대륙의 세력 균형보다 국내 회복에 집중합니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "war"
+    },
+    {
+      "id": "politics_1741",
+      "title": "군대와 백성",
+      "body": "다시 전쟁에 나선 왕국의 부담을 정합니다.",
+      "choices": [
+        {
+          "text": "군비와 민생을 절충한다",
+          "effects": {
+            "treasury": -4,
+            "morale": 3,
+            "military": 3
+          },
+          "historical": true,
+          "result": "군대의 수요와 국내 불만 사이에서 균형을 잡습니다."
+        },
+        {
+          "text": "군대에 모든 자원을 집중한다",
+          "effects": {
+            "treasury": -10,
+            "morale": -14,
+            "military": 15
+          },
+          "result": "강한 군대를 얻었지만 민심은 흔들립니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "politics"
+    },
+    {
+      "id": "diplomacy_1741",
+      "title": "독일의 세력 균형",
+      "body": "프로이센의 움직임과 오스트리아의 저항을 살핍니다.",
+      "choices": [
+        {
+          "text": "프로이센과 보조를 맞춘다",
+          "effects": {
+            "diplomacy": 6,
+            "military": 4
+          },
+          "historical": true,
+          "result": "공동의 적을 두고 움직이지만 이해관계까지 같지는 않습니다."
+        },
+        {
+          "text": "독자 협상을 준비한다",
+          "effects": {
+            "diplomacy": 10,
+            "military": -4
+          },
+          "result": "군사 작전보다 협상의 여지를 남깁니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "diplomacy"
+    },
+    {
+      "id": "diplomacy_1748",
+      "title": "엑스라샤펠의 협상",
+      "body": "플랑드르의 전과를 영토로 바꿀지, 전쟁을 끝내기 위해 돌려줄지 결정합니다.",
+      "choices": [
+        {
+          "text": "점령지를 돌려주고 화평한다",
+          "effects": {
+            "treasury": 8,
+            "morale": 5,
+            "diplomacy": 8
+          },
+          "historical": true,
+          "territory": [
+            {
+              "prov": "belgium",
+              "occupation": null
+            },
+            {
+              "prov": "milan",
+              "occupation": null
+            }
+          ],
+          "result": "지도 위의 점령 표시가 사라집니다. 전과를 영토로 남기지는 못했습니다."
+        },
+        {
+          "text": "군사력과 외교력을 내세워 영유를 요구한다",
+          "effects": {
+            "treasury": -8,
+            "diplomacy": -8
+          },
+          "when": [
+            {
+              "kind": "stat",
+              "key": "military",
+              "op": "gte",
+              "value": 65
+            },
+            {
+              "kind": "flag",
+              "key": "flanders",
+              "op": "eq",
+              "value": true
+            }
+          ],
+          "setFlags": {
+            "keep_flanders": true
+          },
+          "result": "실제와 다른 협상 조건을 요구했습니다. 마지막 정산에서 소유권을 판정합니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "part": "diplomacy"
+    },
+    {
+      "id": "protest",
+      "title": "전쟁세에 대한 항의",
+      "body": "세금과 징발에 지친 지방에서 항의가 이어집니다.",
+      "choices": [
+        {
+          "text": "세금을 감면한다",
+          "effects": {
+            "treasury": -10,
+            "morale": 15
+          },
+          "result": "세입을 포기하는 대신 거리를 진정시켰습니다."
+        },
+        {
+          "text": "강경하게 진압한다",
+          "effects": {
+            "military": 4,
+            "morale": -10
+          },
+          "result": "저항은 가라앉았지만 원망은 남았습니다."
+        }
+      ],
+      "next": "RETURN",
+      "when": [],
+      "speaker": "지방 총독"
+    }
+  ],
+  "endings": [
+    {
+      "id": "expanded",
+      "title": "플랑드르를 남긴 왕",
+      "summary": "점령을 영토로 바꾸었습니다. 프랑스의 색은 넓어졌지만 전쟁의 장부는 아직 남았습니다.",
+      "body": "점령을 영토로 바꾸었습니다. 프랑스의 색은 넓어졌지만 전쟁의 장부는 아직 남았습니다.",
+      "kind": "good",
+      "priority": 30,
+      "immediate": false,
+      "when": [
+        {
+          "kind": "flag",
+          "key": "keep_flanders",
+          "op": "eq",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "exhausted",
+      "title": "승전 뒤의 빈 창고",
+      "summary": "왕국은 살아남았습니다. 그러나 전쟁의 부담으로 재정과 백성은 지쳤습니다.",
+      "body": "왕국은 살아남았습니다. 그러나 전쟁의 부담으로 재정과 백성은 지쳤습니다.",
+      "kind": "bad",
+      "priority": 20,
+      "immediate": false,
+      "when": [
+        {
+          "kind": "stat",
+          "key": "treasury",
+          "op": "lte",
+          "value": 20
+        }
+      ]
+    },
+    {
+      "id": "legacy",
+      "title": "프로이센 왕을 위해 일했는가",
+      "summary": "프랑스는 점령지를 돌려주었습니다. 전쟁의 비용과 외교적 성과가 서로 다른 장부에 남았습니다.",
+      "body": "프랑스는 점령지를 돌려주었습니다. 전쟁의 비용과 외교적 성과가 서로 다른 장부에 남았습니다.",
+      "kind": "mixed",
+      "priority": 0,
+      "immediate": false,
+      "when": []
+    }
+  ],
+  "defaultEnding": "legacy",
+  "randomEvents": [
+    {
+      "id": "unrest",
+      "title": "전쟁세 항의",
+      "eventId": "protest",
+      "when": [
+        {
+          "kind": "stat",
+          "key": "morale",
+          "op": "lte",
+          "value": 40
+        }
+      ],
+      "chance": 30,
+      "priority": 10,
+      "once": false,
+      "cooldown": 2
+    }
+  ],
+  "player": {
+    "askName": true,
+    "label": "국왕의 이름",
+    "defaultName": "루이 15세",
+    "placeholder": "이름을 입력하세요"
+  },
+  "mode": "reign",
+  "map": {
+    "templateId": "world1754",
+    "playerCountry": "france",
+    "countries": [
+      {
+        "id": "naples",
+        "name": "나폴리의 부르봉 왕국",
+        "color": "#c68b6b"
+      }
+    ],
+    "initial": {
+      "owners": {
+        "naples": "austria",
+        "sicily": "austria"
+      },
+      "influence": {
+        "lorraine": null
+      }
+    }
+  },
+  "reign": {
+    "parts": [
+      {
+        "id": "war",
+        "name": "전쟁",
+        "color": "#ad705e"
+      },
+      {
+        "id": "politics",
+        "name": "정치",
+        "color": "#648d75"
+      },
+      {
+        "id": "diplomacy",
+        "name": "외교",
+        "color": "#6c91b0"
+      }
+    ],
+    "turns": [
+      {
+        "id": "y1733",
+        "date": "1733년",
+        "title": "폴란드 왕위 계승 전쟁",
+        "body": "전쟁·정치·외교에서 각각 하나씩 선택하세요. 조합은 정산에서 결과가 됩니다.",
+        "eventIds": [
+          "war_1733",
+          "politics_1733",
+          "diplomacy_1733"
+        ],
+        "between": [],
+        "settlements": [
+          {
+            "id": "milan_allied",
+            "text": "이탈리아 원정과 동맹의 협력으로 밀라노를 점령했습니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "italy",
+                "op": "eq",
+                "value": true
+              },
+              {
+                "kind": "flag",
+                "key": "allies",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {
+              "military": 4
+            },
+            "territory": [
+              {
+                "prov": "milan",
+                "occupation": "france"
+              }
+            ]
+          },
+          {
+            "id": "milan_alone",
+            "text": "동맹 없이 떠난 이탈리아 원정은 보급난을 겪습니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "italy",
+                "op": "eq",
+                "value": true
+              },
+              {
+                "kind": "flag",
+                "key": "allies",
+                "op": "eq",
+                "value": false
+              }
+            ],
+            "effects": {
+              "treasury": -12,
+              "military": -10
+            }
+          },
+          {
+            "id": "naples_allied",
+            "text": "스페인 부르봉 세력이 이탈리아 남부에 진출합니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "allies",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {},
+            "territory": [
+              {
+                "prov": "naples",
+                "to": "naples"
+              },
+              {
+                "prov": "sicily",
+                "to": "naples"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "y1735",
+        "date": "1735년",
+        "title": "전쟁을 조약으로 바꿀 때",
+        "body": "앞선 동맹과 원정이 지도를 바꾸었습니다. 이제 종전 조건을 고릅니다.",
+        "eventIds": [
+          "war_1735",
+          "politics_1735",
+          "diplomacy_1735"
+        ],
+        "between": [
+          {
+            "id": "tax_after",
+            "text": "전쟁세의 부담이 뒤늦게 민심을 깎습니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "taxed",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {
+              "morale": -5
+            }
+          }
+        ],
+        "settlements": [
+          {
+            "id": "milan_return",
+            "text": "강화 협상에서 밀라노의 점령을 해제합니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "lorraine_deal",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {},
+            "territory": [
+              {
+                "prov": "milan",
+                "occupation": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "y1741",
+        "date": "1741~1747년",
+        "title": "오스트리아 왕위 계승 전쟁",
+        "body": "몇 해의 전쟁을 한 차례 결정으로 요약한 기능 예시입니다.",
+        "eventIds": [
+          "war_1741",
+          "politics_1741",
+          "diplomacy_1741"
+        ],
+        "between": [],
+        "settlements": [
+          {
+            "id": "flanders_occupied",
+            "text": "프랑스군의 공세로 오스트리아령 네덜란드에 점령 표시가 생깁니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "flanders",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {
+              "treasury": -5
+            },
+            "territory": [
+              {
+                "prov": "belgium",
+                "occupation": "france"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "y1748",
+        "date": "1748년",
+        "title": "왕국에 무엇을 남길 것인가",
+        "body": "마지막 해에는 외교 분야만 있습니다. 조건에 따라 실제 역사와 다른 선택이 열립니다.",
+        "eventIds": [
+          "diplomacy_1748"
+        ],
+        "between": [],
+        "settlements": [
+          {
+            "id": "flanders_kept",
+            "text": "다른 협상의 결과로 플랑드르의 영유를 확보했습니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "keep_flanders",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {},
+            "territory": [
+              {
+                "prov": "belgium",
+                "to": "france",
+                "occupation": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

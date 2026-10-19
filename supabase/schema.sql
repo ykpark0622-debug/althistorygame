@@ -51,10 +51,21 @@ create table if not exists public.scenarios (
   data          jsonb not null
                 constraint scenarios_data_shape check (
                   coalesce(jsonb_typeof(data) = 'object', false)
-                  and coalesce(data ->> 'schemaVersion' = '1', false)
+                  and coalesce(data ->> 'schemaVersion' in ('1', '2'), false)
                   and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
                   and coalesce(jsonb_typeof(data -> 'endings') = 'array', false)
                   and coalesce(jsonb_typeof(data -> 'stats') = 'array', false)
+                  and coalesce((data ->> 'schemaVersion' = '1' or (
+                    coalesce(data ->> 'mode', 'chronicle') in ('chronicle', 'reign')
+                    and (not (data ? 'map') or (jsonb_typeof(data -> 'map') = 'object'
+                      and jsonb_typeof(data #> '{map,templateId}') = 'string'
+                      and length(data #>> '{map,templateId}') > 0))
+                    and (coalesce(data ->> 'mode', 'chronicle') <> 'reign' or (
+                      jsonb_typeof(data -> 'reign') = 'object'
+                      and jsonb_typeof(data #> '{reign,parts}') = 'array'
+                      and jsonb_typeof(data #> '{reign,turns}') = 'array'
+                    ))
+                  )), false)
                 )
                 constraint scenarios_data_size check (octet_length(data::text) <= 1048576),
   event_count   integer not null default 0,
@@ -71,11 +82,62 @@ create table if not exists public.scenarios (
 alter table public.scenarios drop constraint if exists scenarios_data_shape;
 alter table public.scenarios add constraint scenarios_data_shape check (
   coalesce(jsonb_typeof(data) = 'object', false)
-  and coalesce(data ->> 'schemaVersion' = '1', false)
+  and coalesce(data ->> 'schemaVersion' in ('1', '2'), false)
   and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
   and coalesce(jsonb_typeof(data -> 'endings') = 'array', false)
   and coalesce(jsonb_typeof(data -> 'stats') = 'array', false)
+  and coalesce((data ->> 'schemaVersion' = '1' or (
+    coalesce(data ->> 'mode', 'chronicle') in ('chronicle', 'reign')
+    and (not (data ? 'map') or (jsonb_typeof(data -> 'map') = 'object'
+      and jsonb_typeof(data #> '{map,templateId}') = 'string'
+      and length(data #>> '{map,templateId}') > 0))
+    and (coalesce(data ->> 'mode', 'chronicle') <> 'reign' or (
+      jsonb_typeof(data -> 'reign') = 'object'
+      and jsonb_typeof(data #> '{reign,parts}') = 'array'
+      and jsonb_typeof(data #> '{reign,turns}') = 'array'
+    ))
+  )), false)
 ) not valid;
+
+-- V2 목록의 표시 정보. 목록마다 본문 JSON을 내려받지 않도록 서버가 계산합니다.
+alter table public.scenarios add column if not exists schema_version integer not null default 1;
+alter table public.scenarios add column if not exists mode text not null default 'chronicle';
+alter table public.scenarios add column if not exists map_template_id text;
+alter table public.scenarios drop constraint if exists scenarios_schema_version_meta;
+alter table public.scenarios add constraint scenarios_schema_version_meta check (schema_version in (1, 2));
+alter table public.scenarios drop constraint if exists scenarios_mode_meta;
+alter table public.scenarios add constraint scenarios_mode_meta check (mode in ('chronicle', 'reign'));
+
+create or replace function public.hc_scenarios_metadata_v2() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  new.schema_version := case when new.data ->> 'schemaVersion' = '2' then 2 else 1 end;
+  new.mode := case when new.schema_version = 2 then coalesce(new.data ->> 'mode', 'chronicle') else 'chronicle' end;
+  new.map_template_id := case when new.schema_version = 2 then new.data #>> '{map,templateId}' else null end;
+  return new;
+end $$;
+drop trigger if exists hc_scenarios_metadata_v2 on public.scenarios;
+create trigger hc_scenarios_metadata_v2 before insert or update of data on public.scenarios
+  for each row execute function public.hc_scenarios_metadata_v2();
+
+-- 기존 정상 원고의 표시 정보만 보충합니다. 원고와 작성·수정 시각은 바꾸지 않습니다.
+update public.scenarios set data = data
+where coalesce(jsonb_typeof(data) = 'object', false)
+  and coalesce(data ->> 'schemaVersion' in ('1', '2'), false)
+  and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
+  and coalesce(jsonb_typeof(data -> 'endings') = 'array', false)
+  and coalesce(jsonb_typeof(data -> 'stats') = 'array', false)
+  and coalesce((data ->> 'schemaVersion' = '1' or (
+    coalesce(data ->> 'mode', 'chronicle') in ('chronicle', 'reign')
+    and (not (data ? 'map') or (jsonb_typeof(data -> 'map') = 'object'
+      and jsonb_typeof(data #> '{map,templateId}') = 'string'
+      and length(data #>> '{map,templateId}') > 0))
+    and (coalesce(data ->> 'mode', 'chronicle') <> 'reign' or (
+      jsonb_typeof(data -> 'reign') = 'object'
+      and jsonb_typeof(data #> '{reign,parts}') = 'array'
+      and jsonb_typeof(data #> '{reign,turns}') = 'array'
+    ))
+  )), false);
 
 create index if not exists scenarios_popular_idx on public.scenarios (status, like_count desc, created_at desc);
 create index if not exists scenarios_recent_idx  on public.scenarios (status, created_at desc);

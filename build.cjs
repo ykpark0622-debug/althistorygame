@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
+const dir=__dirname,read=f=>fs.readFileSync(path.join(dir,f),'utf8');
+const scriptFiles=[['map-templates.js','map-templates-script'],['map-view.js','map-view-script'],['engine.js','engine-script'],['bootstrap.js','bootstrap-script'],['flowchart.js','flowchart-script'],['editor.js','editor-script'],['ai-helper.js','ai-script'],['app.js','app-script']];
+const styles=[['styles.css','game-styles'],['flowchart.css','flowchart-styles'],['launcher.css','launcher-styles'],['map-view.css','map-view-styles']];
+let standalone=read('index.html').replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,'').replace(/<link\b[^>]*rel="stylesheet"[^>]*>/gi,'').replace(/<a\b[^>]*data-community-only[^>]*>[\s\S]*?<\/a>/gi,'');
+standalone=standalone.replace('</head>',styles.map(([file,id])=>`<style id="${id}">${read(file).replace(/<\/style/gi,'<\\/style')}</style>`).join('\n')+'\n<style id="standalone-styles">[data-community-only],[data-web-only]{display:none!important}</style>\n</head>');
+standalone=standalone.replace('</body>',scriptFiles.map(([file,id])=>`<script id="${id}">${read(file).replace(/<\/script/gi,'<\\/script')}</script>`).join('\n')+'\n</body>');
+for(const match of standalone.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi))new vm.Script(match[1]);
+fs.writeFileSync(path.join(dir,'standalone.html'),standalone);
+fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 지도 · 연대기 · 치세 + 커뮤니티\nVersion: 2.0.0-community\nBuild date: 2026-10-19\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
+const files=[];function visit(folder){for(const ent of fs.readdirSync(path.join(dir,folder),{withFileTypes:true})){const rel=path.posix.join(folder,ent.name);if(ent.isDirectory())visit(rel);else if(!['RELEASE-MANIFEST.json'].includes(rel)){const data=fs.readFileSync(path.join(dir,rel));files.push({path:rel,bytes:data.length,sha256:crypto.createHash('sha256').update(data).digest('hex')});}}}visit('');
+fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.0.0-community',builtAt:'2026-10-19',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
+console.log(`Built blank standalone HTML and manifest (${files.length} files; examples separate).`);

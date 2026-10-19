@@ -1,4 +1,4 @@
-역사의 갈림길 — 메이커 + 갤러리
-Version: 1.2.0-community
-Build date: 2026-10-18
+역사의 갈림길 — 지도 · 연대기 · 치세 + 커뮤니티
+Version: 2.0.0-community
+Build date: 2026-10-19
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)

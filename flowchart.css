@@ -173,8 +173,24 @@
 .branch-inline-add.branch-button{font-size:10px;padding:6px 9px;background:#f3f8f9}
 .branch-name-help{margin-top:-3px!important}
 .branch-inspector>.branch-field{margin-bottom:12px}
+.branch-mode-notice{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;padding:10px 16px;border-bottom:1px solid #d8dfc9;background:#f4f6ec;color:#586347;line-height:1.6}
+.branch-mode-notice>strong{font-size:12px}.branch-mode-notice>span{flex:1 1 360px;font-size:11px;overflow-wrap:anywhere}.branch-mode-notice>.branch-button{font-size:11px;white-space:nowrap}
+.branch-mode-card-note{padding:11px;border:1px solid #d8dfc9;border-radius:6px;background:#f4f6ec;color:#586347;font-size:11px;line-height:1.7}
+.branch-reign-membership{margin:7px 0;padding:5px 7px;border-radius:4px;background:#edf1e6;color:#5f6b4e;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:740px){.branch-mode-notice{padding:9px 12px;gap:5px 8px}.branch-mode-notice>span{flex-basis:100%;font-size:10px}.branch-mode-notice>strong{font-size:11px}}
 @media(max-width:1300px) and (min-width:741px){.branch-inspector{width:390px}}
 @media(max-width:740px){.branch-random-summary{padding:6px 10px;gap:7px}.branch-random-heading>strong{font-size:10px}.branch-random-heading>span{font-size:8px}.branch-random-rule.branch-button{max-width:190px}.branch-random-edit.branch-button{font-size:9px;padding:5px 6px}}
 @media(max-width:1100px){.branch-intro>span{display:none}.branch-inspector{width:380px;padding:16px}.branch-toolbar{padding:12px 16px}}
 @media(max-width:740px){.branch-toolbar{align-items:flex-start;gap:9px;flex-wrap:wrap;padding:11px 12px}.branch-intro strong{font-size:15px}.branch-controls{gap:4px}.branch-controls .branch-button{font-size:10px;padding:6px 8px}.branch-controls .branch-zoom-button{padding:2px;font-size:18px;width:27px}.branch-zoom{font-size:10px;min-width:33px}.branch-body{flex-direction:column;overflow:auto}.branch-graph-area{flex:none;height:46vh;min-height:250px}.branch-inspector{width:100%;height:auto;min-height:250px;overflow:visible;border-left:0;border-top:1px solid #d8e2e5;padding:16px}.branch-inspector-title{font-size:17px!important}.branch-status{padding:7px 12px;font-size:9px}.branch-legend{padding:8px 10px 5px;gap:5px 12px;font-size:9px}.branch-navigation-hint{padding:0 10px 7px;font-size:9px}.branch-inspector-actions{margin-bottom:16px}}
 @media(prefers-reduced-motion:reduce){.branch-button{transition:none}}
+.v2-condition-editor{margin:14px 0;padding:12px;border:1px solid #d9e2d0;border-radius:8px;background:#f8faf4}
+.v2-condition-editor h3,.v2-territory-editor h3{font-size:13px;margin:0 0 9px}
+.v2-condition-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px;margin:8px 0;border:1px solid #dce4d6;border-radius:7px;background:#fffef9;align-items:start}
+.v2-condition-row .field{margin:0;font-size:11px}.v2-condition-row .btn{align-self:end;justify-self:start}
+.v2-territory-editor{border:1px solid #d9e1d5;padding:12px;border-radius:8px;background:#f7faf4;margin:13px 0}
+.v2-effect-card{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:12px}.v2-effect-card>.v2-map-picker{grid-column:1/-1}.v2-effect-card>.field{margin:0}
+.v2-map-picker{min-width:0;border-radius:8px;overflow:hidden}.v2-map-picker .map-viewport{height:240px;min-height:180px}.v2-map-picker .map-heading h2{font-size:15px}.v2-map-picker .map-notice,.v2-map-picker .map-legend{display:none}
+.v2-editor-map{min-height:260px;margin:15px 0;min-width:0}.v2-editor-map .map-viewport{height:420px}.v2-province-panel{margin:16px 0}.v2-province-panel h3{margin-bottom:13px}
+.v2-reign-rule{padding:0}.v2-reign-rule>summary{cursor:pointer;padding:13px 16px;font-size:12px;font-weight:600;overflow-wrap:anywhere}.v2-rule-body{padding:0 15px 15px}.v2-rule-body>.toolbar{margin-top:13px}
+.branch-inspector .v2-condition-row,.branch-inspector .v2-effect-card{grid-template-columns:repeat(2,minmax(0,1fr))}.branch-inspector .v2-condition-editor,.branch-inspector .v2-territory-editor{padding:10px;margin:7px 0}.branch-inspector .v2-condition-editor .field input,.branch-inspector .v2-condition-editor .field select,.branch-inspector .v2-territory-editor .field input,.branch-inspector .v2-territory-editor .field select{font-size:11px;padding:7px;min-width:0}.branch-inspector .v2-map-picker .map-viewport{height:190px}
+@media(max-width:650px){.v2-condition-row,.v2-effect-card{grid-template-columns:repeat(2,minmax(0,1fr))}.v2-editor-map .map-viewport{height:300px}.v2-condition-row .field select{font-size:11px;padding:7px}.v2-rule-body{padding:0 10px 12px}}

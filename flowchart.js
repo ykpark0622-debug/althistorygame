@@ -21,6 +21,17 @@
   const specialTarget = id => id === 'END' || id === 'RETURN';
   const hasConditions = item => Array.isArray(item.when) && item.when.length > 0;
   const inherited = choice => choice.next === undefined || choice.next === '';
+  const isReign = scenario => scenario.schemaVersion === 2 && scenario.mode === 'reign';
+  function reignLinks(scenario) {
+    const events = eventsOf(scenario), byID = new Map(events.map(event => [event.id, event]));
+    const linked = new Set(), pending = rulesOf(scenario).map(rule => rule.eventId);
+    while (pending.length) {
+      const id = pending.pop(), event = byID.get(id); if (!event || linked.has(id)) continue;
+      linked.add(id);
+      [event.next, ...choicesOf(event).map(choice => inherited(choice) ? event.next : choice.next)].forEach(next => { if (byID.has(next)) pending.push(next); });
+    }
+    return linked;
+  }
 
   function addChoice(event) {
     if (!event || !Array.isArray(event.choices) || event.choices.length >= 20) return null;
@@ -84,6 +95,7 @@
     const events = eventsOf(scenario);
     const event = events.find(item => item.id === sourceId);
     if (!event || (!specialTarget(targetId) && !events.some(item => item.id === targetId))) return false;
+    if (isReign(scenario) && !reignLinks(scenario).has(sourceId)) return false;
     if (choiceIndex === null || choiceIndex === undefined) event.next = targetId;
     else {
       if (!Number.isInteger(choiceIndex) || !Array.isArray(event.choices) || !event.choices[choiceIndex]) return false;
@@ -97,23 +109,34 @@
     const ids = new Set(events.map(event => event.id));
     const edges = [];
     const warnings = [];
+    const reign = isReign(scenario), linkedEventIds = reign ? reignLinks(scenario) : new Set(ids);
+    const turnCards = new Set((scenario.reign?.turns || []).flatMap(turn => turn.eventIds || []));
     const randomRules = rulesOf(scenario).map(rule => Object.assign({}, rule, { invalid: !ids.has(rule.eventId) }));
     events.forEach(event => {
+      if (reign && !linkedEventIds.has(event.id)) return;
       const add = (target, type, extra) => edges.push(Object.assign({ source: event.id, target, type, invalid: !specialTarget(target) && !ids.has(target) }, extra));
       add(event.next, 'default');
       choicesOf(event).forEach((choice, choiceIndex) => add(inherited(choice) ? event.next : choice.next, 'choice', { choiceIndex, inherited: inherited(choice) }));
       if (hasConditions(event)) add(event.next, 'skip');
     });
     const reachable = new Set();
-    const pending = ids.has(scenario.start) ? [scenario.start] : [];
-    if (pending.length) randomRules.filter(rule => !rule.invalid && rule.chance !== 0).forEach(rule => pending.push(rule.eventId));
+    const pending = reign ? [...turnCards].filter(id => ids.has(id)) : ids.has(scenario.start) ? [scenario.start] : [];
+    if (reign || pending.length) randomRules.filter(rule => !rule.invalid && rule.chance !== 0).forEach(rule => pending.push(rule.eventId));
     while (pending.length) {
       const id = pending.pop();
       if (reachable.has(id)) continue;
       reachable.add(id);
       edges.filter(edge => edge.source === id && edge.type !== 'default' && !edge.invalid && ids.has(edge.target)).forEach(edge => pending.push(edge.target));
     }
-    if (events.length && !ids.has(scenario.start)) warnings.push({ message: '시작 사건을 찾을 수 없습니다: ' + (scenario.start || '(미지정)'), eventId: null });
+    if (events.length && !reign && !ids.has(scenario.start)) warnings.push({ message: '시작 사건을 찾을 수 없습니다: ' + (scenario.start || '(미지정)'), eventId: null });
+    if (reign) {
+      const parts = new Set((scenario.reign?.parts || []).map(part => part.id));
+      (scenario.reign?.turns || []).forEach(turn => (turn.eventIds || []).forEach(id => {
+        const event = events.find(item => item.id === id);
+        if (!event) warnings.push({ message: (turn.date || turn.title || turn.id) + ': 등록한 사건 ' + id + '을 찾을 수 없습니다.', eventId: null });
+        else if (!parts.has(event.part)) warnings.push({ message: id + ': 치세 카드 분야를 지정해 주세요.', eventId: id });
+      }));
+    }
     const broken = new Set();
     edges.filter(edge => edge.invalid).forEach(edge => {
       const key = edge.source + '\n' + edge.target;
@@ -121,9 +144,9 @@
       broken.add(key);
       warnings.push({ message: edge.source + ' → ' + (edge.target || '(미지정)') + ': 대상 사건이 없습니다.', eventId: edge.source });
     });
-    events.filter(event => !reachable.has(event.id)).forEach(event => warnings.push({ message: event.id + ': 시작 사건에서 이어지는 경로가 없습니다.', eventId: event.id }));
+    events.filter(event => !reachable.has(event.id)).forEach(event => warnings.push({ message: event.id + (reign ? ': 연도 사건 목록이나 활성 돌발 규칙에 등록되지 않았습니다.' : ': 시작 사건에서 이어지는 경로가 없습니다.'), eventId: event.id }));
     randomRules.filter(rule => rule.invalid).forEach(rule => warnings.push({ message: (rule.title || rule.id || '중간사건 규칙') + ': 대상 사건 ' + (rule.eventId || '(미지정)') + '을 찾을 수 없습니다.', eventId: null }));
-    return { edges, reachableIds: Array.from(reachable), warnings, randomRules };
+    return { edges, reachableIds: Array.from(reachable), warnings, randomRules, reign, linkedEventIds: [...linkedEventIds], reignEventIds: reign ? [...turnCards] : [] };
   }
 
   function mount(container, options) {
@@ -131,6 +154,7 @@
     const onChange = typeof options.onChange === 'function' ? options.onChange : () => {};
     const onOpenEvent = typeof options.onOpenEvent === 'function' ? options.onOpenEvent : () => {};
     const onOpenRandomEvents = typeof options.onOpenRandomEvents === 'function' ? options.onOpenRandomEvents : null;
+    const onOpenReign = typeof options.onOpenReign === 'function' ? options.onOpenReign : null;
     const uid = 'branch-' + (++serial);
     let disposed = false;
     let selectedId = eventsOf(scenario).some(event => event.id === scenario.start) ? scenario.start : eventsOf(scenario)[0]?.id;
@@ -144,14 +168,14 @@
     let size = { width: 1000, height: 800 };
     let dragging = null;
     const sectionState = new Map();
-    const positions = new Map();
+    const positions = new Map(Object.entries(scenario.editorLayout?.positions || {}).filter(([, position]) => position && Number.isFinite(position.x) && Number.isFinite(position.y)).map(([id, position]) => [id, { x: Math.max(35, position.x), y: Math.max(40, position.y), manual: true }]));
     const cards = new Map();
 
     const host = element('section', 'branch-flow-root');
     host.setAttribute('aria-label', '사건 분기 흐름도');
     const toolbar = element('div', 'branch-toolbar');
     const intro = element('div', 'branch-intro');
-    intro.append(element('strong', '', '분기 흐름도'), element('span', '', '카드를 눌러 본문·선택지·조건·확률을 함께 편집하세요.'));
+    intro.append(element('strong', '', '분기 흐름도'), element('span', '', scenario.mode === 'reign' ? '치세 카드 편집 · 연도와 분야의 진행은 치세·연도 탭에서 설정합니다. 아래 일반 연결선은 치세의 카드 순서를 정하지 않습니다.' : '카드를 눌러 본문·선택지·조건·확률을 함께 편집하세요.'));
     const controls = element('div', 'branch-controls');
     const zoomLabel = element('output', 'branch-zoom', '100%');
     zoomLabel.setAttribute('aria-label', '현재 확대 비율');
@@ -162,7 +186,7 @@
       return node;
     }
     controls.append(button('−', () => zoomAt(scale / 1.2), 'branch-zoom-button'), zoomLabel,
-      button('+', () => zoomAt(scale * 1.2), 'branch-zoom-button'), button('선택 사건 보기', focusSelected), button('전체 보기', fit), button('자동 정렬', () => { positions.clear(); fitMode = true; renderGraph(); }));
+      button('+', () => zoomAt(scale * 1.2), 'branch-zoom-button'), button('선택 사건 보기', focusSelected), button('전체 보기', fit), button('자동 정렬', () => { positions.clear(); if (scenario.editorLayout) delete scenario.editorLayout.positions; onChange(); fitMode = true; renderGraph(); }));
     controls.children[0].setAttribute('aria-label', '흐름도 축소');
     controls.children[2].setAttribute('aria-label', '흐름도 확대');
     const addEventButton = button('＋ 사건 추가', handleAddEvent, 'branch-add-button');
@@ -183,12 +207,12 @@
     emptyState.append(element('span', 'branch-empty-symbol', '＋'), element('strong', '', '첫 사건부터 시작하세요'), element('p', '', '사건을 추가하고 선택지의 연결점을 끌어 이야기를 이어갈 수 있습니다.'), button('＋ 사건 추가', handleAddEvent, 'branch-add-button'));
     stage.append(world, emptyState);
     const legend = element('div', 'branch-legend');
-    [['default', '사건 기본 연결'], ['choice', '개별 선택 경로'], ['skip', '등장 조건 불충족 → 건너뜀']].forEach(([kind, label]) => {
+    [['default', isReign(scenario) ? '돌발 대응의 기본 연결' : '사건 기본 연결'], ['choice', isReign(scenario) ? '돌발 대응의 개별 경로' : '개별 선택 경로'], ['skip', '등장 조건 불충족 → 건너뜀']].forEach(([kind, label]) => {
       const item = element('span', 'branch-legend-item');
       item.append(element('i', 'branch-legend-line branch-legend-' + kind), document.createTextNode(label));
       legend.append(item);
     });
-    const hint = element('div', 'branch-navigation-hint', '● 연결점을 끌어 다른 사건에 놓으세요 · 빈 공간 끌기·스크롤로 이동 · Ctrl + 휠로 확대 · Esc로 연결 취소 · 조건의 실제 충족 여부는 계산하지 않습니다.');
+    const hint = element('div', 'branch-navigation-hint', (isReign(scenario) ? '치세 카드의 선택은 다른 미결정 분야나 연도 정산으로 이어집니다. 선 연결은 돌발 대응 사건에만 사용합니다. · ' : '● 연결점을 끌어 다른 사건에 놓으세요 · ') + '빈 공간 끌기·스크롤로 이동 · Ctrl + 휠로 확대 · 조건의 실제 충족 여부는 계산하지 않습니다.');
     graphArea.append(stage, legend, hint);
     const inspector = element('aside', 'branch-inspector');
     inspector.setAttribute('aria-label', '선택한 사건 편집');
@@ -197,7 +221,14 @@
     status.setAttribute('aria-live', 'polite');
     const randomSummary = element('div', 'branch-random-summary');
     randomSummary.setAttribute('aria-label', '매 선택 후 중간사건 추첨 규칙');
-    host.append(toolbar, randomSummary, body, status);
+    host.append(toolbar);
+    if (isReign(scenario)) {
+      const note = element('div', 'branch-mode-notice');
+      note.append(element('strong', '', '치세 모드 · 연도/분야가 진행 순서를 정합니다.'), element('span', '', '일반 카드의 next 연결은 사용하지 않습니다. 카드 본문·선택·효과는 여기서 편집하고, 연도별 카드 배치와 정산 규칙은 치세·연도 탭에서 설정하세요.'));
+      if (onOpenReign) note.append(button('치세·연도 설정 ↗', onOpenReign, 'branch-reign-open'));
+      host.append(note);
+    }
+    host.append(randomSummary, body, status);
     container.replaceChildren(host);
 
     function handleAddEvent() {
@@ -400,6 +431,12 @@
       return details;
     }
     function conditionBuilder(owner, title, key) {
+      if (root.ScenarioEditorV2?.conditions) {
+        if (!Array.isArray(owner.when)) owner.when = [];
+        const details = fold(title + ' · ' + owner.when.length + '개', key, false);
+        details.append(root.ScenarioEditorV2.conditions(scenario, owner.when, title, () => { onChange(); details.querySelector('summary').textContent = title + ' · ' + owner.when.length + '개'; scheduleGraphRefresh(); }));
+        return details;
+      }
       const conditions = () => Array.isArray(owner.when) ? owner.when : [];
       const section = fold(title + ' · ' + conditions().length + '개', key, false);
       const content = element('div', 'branch-edit-section-body');
@@ -498,6 +535,7 @@
         inspector.append(element('h3', '', eventsOf(scenario).length ? '사건을 선택하세요' : '아직 사건이 없습니다'), element('p', 'branch-help', eventsOf(scenario).length ? '흐름도에서 사건 카드나 선택지를 누르면 연결을 편집할 수 있습니다.' : '첫 사건을 추가하면 시작 사건으로 지정됩니다. 수치·선택 기록·엔딩은 각 편집 탭에서 추가할 수 있습니다.'));
         return;
       }
+      const usesLinks = !model.reign || model.linkedEventIds.includes(event.id);
       const eyebrow = element('div', 'branch-inspector-eyebrow', '사건 통합 편집 · ' + event.id);
       inspector.append(eyebrow, element('h3', 'branch-inspector-title', event.title || '제목 없음'));
       const startButton = button(scenario.start === event.id ? '✓ 시작 사건' : '이 사건에서 시작', () => {
@@ -507,7 +545,9 @@
       }, 'branch-start-button');
       startButton.disabled = scenario.start === event.id;
       const actions = element('div', 'branch-inspector-actions');
-      actions.append(startButton, button('기존 사건 편집 탭 ↗', () => onOpenEvent(event.id)));
+      if (!model.reign) actions.append(startButton);
+      else if (onOpenReign) actions.append(button('치세·연도 설정 ↗', onOpenReign));
+      actions.append(button('기존 사건 편집 탭 ↗', () => onOpenEvent(event.id)));
       inspector.append(actions);
       inspector.append(textField('사건 제목', event.title, value => {
         event.title = value;
@@ -524,9 +564,12 @@
       [['date', '날짜·시기'], ['speaker', '화자'], ['chapter', '장·챕터']].forEach(([key, label]) => metadataBody.append(textField(label, event[key], value => { event[key] = value; }, key, false, { maxLength: 300 })));
       metadata.append(metadataBody);
       inspector.append(metadata);
+      if (scenario.mode === 'reign') inspector.append(simpleSelect('치세 카드 분야', event.part || '', [['', '분야 미지정'], ...(scenario.reign?.parts || []).map(part => [part.id, part.name])], value => { event.part = value; }));
       inspector.append(conditionBuilder(event, '사건 자체 등장 조건', 'event-conditions-' + event.id));
-      inspector.append(destinationSelect('사건의 기본 다음 사건', event.next, false, value => { event.next = value; }, 'default'));
-      inspector.append(element('p', 'branch-help', '기본 연결을 따르는 선택지에 적용됩니다. 사건 자체 등장 조건을 만족하지 않으면 이 경로로 건너뜁니다.'));
+      if (usesLinks) {
+        inspector.append(destinationSelect(model.reign ? '돌발 대응의 기본 다음 사건' : '사건의 기본 다음 사건', event.next, false, value => { event.next = value; }, 'default'));
+        inspector.append(element('p', 'branch-help', model.reign ? '이 연결은 돌발 대응으로 등장했을 때 사용합니다. 연도의 일반 카드로 고를 때는 next를 사용하지 않습니다. RETURN으로 치세의 분야 선택에 복귀할 수 있습니다.' : '기본 연결을 따르는 선택지에 적용됩니다. 사건 자체 등장 조건을 만족하지 않으면 이 경로로 건너뜁니다.'));
+      } else inspector.append(element('p', 'branch-mode-card-note', '치세 카드입니다. 선택 후 남은 분야를 고르며, 모든 분야를 결정하면 연도를 정산합니다. 다음 연도와 정산 규칙은 치세·연도 탭에서 설정합니다. 기존 next 값은 연대기로 전환할 때를 위해 보관하며 여기서는 사용하지 않습니다.'));
       const choiceHeading = element('div', 'branch-choice-heading');
       const addChoiceButton = button('＋ 선택지 추가', () => handleAddChoice(event), 'branch-add-choice');
       addChoiceButton.disabled = choicesOf(event).length >= 20;
@@ -545,11 +588,14 @@
           scheduleGraphRefresh();
         }, 'choice-' + index, true, { rows: 2, maxLength: 1000 }));
         content.append(textField('선택지 설명', choice.description, value => { choice.description = value; }, 'description-' + index, true, { rows: 2, maxLength: 2000 }));
-        content.append(destinationSelect('선택 ' + (index + 1) + ' 이후', inherited(choice) ? '' : choice.next, true, value => {
+        content.append(textField('선택 후 결과 본문', choice.result, value => { choice.result = value; if (root.ScenarioEditorV2) root.ScenarioEditorV2.upgrade(scenario); else scenario.schemaVersion = 2; }, 'result-' + index, true, { rows: 3 }),
+          checkboxField('실제 역사에서 선택한 경로', choice.historical === true, value => { choice.historical = value; if (root.ScenarioEditorV2) root.ScenarioEditorV2.upgrade(scenario); else scenario.schemaVersion = 2; }));
+        const nextField = destinationSelect('선택 ' + (index + 1) + (model.reign ? ' · 돌발 대응 이후' : ' 이후'), inherited(choice) ? '' : choice.next, true, value => {
           if (value === '') delete choice.next;
           else choice.next = value;
           selectedChoice = index;
-        }, 'choice-' + index));
+        }, 'choice-' + index);
+        if (usesLinks) content.append(nextField);
         const effects = fold('수치 변화', 'effects-' + event.id + '-' + index, false);
         const effectBody = element('div', 'branch-edit-section-body branch-small-grid');
         (scenario.stats || []).forEach(stat => effectBody.append(numberField(stat.name || stat.id, choice.effects?.[stat.id] || 0, value => {
@@ -572,6 +618,10 @@
         if (!(scenario.flags || []).length) flagBody.append(element('p', 'branch-help', '시나리오에 선택 기록을 먼저 추가하세요.'));
         flags.append(flagBody);
         content.append(effects, flags, conditionBuilder(choice, '선택지 사용 조건', 'choice-conditions-' + event.id + '-' + index));
+        if (root.ScenarioEditorV2?.territory) {
+          const territory = fold('영토·점령·영향권 변화', 'territory-' + event.id + '-' + index, false);
+          territory.append(root.ScenarioEditorV2.territory(scenario, choice, () => { onChange(); scheduleGraphRefresh(); })); content.append(territory);
+        }
         const remove = button('이 선택지 삭제', () => {
           if (!removeChoice(event, index)) return;
           selectedChoice = Math.min(index, event.choices.length - 1);
@@ -627,7 +677,7 @@
       rulesSection.append(rulesBody);
       inspector.append(rulesSection);
       const endNote = element('div', 'branch-end-note');
-      endNote.append(element('strong', '', 'END는 엔딩 판정 · RETURN은 돌발 사건 복귀'), element('p', '', 'END는 누적 수치·선택 기록과 엔딩 조건·우선순위로 결말을 결정합니다. 즉시 엔딩과 확률 엔딩은 매 선택 후 판정합니다. RETURN은 원래 대기 중이던 다음 사건으로 복귀하며, 대기 중인 흐름이 없으면 엔딩을 판정합니다.'));
+      endNote.append(element('strong', '', model.reign ? '마지막 연도 정산 → 엔딩 · RETURN → 치세 복귀' : 'END는 엔딩 판정 · RETURN은 돌발 사건 복귀'), element('p', '', model.reign ? '연도 목록의 마지막 정산을 마치면 엔딩 조건을 판정합니다. 즉시 엔딩은 각 결정과 정산 후에도 적용됩니다. 돌발 대응의 RETURN은 중단했던 분야 선택으로 돌아갑니다.' : 'END는 누적 수치·선택 기록과 엔딩 조건·우선순위로 결말을 결정합니다. 즉시 엔딩과 확률 엔딩은 매 선택 후 판정합니다. RETURN은 원래 대기 중이던 다음 사건으로 복귀하며, 대기 중인 흐름이 없으면 엔딩을 판정합니다.'));
       inspector.append(endNote);
       if (model.warnings.length) {
         const details = element('details', 'branch-warnings');
@@ -660,19 +710,25 @@
       world.hidden = events.length === 0;
       renderRandomSummary();
       events.forEach((event, index) => {
+        const usesLinks = !model.reign || model.linkedEventIds.includes(event.id);
         const node = element('article', 'branch-node' + (event.id === selectedId ? ' branch-selected' : '') + (!reachable.has(event.id) ? ' branch-unconnected' : ''));
         node.dataset.branchEvent = event.id;
         const handle = element('div', 'branch-node-handle');
         handle.dataset.branchDrag = event.id;
         handle.append(element('span', 'branch-event-number', String(index + 1).padStart(2, '0')), element('span', 'branch-node-id', event.id), element('span', 'branch-drag-icon', '⠿'));
-        if (scenario.start === event.id) handle.append(element('span', 'branch-start-chip', '시작'));
+        if (!model.reign && scenario.start === event.id) handle.append(element('span', 'branch-start-chip', '시작'));
         if (randomTargets.has(event.id)) handle.append(element('span', 'branch-random-target-chip', '중간사건'));
         const title = button(event.title || '제목 없음', () => chosen(event.id), 'branch-node-title');
         const inputPort = button('', () => chosen(event.id), 'branch-input-port');
         inputPort.setAttribute('aria-label', event.id + ' 입력 연결점. 다른 선택지의 연결점을 이곳으로 끌어 연결할 수 있습니다.');
         inputPort.title = '이 사건으로 연결';
-        node.append(handle, title, inputPort);
-        if (hasConditions(event)) node.append(element('div', 'branch-node-condition', '조건부 사건 · 불충족 시 기본 경로로 건너뜀'));
+        node.append(handle, title); if (usesLinks) node.append(inputPort);
+        if (model.reign) {
+          const turns = (scenario.reign?.turns || []).filter(turn => (turn.eventIds || []).includes(event.id));
+          const part = (scenario.reign?.parts || []).find(part => part.id === event.part);
+          if (turns.length) node.append(element('div', 'branch-reign-membership', turns.map(turn => turn.date || turn.title || turn.id).join(' · ') + ' / ' + (part?.name || '분야 미지정')));
+        }
+        if (hasConditions(event)) node.append(element('div', 'branch-node-condition', model.reign && !usesLinks ? '조건부 카드 · 해당 분야의 첫 허용 후보로 표시' : '조건부 사건 · 불충족 시 기본 경로로 건너뜀'));
         const choiceRows = [];
         choicesOf(event).forEach((choice, choiceIndex) => {
           const line = element('div', 'branch-choice-line' + (event.id === selectedId && choiceIndex === selectedChoice ? ' branch-choice-selected' : ''));
@@ -680,28 +736,28 @@
           row.title = choice.text || '선택지 내용 없음';
           row.append(element('span', 'branch-choice-number', String(choiceIndex + 1)), element('span', 'branch-choice-text', choice.text || '내용 없음'));
           const destination = inherited(choice) ? event.next : choice.next;
-          const badge = element('span', 'branch-choice-destination' + (!inherited(choice) ? ' branch-explicit-destination' : ''), (hasConditions(choice) ? '◇ ' : '') + (inherited(choice) ? '기본' : destination === 'END' ? 'END' : destination));
-          badge.title = '다음: ' + targetLabel(destination) + (hasConditions(choice) ? ' · 선택 조건 있음' : '');
+          const badge = element('span', 'branch-choice-destination' + (!inherited(choice) ? ' branch-explicit-destination' : ''), (hasConditions(choice) ? '◇ ' : '') + (!usesLinks ? '분야 결정' : inherited(choice) ? '기본' : destination === 'END' ? 'END' : destination));
+          badge.title = !usesLinks ? '선택 후 남은 분야를 결정하고 연도를 정산합니다.' : '다음: ' + targetLabel(destination) + (hasConditions(choice) ? ' · 선택 조건 있음' : '');
           row.append(badge);
           const outputPort = button('', () => chosen(event.id, choiceIndex), 'branch-output-port');
           outputPort.dataset.branchSource = event.id;
           outputPort.dataset.branchChoice = String(choiceIndex);
           outputPort.setAttribute('aria-label', event.id + ' 선택 ' + (choiceIndex + 1) + ' 연결점. 끌어서 다음 사건을 연결하거나 눌러 연결 설정을 여세요.');
           outputPort.title = '끌어서 다음 사건 연결 · 클릭하면 연결 설정';
-          line.append(row, outputPort);
+          line.append(row); if (usesLinks) line.append(outputPort);
           choiceRows.push(line);
           node.append(line);
         });
         const defaultRow = element('div', 'branch-default-line');
-        const defaultButton = button('기본 → ' + (event.next === 'END' ? '엔딩 판정' : event.next === 'RETURN' ? '원래 흐름으로 복귀' : event.next || '미지정'), () => chosen(event.id), 'branch-default-row');
+        const defaultButton = button(!usesLinks ? '연도 정산으로 진행 · next 미사용' : '기본 → ' + (event.next === 'END' ? '엔딩 판정' : event.next === 'RETURN' ? '원래 흐름으로 복귀' : event.next || '미지정'), () => chosen(event.id), 'branch-default-row');
         const defaultPort = button('', () => chosen(event.id), 'branch-output-port branch-default-port');
         defaultPort.dataset.branchSource = event.id;
         defaultPort.dataset.branchChoice = 'default';
         defaultPort.setAttribute('aria-label', event.id + ' 기본 연결점. 끌어서 기본 다음 사건을 연결할 수 있습니다.');
         defaultPort.title = '끌어서 기본 다음 사건 연결';
-        defaultRow.append(defaultButton, defaultPort);
+        defaultRow.append(defaultButton); if (usesLinks) defaultRow.append(defaultPort);
         node.append(defaultRow);
-        if (!reachable.has(event.id)) node.append(element('div', 'branch-node-warning', '시작점에서 연결되지 않음'));
+        if (!reachable.has(event.id)) node.append(element('div', 'branch-node-warning', model.reign ? '연도·활성 돌발 규칙에 미등록' : '시작점에서 연결되지 않음'));
         node.addEventListener('click', eventObject => { if (eventObject.target === node) chosen(event.id); });
         nodeLayer.append(node);
         cards.set(event.id, { node, handle, title, defaultRow, choiceRows, event });
@@ -709,7 +765,7 @@
       if (events.length) {
         const ending = element('article', 'branch-node branch-end-node');
         ending.dataset.branchEvent = 'END';
-        ending.append(element('span', 'branch-end-symbol', '◎'), element('strong', '', '엔딩 판정'), element('p', '', '누적 수치와 조건으로 결말 결정'), element('span', '', (Array.isArray(scenario.endings) ? scenario.endings.length : 0) + '개 엔딩 · 조건/우선순위 적용'));
+        ending.append(element('span', 'branch-end-symbol', '◎'), element('strong', '', '엔딩 판정'), element('p', '', model.reign ? '마지막 연도 정산 후 결말 결정' : '누적 수치와 조건으로 결말 결정'), element('span', '', (Array.isArray(scenario.endings) ? scenario.endings.length : 0) + '개 엔딩 · 조건/우선순위 적용'));
         const endingPort = button('', () => { status.textContent = 'END에 연결하면 누적 수치·조건에 따라 엔딩을 판정합니다.'; }, 'branch-input-port');
         endingPort.setAttribute('aria-label', '엔딩 판정 입력 연결점. 선택지의 연결점을 이곳으로 끌어 이야기를 끝내세요.');
         endingPort.title = '엔딩 판정으로 연결';
@@ -718,7 +774,7 @@
         cards.set('END', { node: ending, choiceRows: [], event: null });
         const returning = element('article', 'branch-node branch-return-node');
         returning.dataset.branchEvent = 'RETURN';
-        returning.append(element('span', 'branch-return-symbol', '↩'), element('strong', '', '원래 흐름으로 복귀'), element('p', '', '중간사건 종료 → 대기하던 다음 사건'), element('span', '', 'RETURN · 중간사건 전용'));
+        returning.append(element('span', 'branch-return-symbol', '↩'), element('strong', '', '원래 흐름으로 복귀'), element('p', '', model.reign ? '돌발 대응 종료 → 치세 분야 선택' : '중간사건 종료 → 대기하던 다음 사건'), element('span', '', 'RETURN · 중간사건 전용'));
         const returnPort = button('', () => { status.textContent = 'RETURN은 중간사건을 종료하고 원래 대기 중이던 다음 사건으로 복귀합니다.'; }, 'branch-input-port');
         returnPort.setAttribute('aria-label', '원래 흐름으로 복귀 입력 연결점. 중간사건의 마지막 선택지를 이곳으로 연결하세요.');
         returnPort.title = '중간사건을 끝내고 원래 흐름으로 복귀';
@@ -754,7 +810,7 @@
         if (rule) section.querySelector('summary').textContent = (rule.title || rule.id) + ' · ' + ruleLabel(rule);
       });
       drawLines();
-      status.textContent = events.length ? events.length + '개 사건 · ' + model.edges.filter(edge => edge.type === 'choice').length + '개 선택 경로 · ' + (model.warnings.length ? '연결 확인 ' + model.warnings.length + '건' : '끊긴 연결 없음') + ' · 변경 후 ‘적용하고 새 게임’으로 반영' : '빈 시나리오 · 첫 사건을 추가하면 시작 사건으로 지정됩니다.';
+      status.textContent = events.length ? events.length + '개 사건 · ' + (model.reign ? model.reignEventIds.length + '개 연도 등록 카드 · ' : model.edges.filter(edge => edge.type === 'choice').length + '개 선택 경로 · ') + (model.warnings.length ? '연결 확인 ' + model.warnings.length + '건' : model.reign ? '연도·돌발 등록 확인됨' : '끊긴 연결 없음') + ' · 변경 후 ‘적용하고 새 게임’으로 반영' : model.reign ? '빈 치세 원고 · 치세·연도 탭에서 분야와 연도를 만든 뒤 사건을 등록하세요.' : '빈 시나리오 · 첫 사건을 추가하면 시작 사건으로 지정됩니다.';
       if (frame) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (disposed) return;
@@ -949,6 +1005,10 @@
       const previous = dragging;
       const targetId = previous.kind === 'connection' && previous.started ? dropTarget(event.clientX, event.clientY) : null;
       cancelDrag();
+      if (previous.kind === 'node' && (positions.get(previous.id)?.x !== previous.startX || positions.get(previous.id)?.y !== previous.startY)) {
+        scenario.editorLayout = { ...(scenario.editorLayout || {}), positions: Object.fromEntries([...positions].filter(([, position]) => position.manual).map(([id, position]) => [id, { x: position.x, y: position.y }])) };
+        onChange();
+      }
       if (targetId && connect(scenario, previous.id, previous.choiceIndex, targetId)) {
         onChange();
         renderGraph();

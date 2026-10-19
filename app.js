@@ -7,7 +7,8 @@
   const baseKey = 'history-crossroads:web:v1';
   const MAX_SCENARIO_BYTES = 5 * 1024 * 1024;
   let storageOK = true, timer, scenario, state, awaitingName=false, nameReturnState=null;
-  let launcherMode='file', ai={idea:'',size:'short',endings:'5',base:false,paste:'',prompt:'',promptNote:'',showPrompt:false,problem:null,repair:'',repairNote:'',showRepair:false};
+  let launcherMode='file', ai={idea:'',size:'short',endings:'5',mode:'chronicle',mapTemplateId:'',base:false,paste:'',prompt:'',promptNote:'',showPrompt:false,problem:null,repair:'',repairNote:'',showRepair:false};
+  let compareMap=false,referenceCache=null;
   let launcherBusy=false, launcherError='', launcherMessage='', failedScenarioUrl=null, loadSequence=0, pendingUrlController=null;
   const storage = {
     get(key){try{return JSON.parse(localStorage.getItem(baseKey+':'+key));}catch{return null;}},
@@ -30,7 +31,8 @@
   const envelope = () => ({signature:signature(),state:E.clone(state),at:new Date().toISOString()});
   const display = value => E.formatText(value,state);
   const t = value => escape(display(value));
-  const playerSettings = () => ({askName:true,label:'당신의 이름',defaultName:'플레이어',placeholder:'이름을 입력하세요',...(scenario.player||{})});
+  const playerSettings = () => ({askName:true,label:'당신의 이름',defaultName:'집정관',placeholder:'이름을 입력하세요',...(scenario.player||{})});
+  const reignMode = () => scenario.schemaVersion===2&&scenario.mode==='reign';
   const isEmptyScenario = () => scenario.draft===true&&!scenario.events.length&&!scenario.stats.length&&!scenario.endings.length&&!scenario.flags.length&&!(scenario.randomEvents||[]).length;
   function notify(message){byId('toast').textContent=message;byId('toast').hidden=false;clearTimeout(timer);timer=setTimeout(()=>{byId('toast').hidden=true;},3500);}
   function status(message,error=false){const node=byId('status-message');node.textContent=message;node.classList.toggle('error',error);node.hidden=!message;}
@@ -51,13 +53,14 @@
   }
   function projectedRiskMarkup(choice){
     const projected={...state,turn:state.turn+1,stats:{...state.stats},flags:{...state.flags,...(choice.setFlags||{})}};
+    if(state.map){projected.map=E.clone(state.map);for(const change of choice.territory||[]){if(change.to!==undefined)projected.map.owners[change.prov]=change.to;for(const [field,layer] of [['occupation','occupation'],['influence','influence'],['marker','markers']])if(Object.hasOwn(change,field))projected.map[layer][change.prov]=change[field];}}
     for(const [id,delta] of Object.entries(choice.effects||{})){
       const stat=scenario.stats.find(s=>s.id===id);
       if(stat)projected.stats[id]=Math.max(stat.min,Math.min(stat.max,projected.stats[id]+delta));
     }
     const risks=immediateRisks(projected);
     const destination=choice.next===undefined?E.getEvent(scenario,state)?.next:choice.next;
-    const encounters=risks.some(r=>r.chance===100)||destination==='RETURN'?[]:encounterRisks(projected);
+    const encounters=risks.some(r=>r.chance===100)||(destination==='RETURN'&&(!reignMode()||state.activeRandomEventId))?[]:encounterRisks(projected);
     return (risks.length?`<span class="choice-risk">⚠ 선택 후 ${risks.map(r=>`${t(r.ending.title)} ${r.chance}%`).join(' · ')}</span>`:'')+
       (encounters.length?`<span class="choice-encounter">◇ 돌발 사건 ${encounters.map(r=>`${t(r.title)} ${r.chance}%`).join(' · ')}${risks.length?' · 즉시 엔딩이 발생하지 않으면 추첨':''}</span>`:'');
   }
@@ -78,7 +81,23 @@
   function effectMarkup(choice){
     const nums=Object.entries(choice.effects||{}).filter(([,v])=>v!==0).map(([id,v])=>`<span class="effect ${v>0?'up':'down'}">${t(scenario.stats.find(s=>s.id===id)?.name||id)} ${v>0?'＋':'−'}${Math.abs(v)}</span>`).join('');
     const flags=Object.entries(choice.setFlags||{}).map(([id,v])=>`<span class="effect flag">${v?'◇':'↩'} ${t(scenario.flags.find(f=>f.id===id)?.name||id)}${v?'':' 해제'}</span>`).join('');
-    return nums+flags?`<span class="choice-effects">${nums}${flags}</span>`:'';
+    const mapEffects=(choice.territory||[]).map(change=>{const template=globalThis.MapTemplates?.get(scenario.map?.templateId),province=template?.provinces.find(p=>p.id===change.prov);return `<span class="effect flag">⌖ ${escape(province?.name||change.prov)}</span>`;}).join('');
+    return nums+flags+mapEffects?`<span class="choice-effects">${nums}${flags}${mapEffects}</span>`:'';
+  }
+  function renderMap(){
+    const panel=byId('player-map-panel');if(!panel)return;
+    panel.hidden=!scenario.map;if(!scenario.map)return;
+    if(!referenceCache||referenceCache.signature!==signature())referenceCache={signature:signature(),reference:E.getHistoricalReference?.(scenario)};
+    const reference=referenceCache.reference;
+    byId('map-reference-tools').innerHTML=reference?.complete?`<button class="btn secondary" data-map-compare aria-pressed="${compareMap}">${compareMap?'기준 경로 비교 끄기':'기준 경로와 비교'}</button><small>작성자가 표시한 기준 선택의 최종 지도와 비교합니다.</small>`:'<small>편집기에서 선택지에 ‘기준 역사’를 지정하면 지도 비교를 사용할 수 있습니다.</small>';
+    MapView.render(byId('player-map'),scenario,state,{compareState:compareMap&&reference?.complete?reference.state:null});
+  }
+  function decisionResultMarkup(){
+    if(!state||awaitingName||!state.history.length)return '';
+    const record=state.history[state.history.length-1],event=scenario.events.find(e=>e.id===record.eventId),choice=event?.choices[record.choiceIndex];
+    if(!choice?.result)return '';
+    const historical=event.choices.find(c=>c.historical);
+    return `<section class="decision-result"><strong>직전 결정의 결과</strong><p>${t(choice.result)}</p>${historical?`<p class="small">기준 선택: ${t(historical.text)}${choice.historical?' · 같은 길을 택했습니다.':' · 다른 길을 택했습니다.'}</p>`:''}</section>`;
   }
   function render(){
     const empty=isEmptyScenario();
@@ -87,9 +106,10 @@
     byId('scenario-subtitle').textContent=empty?'시나리오 파일을 불러오거나 빈 공간에서 새 이야기를 만드세요.':display(scenario.subtitle||'당신의 결정으로 쓰는 또 하나의 역사');
     byId('scenario-description').textContent=empty?'프로그램에는 시나리오가 포함되어 있지 않습니다. JSON 파일은 이 브라우저에서 읽습니다.':display(scenario.description||'');
     document.body.classList.toggle('empty-workspace',empty);
+    renderMap();
     for(const id of ['save-button','restart-button','journal-button','collection-button'])byId(id).disabled=!state||awaitingName;
     if(!state){renderDraft();return;}
-    byId('turn-label').textContent=awaitingName?'통치자의 이름을 정하고 이야기를 시작하세요.':`${state.playerName} · ${state.turn}번의 결정`;
+    byId('turn-label').textContent=awaitingName?'통치자의 이름을 정하고 이야기를 시작하세요.':`${state.playerName} · ${reignMode()?'치세 '+(state.reign.turnIndex+1)+'번째 해 · ':''}${state.turn}번의 기록`;
     byId('stats-panel').innerHTML=scenario.stats.map(s=>{
       const value=state.stats[s.id],percent=100*(value-s.min)/(s.max-s.min);
       const color=/^#[0-9a-f]{6}$/i.test(s.color||'')?s.color:'#688764';
@@ -109,7 +129,7 @@
     byId('load-button').disabled=!manual||manual.signature!==signature();
     byId('save-status').textContent=storageOK?'매 선택마다 이 브라우저에 자동 저장됩니다.':'브라우저 저장을 사용할 수 없습니다.';
     byId('story-panel').classList.toggle('game-over',Boolean(state.endingId&&scenario.endings.find(e=>e.id===state.endingId)?.kind==='bad'));
-    if(awaitingName)renderNameSetup();else if(state.endingId)renderEnding();else renderEvent();
+    if(awaitingName)renderNameSetup();else if(state.endingId)renderEnding();else if(reignMode()&&!state.activeRandomEventId)renderReign();else renderEvent();
   }
   function renderNameSetup(){
     const settings=playerSettings(),remembered=storage.get('playerName');
@@ -143,13 +163,31 @@
     const event=E.getEvent(scenario,state),choices=E.getChoices(scenario,state);
     if(!event)throw Error('현재 사건을 찾을 수 없습니다.');
     const speaker=display(event.speaker||'국정 회의');
-    const returnName=state.pendingNext==='END'?'기존 엔딩 판정':scenario.events.find(e=>e.id===state.pendingNext)?.title;
+    const returnName=state.pendingNext==='REIGN'?'현재 해의 분야별 카드':state.pendingNext==='END'?'기존 엔딩 판정':scenario.events.find(e=>e.id===state.pendingNext)?.title;
     const encounterNotice=state.activeRandomEventId?`<div class="encounter-notice"><strong>돌발 사건</strong><span>복귀 경로를 선택하면 ${t(returnName||'예정된 다음 사건')}${state.pendingNext==='END'?'으로 진행합니다.':'(으)로 돌아갑니다.'}</span></div>`:'';
     byId('story-panel').innerHTML=`${encounterNotice}<div class="event-meta"><span class="chapter">${t(event.chapter||'새로운 역사')}<span class="event-number">선택 ${String(state.turn+1).padStart(2,'0')}</span></span><span>${t(event.date||'')}</span></div><div class="speaker-line"><div class="portrait" aria-hidden="true">${escape(speaker.replace(/\s/g,'').slice(0,1))}</div><div class="speaker-name">${escape(speaker)}<span class="speaker-caption">A VOICE IN HISTORY</span></div></div><h2 class="event-title">${t(event.title)}</h2><div class="event-body">${t(event.body)}</div><div class="choice-section-label">당신의 결정은</div><div class="choices">${choices.map(({choice,index,enabled,reason})=>`<button class="choice ${enabled?'':'locked'}" data-choice="${index}" ${enabled?'':'disabled'}><span class="choice-key">${index+1}</span><span class="choice-copy"><span class="choice-title">${t(choice.text)}</span>${choice.description?`<span class="choice-description">${t(choice.description)}</span>`:''}${effectMarkup(choice)}${enabled?projectedRiskMarkup(choice):''}${enabled?'':`<span class="choice-locked">🔒 ${t(reason||'조건을 충족하지 못했습니다.')}</span>`}</span><span class="choice-arrow" aria-hidden="true">↗</span></button>`).join('')}</div>`;
+    byId('story-panel').insertAdjacentHTML('afterbegin',`<span class="mode-badge">${reignMode()?'치세':'연대기'} · ${state.activeRandomEventId?'돌발 사건 대응':'장면과 선택'}</span>${decisionResultMarkup()}`);
+  }
+  function renderReign(){
+    const status=E.getReignStatus(scenario,state),turn=status.turn;
+    if(!turn)throw Error('현재 치세의 해를 찾을 수 없습니다.');
+    const resultList=(list,title,cls)=>list?.length?`<section class="${cls}"><strong>${title}</strong>${list.map(r=>`<p>${t(typeof r==='string'?r:r.text)}</p>`).join('')}</section>`:'';
+    byId('story-panel').innerHTML=`<span class="mode-badge">치세 · 분야별 결정과 정산</span><div class="event-meta"><span class="chapter">${t(turn.date||'제 '+(status.turnIndex+1)+'년')}</span><span>${Object.keys(status.decisions||{}).length}개 분야 결정</span></div><h2 class="event-title">${t(turn.title)}</h2><div class="event-body">${t(turn.body||'각 분야에서 하나씩 선택한 뒤 정산하세요.')}</div>${resultList(status.between,'그 사이에 일어난 일','reign-between')}${resultList(status.results,'결정과 정산의 결과','reign-results')}${status.cards.map(({part,event,choices})=>{
+      const pick=status.decisions?.[part.id],selected=pick&&scenario.events.find(e=>e.id===pick.eventId)?.choices[pick.choiceIndex];
+      return `<article class="reign-card ${pick?'selected':''}" data-reign-card="${escape(part.id)}" style="--part-color:${/^#[0-9a-f]{6}$/i.test(part.color||'')?part.color:'#537b63'}"><span class="reign-part">${t(part.name)}${pick?' · 결정 완료':''}</span><h3>${t(event.title)}</h3><div class="event-body">${t(event.body)}</div>${pick?`<p class="reign-pick">✓ ${t(selected?.text||'결정 완료')}</p>`:choices.map(({choice,index,enabled,reason})=>`<button class="choice" data-part-event="${escape(event.id)}" data-part-choice="${index}" ${enabled?'':'disabled'}><span class="choice-copy"><span class="choice-title">${t(choice.text)}</span>${choice.description?`<span class="choice-description">${t(choice.description)}</span>`:''}${effectMarkup(choice)}${enabled?projectedRiskMarkup(choice):`<span class="choice-locked">${t(reason)}</span>`}</span><span class="choice-arrow">↗</span></button>`).join('')}</article>`;
+     }).join('')}<button class="btn primary reign-settle" data-action="settle-reign" ${status.ready?'':'disabled'}>${status.ready?'정산하고 '+(status.turnIndex+1===scenario.reign.turns.length?'결말 보기':'다음 해로'):'각 분야의 결정을 마치면 정산할 수 있습니다'}</button>`;
+  }
+  function playReign(eventId,index){
+    if(!state||awaitingName)return;try{state=E.choosePart(scenario,state,eventId,index);rememberEnding();saveAuto();render();status('분야별 결정을 반영했습니다.');}catch(error){status(error.message,true);}
+  }
+  function settleReign(){
+    if(!state||awaitingName)return;try{state=E.settleTurn(scenario,state);rememberEnding();saveAuto();render();status('선택의 조합을 정산했습니다.');byId('story-panel').focus({preventScroll:true});}catch(error){status(error.message,true);}
   }
   function renderEnding(){
     const ending=scenario.endings.find(e=>e.id===state.endingId);
     byId('story-panel').innerHTML=`<div class="event-meta"><span class="chapter">${ending.kind==='bad'?'정부의 통치가 끝났습니다':'역사의 한 페이지가 닫혔습니다'}</span><span>${state.turn}번의 결정</span></div><p class="ending-banner">${ending.kind==='bad'?'GAME OVER · BAD ENDING':'ANOTHER HISTORY, YOUR LEGACY'}</p><div class="ending-ornament" aria-hidden="true">${ending.kind==='bad'?'敗':'終'}</div><h2 class="ending-title">${t(ending.title)}</h2><p class="ending-summary">${t(ending.summary||'당신의 선택이 남긴 역사입니다.')}</p><div class="ending-body">${t(ending.body||'')}</div><div class="ending-actions"><button class="btn primary" data-action="restart">다른 역사를 써보기</button><button class="btn secondary" data-action="journal">선택의 기록</button><button class="btn secondary" data-action="collection">발견한 결말</button></div><p class="ending-footnote">${t(riskResultText(state.history[state.history.length-1]||{})||'수치와 선택 기록의 조합으로 결정된 결말입니다. 다른 선택은 또 다른 역사를 만듭니다.')}</p>`;
+    if(reignMode()&&state.reign.results?.length)byId('story-panel').insertAdjacentHTML('afterbegin',`<section class="reign-results"><strong>마지막 정산</strong>${state.reign.results.map(r=>`<p>${t(typeof r==='string'?r:r.text)}</p>`).join('')}</section>`);
+    if(!reignMode())byId('story-panel').insertAdjacentHTML('afterbegin',decisionResultMarkup());
   }
   function play(index){
     if(awaitingName||!state)return;
@@ -167,22 +205,34 @@
     }catch(error){status(error.message,true);}
   }
   function info(title,body){byId('info-content').innerHTML=`<h2>${escape(title)}</h2>${body}`;byId('info-dialog').showModal();}
-  function journal(){info('지나온 선택',state&&state.history.length?state.history.map((h,i)=>`<article class="journal-entry"><h3>${i+1}. ${t(h.eventTitle)}</h3><p>${t(h.choiceText)}</p><p>${t(effectText(h.effects)||'수치 변화 없음')}</p>${riskResultText(h)?`<p class="journal-risk">사건·위기 판정 · ${t(riskResultText(h))}</p>`:''}</article>`).join(''):'<p>아직 선택한 사건이 없습니다.</p>');}
+  function journal(){
+    const entries=state?.history.map((h,i)=>{
+      const effects={...(h.effects||{})};for(const result of h.results||[])for(const [id,delta] of Object.entries(result.effects||{}))effects[id]=(effects[id]||0)+delta;
+      const resultText=h.result||(h.results||[]).map(r=>r.text).filter(Boolean).join('\n');
+      return `<article class="journal-entry"><h3>${i+1}. ${t(h.eventTitle)}</h3><p>${t(h.choiceText)}</p><p>${t(effectText(effects)||'수치 변화 없음')}</p>${resultText?`<p>${t(resultText)}</p>`:''}${h.historical?'<p class="small">기준 역사와 같은 선택</p>':''}${riskResultText(h)?`<p class="journal-risk">사건·위기 판정 · ${t(riskResultText(h))}</p>`:''}</article>`;
+    });info('지나온 선택',entries?.length?entries.join(''):'<p>아직 선택한 사건이 없습니다.</p>');
+  }
   function collection(){const found=discovered();info('당신이 발견한 결말',scenario.endings.map(e=>found.includes(e.id)?`<article class="ending-item"><h3>${t(e.title)}</h3><p>${t(e.summary||'')}</p></article>`:'<article class="ending-item undiscovered"><h3>아직 쓰이지 않은 역사</h3><p>다른 선택을 통해 이 결말을 발견해 보세요.</p></article>').join(''));}
   function launcherMarkup(dialog){
     const tabs=`<div class="launcher-tabs" role="tablist" aria-label="시나리오를 시작하는 방법"><button type="button" role="tab" class="launcher-tab" data-launch-action="mode-file" aria-selected="${launcherMode==='file'}">JSON 파일 열기</button><button type="button" role="tab" class="launcher-tab" data-launch-action="mode-ai" aria-selected="${launcherMode==='ai'}"><span aria-hidden="true">✦</span> AI로 만들기 · 붙여 넣기</button></div>`;
     const file=`<div class="scenario-dropzone" data-scenario-dropzone data-launch-action="choose-file" tabindex="0" role="button" aria-label="JSON 파일 불러오기. Enter 또는 스페이스 키로 파일을 고를 수 있습니다."><span class="drop-symbol" aria-hidden="true">↥</span><strong>JSON 파일을 이곳에 놓으세요</strong><span>또는 아래 버튼으로 파일 선택 · 최대 5 MB</span></div><div class="launcher-actions"><button type="button" class="btn primary" data-launch-action="choose-file">JSON 파일 불러오기</button><button type="button" class="btn secondary" data-launch-action="new">빈 시나리오 새로 작성</button></div><p class="launcher-progress" data-launch-progress role="status" aria-live="polite" ${launcherMessage?'':'hidden'}>${escape(launcherMessage)}</p><p class="launcher-error" data-launch-error role="alert" ${launcherError?'':'hidden'}>${escape(launcherError)}</p><button type="button" class="btn secondary" data-launch-action="retry-url" ${failedScenarioUrl?'':'hidden'}>주소에서 다시 불러오기</button>`;
-    return `<section class="scenario-launcher" aria-label="시나리오 불러오기"><div class="small-label">YOUR STORY, YOUR CHOICES</div><h2>${dialog?'시나리오 열기':'어떤 이야기를 시작할까요?'}</h2><p>보관한 시나리오 JSON 파일을 열거나, AI에게 시나리오를 만들어 달라고 해서 붙여 넣으세요. 직접 작성할 수도 있습니다.</p><a class="launcher-gallery" href="gallery.html" data-community-only>다른 사람이 만든 시나리오를 갤러리에서 바로 플레이하기 <span aria-hidden="true">→</span></a>${tabs}<div class="launcher-pane">${launcherMode==='ai'?aiMarkup():file}</div><p class="launcher-note">파일과 붙여 넣은 내용은 브라우저 안에서만 읽습니다. 시나리오와 진행은 접속한 브라우저에 각각 저장되며, 다른 접속자와 공유되지 않습니다. 원고는 JSON으로 따로 보관하세요.</p>${dialog?'<p class="launcher-note">새 시나리오를 열면 현재 시나리오가 교체됩니다. 형식 검사를 통과한 내용만 적용합니다.</p><div class="launcher-dialog-footer"><button type="button" class="btn secondary" data-launch-action="close">돌아가기</button></div>':''}</section>`;
+    return `<section class="scenario-launcher" aria-label="시나리오 불러오기"><div class="small-label">YOUR STORY, YOUR CHOICES</div><h2>${dialog?'시나리오 열기':'어떤 이야기를 시작할까요?'}</h2><p>보관한 시나리오 JSON 파일을 열거나, AI에게 시나리오를 만들어 달라고 해서 붙여 넣으세요. 직접 작성할 수도 있습니다.</p><a class="launcher-gallery" href="gallery.html" data-community-only>다른 사람이 만든 시나리오를 갤러리에서 바로 플레이하기 <span aria-hidden="true">→</span></a><div class="sample-picks" data-web-only><span class="small muted">기능 예시</span><button class="btn secondary" data-launch-action="demo-chronicle">연대기 · 세종과 지도</button><button class="btn secondary" data-launch-action="demo-reign">치세 · 프랑스와 정산</button></div>${tabs}<div class="launcher-pane">${launcherMode==='ai'?aiMarkup():file}</div><p class="launcher-note">파일과 붙여 넣은 내용은 브라우저 안에서만 읽습니다. 시나리오와 진행은 접속한 브라우저에 각각 저장되며, 다른 접속자와 공유되지 않습니다. 원고는 JSON으로 따로 보관하세요.</p>${dialog?'<p class="launcher-note">새 시나리오를 열면 현재 시나리오가 교체됩니다. 형식 검사를 통과한 내용만 적용합니다.</p><div class="launcher-dialog-footer"><button type="button" class="btn secondary" data-launch-action="close">돌아가기</button></div>':''}</section>`;
+  }
+  function aiPromptOptions(){
+    const base=ai.base&&canUseBase()?scenario:null;
+    return {idea:ai.idea,size:ai.size,endings:ai.endings,mode:ai.mode,mapTemplateId:ai.mapTemplateId,baseScenario:base?E.clone(base):null};
   }
   function aiMarkup(){
     const sizes=Object.entries(ScenarioAI.SIZES).map(([key,item])=>`<option value="${key}" ${ai.size===key?'selected':''}>${escape(item.label)} · 사건 ${escape(item.events)}개${item.note?' ('+escape(item.note)+')':''}</option>`).join('');
     const endings=['3','4','5','6','8'].map(n=>`<option value="${n}" ${ai.endings===n?'selected':''}>${n}개</option>`).join('');
     const base=canUseBase()?`<label class="ai-check"><input type="checkbox" data-ai-field="base" ${ai.base?'checked':''}> 지금 열린 「${escape(scenario.title)}」을 바탕으로 고치거나 늘리기</label>`:'';
+    const mapOptions=(globalThis.MapTemplates?.list()||[]).map(m=>`<option value="${escape(m.id)}" ${ai.mapTemplateId===m.id?'selected':''}>${escape(m.name)}</option>`).join('');
+    const v2Options=`<div class="ai-v2-settings"><label class="field"><span>게임 방식</span><select data-ai-field="mode"><option value="chronicle" ${ai.mode==='chronicle'?'selected':''}>연대기 · 장면마다 선택</option><option value="reign" ${ai.mode==='reign'?'selected':''}>치세 · 분야별 선택 후 정산</option></select></label><label class="field"><span>지도</span><select data-ai-field="mapTemplateId"><option value="">지도 없이</option>${mapOptions}</select></label></div>`;
     const problem=ai.problem;
     const repairable=problem&&problem.kind!=='blank';
     const tip=problem&&problem.kind==='truncated'?'<p class="ai-help">AI에게 “이어서 출력해 줘”라고 보낸 뒤, 이어진 부분을 붙여 넣은 내용 맨 끝에 덧붙여 다시 불러와도 됩니다.</p>':'';
     return `<div class="ai-maker"><p class="ai-intro">ChatGPT·Claude·Gemini 같은 AI에게 요청문을 붙여 넣으면, 이 프로그램에 바로 넣을 수 있는 시나리오 JSON을 써 줍니다. 이 사이트가 AI에 직접 접속하거나 내용을 보내지는 않습니다.</p><ol class="ai-steps">`+
-      `<li class="ai-step"><div class="ai-step-head"><span class="ai-step-no" aria-hidden="true">1</span><strong>요청문 복사하기</strong></div><label class="field"><span>어떤 이야기를 원하나요? <small>비워 두면 AI가 주제를 고릅니다</small></span><textarea data-ai-field="idea" rows="3" maxlength="4000" placeholder="예: 1592년, 조선 수군이 먼저 대마도를 친다면? 왕의 입장에서 결정하는 이야기">${escape(ai.idea)}</textarea></label><div class="ai-options"><label class="field"><span>분량</span><select data-ai-field="size">${sizes}</select></label><label class="field"><span>엔딩 수</span><select data-ai-field="endings">${endings}</select></label></div>${base}<div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-copy-prompt">AI 요청문 복사</button><span class="ai-links">AI 열기 <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT</a><a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude</a><a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Gemini</a></span></div><p class="ai-note" role="status" aria-live="polite" ${ai.promptNote?'':'hidden'}>${escape(ai.promptNote)}</p><details class="ai-prompt-view" ${ai.showPrompt?'open':''}><summary>요청문 내용 보기</summary><textarea readonly rows="8" data-ai-prompt aria-label="AI 요청문">${escape(ai.prompt||ScenarioAI.buildPrompt({idea:ai.idea,size:ai.size,endings:ai.endings}))}</textarea></details></li>`+
+      `<li class="ai-step"><div class="ai-step-head"><span class="ai-step-no" aria-hidden="true">1</span><strong>요청문 복사하기</strong></div><label class="field"><span>어떤 이야기를 원하나요? <small>비워 두면 AI가 주제를 고릅니다</small></span><textarea data-ai-field="idea" rows="3" maxlength="4000" placeholder="예: 1592년, 조선 수군이 먼저 대마도를 친다면? 왕의 입장에서 결정하는 이야기">${escape(ai.idea)}</textarea></label><div class="ai-options"><label class="field"><span>분량</span><select data-ai-field="size">${sizes}</select></label><label class="field"><span>엔딩 수</span><select data-ai-field="endings">${endings}</select></label></div>${v2Options}${base}<div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-copy-prompt">AI 요청문 복사</button><span class="ai-links">AI 열기 <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT</a><a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude</a><a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Gemini</a></span></div><p class="ai-note" role="status" aria-live="polite" ${ai.promptNote?'':'hidden'}>${escape(ai.promptNote)}</p><details class="ai-prompt-view" ${ai.showPrompt?'open':''}><summary>요청문 내용 보기</summary><textarea readonly rows="8" data-ai-prompt aria-label="AI 요청문">${escape(ai.prompt||ScenarioAI.buildPrompt(aiPromptOptions()))}</textarea></details></li>`+
       `<li class="ai-step"><div class="ai-step-head"><span class="ai-step-no" aria-hidden="true">2</span><strong>AI 답변 붙여 넣기</strong></div><p class="ai-help">AI의 답변을 통째로 복사해 붙여 넣으세요. 앞뒤 설명이나 \`\`\`json 표시가 섞여 있어도 JSON 부분만 골라냅니다. 다른 곳에서 복사한 시나리오 JSON도 됩니다.</p><textarea class="ai-paste" data-ai-field="paste" rows="7" spellcheck="false" aria-label="AI 답변 붙여 넣기" placeholder="여기에 붙여 넣기 (Ctrl+V)">${escape(ai.paste)}</textarea><div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-import">불러와서 시작하기</button><button type="button" class="btn secondary" data-launch-action="ai-clear">지우기</button><span class="ai-shortcut">Ctrl + Enter</span></div></li>`+
       `<li class="ai-step ai-problem" data-ai-problem tabindex="-1" ${problem?'':'hidden'}><div class="ai-step-head"><span class="ai-step-no warn" aria-hidden="true">3</span><strong>${repairable?'문제가 있어요 — AI에게 고쳐 달라고 하기':'붙여 넣은 내용을 확인해 주세요'}</strong></div><p class="launcher-error" role="alert">${escape(problem?.message||'')}</p>${repairable?`<p class="ai-help">아래 버튼으로 고쳐 달라는 문구를 복사해 <strong>같은 AI 대화</strong>에 보내세요. 새 답변을 2단계에 다시 붙여 넣으면 됩니다.</p>${tip}<div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-copy-repair">고쳐 달라는 문구 복사</button></div><p class="ai-note" role="status" aria-live="polite" ${ai.repairNote?'':'hidden'}>${escape(ai.repairNote||'')}</p><details class="ai-prompt-view" ${ai.showRepair?'open':''}><summary>문구 내용 보기</summary><textarea readonly rows="6" data-ai-repair aria-label="고쳐 달라는 문구">${escape(ai.repair)}</textarea></details>`:''}</li></ol></div>`;
   }
@@ -207,7 +257,7 @@
       base=E.clone(scenario);
       if(JSON.stringify(base).length>150000){ai.promptNote='현재 시나리오가 너무 커서 AI 요청문에 함께 넣기 어렵습니다. ‘바탕으로 고치기’를 끄고 새로 만들거나, 고칠 부분만 따로 요청해 주세요.';ai.showPrompt=false;refreshLaunchers('[data-launch-action="ai-copy-prompt"]');return;}
     }
-    ai.prompt=ScenarioAI.buildPrompt({idea:ai.idea,size:ai.size,endings:ai.endings,baseScenario:base});
+    ai.prompt=ScenarioAI.buildPrompt(aiPromptOptions());
     const ok=await copyText(ai.prompt);
     ai.showPrompt=!ok;
     ai.promptNote=ok?'요청문을 복사했습니다. AI 대화창에 붙여 넣어 보내고, 답변이 오면 전체를 복사해 2단계에 붙여 넣으세요.':'이 브라우저에서는 자동 복사가 막혀 있습니다. 아래 요청문을 모두 선택(Ctrl+A)해 복사해 주세요.';
@@ -276,7 +326,7 @@
     const errors=E.validateScenario(next,{allowDraft:true}).errors;if(errors.length)throw Error(errors.join('\n'));
     checkedText(JSON.stringify(next));
     const copy=E.clone(next);
-    return {scenario:copy,state:copy.draft===true?null:E.createState(copy,{playerName:copy.player?.defaultName||'플레이어'})};
+    return {scenario:copy,state:copy.draft===true?null:E.createState(copy,{playerName:copy.player?.defaultName||'집정관'})};
   }
   function importScenario(next){
     const prepared=prepareScenario(next);
@@ -352,17 +402,19 @@
       else if(bootstrap)bootstrap.textContent='globalThis.DEFAULT_SCENARIO = GameEngine.createBlankScenario();';
       else throw Error('프로그램 내려받기 파일의 구성을 확인할 수 없습니다.');
       // Export only the bundled application, excluding browser-injected assets.
-      const bundledScripts=new Set(['ai-script','engine-script','scenario-data','scenario-loader','bootstrap-script','flowchart-script','editor-script','app-script']);
+      const bundledScripts=new Set(['ai-script','engine-script','scenario-data','scenario-loader','bootstrap-script','flowchart-script','editor-script','app-script','map-templates-script','map-view-script']);
       doc.querySelectorAll('script').forEach(script=>{if(!bundledScripts.has(script.id))script.remove();});
       doc.querySelectorAll('link[rel="stylesheet"]').forEach(link=>link.remove());
-      doc.querySelectorAll('style').forEach(style=>{if(!['game-styles','flowchart-styles','launcher-styles'].includes(style.id))style.remove();});
+      doc.querySelectorAll('style').forEach(style=>{if(!['game-styles','flowchart-styles','launcher-styles','map-view-styles','editor-v2-styles','standalone-styles'].includes(style.id))style.remove();});
       doc.querySelectorAll('dialog[open]').forEach(d=>d.removeAttribute('open'));
       doc.getElementById('editor-dialog').removeAttribute('data-editor-bound');
       doc.getElementById('editor-dialog').classList.remove('flowchart-mode');
-      for(const id of ['editor-root','info-content','scenario-open-content','story-panel','stats-panel','flags-panel','turn-label','scenario-title','scenario-subtitle','scenario-description','risk-summary','toast','status-message']){const node=doc.getElementById(id);if(node){node.innerHTML='';node.textContent='';}}
+      for(const id of ['editor-root','info-content','scenario-open-content','story-panel','stats-panel','flags-panel','turn-label','scenario-title','scenario-subtitle','scenario-description','risk-summary','toast','status-message','player-map','map-reference-tools']){const node=doc.getElementById(id);if(node){node.innerHTML='';node.textContent='';}}
       for(const id of ['flags-count','ending-count']){const node=doc.getElementById(id);if(node)node.textContent=id==='flags-count'?'0':'0 / 0 →';}
       const saveStatus=doc.getElementById('save-status');if(saveStatus)saveStatus.textContent='';
       doc.querySelectorAll('input').forEach(input=>{input.removeAttribute('value');input.value='';});
+      doc.querySelectorAll('[data-web-only]').forEach(node=>node.remove());
+      if(doc.getElementById('player-map-panel'))doc.getElementById('player-map-panel').hidden=true;
       doc.body.classList.remove('empty-workspace');doc.title='역사의 갈림길 · 시나리오 플레이어';
       doc.getElementById('toast').hidden=true;doc.getElementById('status-message').hidden=true;
       download('history-crossroads-player.html','<!doctype html>\n'+doc.documentElement.outerHTML,'text/html');
@@ -370,7 +422,7 @@
     }catch(error){status(error.message,true);}
   }
   function help(){
-    info('이야기를 불러오고 직접 쓰세요',`<p>시나리오의 사건을 읽고 선택지를 누르면 수치와 선택 기록이 바뀝니다. 조건과 확률에 따라 다음 사건과 결말이 달라집니다.</p><ol><li><strong>시나리오 열기:</strong> JSON 파일을 선택하거나 불러오기 화면에 끌어다 놓으세요.</li><li><strong>직접 쓰기:</strong> 흐름도에서 사건과 돌발 사건을 추가하고, 카드에서 본문·선택지·조건·수치 변화를 고칩니다. 작성 중에는 ‘초안 저장’, 플레이할 준비가 되면 ‘적용하고 새 게임’을 누르세요.</li><li><strong>AI로 만들기:</strong> ‘시나리오 열기’의 ‘AI로 만들기’ 탭에서 요청문을 복사해 ChatGPT·Claude 같은 AI에 보내고, 받은 답변을 붙여 넣으면 바로 플레이합니다. 문제가 있으면 AI에게 보낼 수정 요청 문구도 만들어 줍니다.</li><li data-community-only><strong>갤러리:</strong> 위쪽 ‘갤러리’에서 다른 사람의 시나리오를 플레이하고 좋아요를 누를 수 있습니다. 완성한 시나리오는 ‘갤러리에 올리기’로 공개할 수 있습니다(구글 로그인 필요).</li><li><strong>원고 보관:</strong> 시나리오 JSON을 내보내 보관하세요. ‘프로그램 내려받기’에는 원고가 포함되지 않습니다.</li><li><strong>진행 저장:</strong> 자동 저장으로 이어 하거나, ‘진행 저장’과 ‘불러오기’로 같은 내용의 시나리오에서 저장 지점으로 돌아갑니다.</li></ol><p class="notice">시나리오와 진행은 접속한 브라우저에 각각 저장되며 다른 접속자와 공유되지 않습니다. 브라우저 데이터를 지우기 전에는 원고를 JSON으로 내보내세요.</p><div class="toolbar"><button class="btn primary" id="download-html">프로그램 내려받기</button><button class="btn secondary" id="download-json">시나리오 JSON 내보내기</button><button class="btn secondary" id="new-scenario">빈 시나리오 새로 작성</button><button class="btn secondary" type="button" data-launch-action="open-ai">✦ AI로 시나리오 만들기</button><a class="btn secondary" href="gallery.html#upload" data-community-only>갤러리에 올리기</a></div>`);
+    info('이야기를 불러오고 직접 쓰세요',`<p>시나리오의 사건을 읽고 선택지를 누르면 수치와 선택 기록이 바뀝니다. 조건과 확률에 따라 다음 사건과 결말이 달라집니다.</p><ol><li><strong>시나리오 열기:</strong> JSON 파일을 선택하거나 불러오기 화면에 끌어다 놓으세요.</li><li><strong>직접 쓰기:</strong> 흐름도에서 사건과 돌발 사건을 추가하고, 카드에서 본문·선택지·조건·수치 변화를 고칩니다. 작성 중에는 ‘초안 저장’, 플레이할 준비가 되면 ‘적용하고 새 게임’을 누르세요.</li><li><strong>지도와 게임 방식:</strong> 편집기 기본 설정에서 연대기/치세를 고르고 지도 탭에서 템플릿과 시작 소유권을 설정합니다. 선택지에 지역 변화와 기준 역사 표시를 붙일 수 있습니다. 치세에서는 분야별로 결정한 뒤 정산하면 다음 해로 진행합니다.</li><li><strong>AI로 만들기:</strong> ‘시나리오 열기’의 ‘AI로 만들기’ 탭에서 요청문을 복사해 ChatGPT·Claude 같은 AI에 보내고, 받은 답변을 붙여 넣으면 바로 플레이합니다. 문제가 있으면 AI에게 보낼 수정 요청 문구도 만들어 줍니다.</li><li data-community-only><strong>갤러리:</strong> 위쪽 ‘갤러리’에서 다른 사람의 시나리오를 플레이하고 좋아요를 누를 수 있습니다. 완성한 시나리오는 ‘갤러리에 올리기’로 공개할 수 있습니다(구글 로그인 필요).</li><li><strong>원고 보관:</strong> 시나리오 JSON을 내보내 보관하세요. ‘프로그램 내려받기’에는 원고가 포함되지 않습니다.</li><li><strong>진행 저장:</strong> 자동 저장으로 이어 하거나, ‘진행 저장’과 ‘불러오기’로 같은 내용의 시나리오에서 저장 지점으로 돌아갑니다.</li></ol><p class="notice">시나리오와 진행은 접속한 브라우저에 각각 저장되며 다른 접속자와 공유되지 않습니다. 브라우저 데이터를 지우기 전에는 원고를 JSON으로 내보내세요.</p><div class="toolbar"><button class="btn primary" id="download-html">프로그램 내려받기</button><button class="btn secondary" id="download-json">시나리오 JSON 내보내기</button><button class="btn secondary" id="new-scenario">빈 시나리오 새로 작성</button><button class="btn secondary" type="button" data-launch-action="open-ai">✦ AI로 시나리오 만들기</button><a class="btn secondary" href="gallery.html#upload" data-community-only>갤러리에 올리기</a></div>`);
     byId('download-html').onclick=exportHTML;
     byId('download-json').onclick=()=>download('scenario.json',JSON.stringify(scenario,null,2));
     byId('new-scenario').onclick=()=>{byId('info-dialog').close();newScenario();};
@@ -379,7 +431,7 @@
     return commitScenario(prepareScenario(next));
   }
   function commitScenario(prepared){
-    scenario=prepared.scenario;state=prepared.state;
+    scenario=prepared.scenario;state=prepared.state;compareMap=false;referenceCache=null;
     awaitingName=Boolean(state&&playerSettings().askName!==false);nameReturnState=null;
     const saved=storage.set('scenario',scenario);saveSourceContext(saved);if(awaitingName)storage.set('autosave',null);else saveAuto();
     render();status(saved?(state?(awaitingName?'시나리오를 적용했습니다. 이름을 입력하고 시작하세요.':'시나리오를 적용했습니다. 새로운 역사를 시작하세요.'):'작성 중인 초안을 저장했습니다. 흐름도에서 이어서 작성하세요.'):'브라우저 저장이 불가능하므로 JSON으로 내보내 보관하세요.');
@@ -389,8 +441,10 @@
     event.preventDefault();startWithName(byId('player-name-input').value);
   });
   byId('story-panel').addEventListener('click',event=>{
+    const partChoice=event.target.closest('[data-part-choice]');if(partChoice&&!partChoice.disabled){playReign(partChoice.dataset.partEvent,Number(partChoice.dataset.partChoice));return;}
     const choice=event.target.closest('[data-choice]');if(choice&&!choice.disabled){play(Number(choice.dataset.choice));return;}
     const action=event.target.closest('[data-action]')?.dataset.action;
+    if(action==='settle-reign')settleReign();
     if(action==='restart')restart(false);if(action==='journal')journal();if(action==='collection')collection();
     if(action==='edit-flow')ScenarioEditor.open(scenario,applyScenario,{page:'flowchart'});
     if(action==='edit-scenario')ScenarioEditor.open(scenario,applyScenario);
@@ -405,8 +459,10 @@
   function chooseScenarioFile(){const input=byId('scenario-import');input.value='';input.click();}
   document.addEventListener('click',event=>{
     const action=event.target.closest('[data-launch-action]')?.dataset.launchAction;
+    if(event.target.closest('[data-map-compare]')){compareMap=!compareMap;renderMap();return;}
     if(!action)return;
     try{
+      if(action==='demo-chronicle'||action==='demo-reign')void loadScenarioUrl('examples/'+(action==='demo-chronicle'?'chronicle-sejong.json':'reign-france.json'));
       if(action==='choose-file')chooseScenarioFile();
       if(action==='new')newScenario();
       if(action==='close')closeLauncher();
@@ -422,9 +478,14 @@
   const aiFieldInput=event=>{
     const field=event.target.closest?.('[data-ai-field]');if(!field)return;
     const key=field.dataset.aiField;ai[key]=field.type==='checkbox'?field.checked:field.value;
+    if(key==='base'&&ai.base&&canUseBase()){
+      ai.mode=scenario.mode||'chronicle';ai.mapTemplateId=scenario.map?.templateId||'';
+      document.querySelectorAll('[data-ai-field="mode"]').forEach(node=>{node.value=ai.mode;});
+      document.querySelectorAll('[data-ai-field="mapTemplateId"]').forEach(node=>{node.value=ai.mapTemplateId;});
+    }
     if(key==='paste')return;
     ai.prompt='';ai.promptNote='';ai.showPrompt=document.querySelector('.ai-prompt-view[open] [data-ai-prompt]')!==null;
-    const preview=ScenarioAI.buildPrompt({idea:ai.idea,size:ai.size,endings:ai.endings});
+    const preview=ScenarioAI.buildPrompt(aiPromptOptions());
     document.querySelectorAll('[data-ai-prompt]').forEach(node=>{node.value=preview;});
     document.querySelectorAll('.ai-maker .ai-note').forEach(node=>{if(!node.closest('.ai-problem'))node.hidden=true;});
   };
@@ -459,16 +520,21 @@
   };
   document.addEventListener('keydown',event=>{
     if(!state||awaitingName||event.altKey||event.ctrlKey||event.metaKey||document.querySelector('dialog[open]')||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;
+    if(reignMode()&&!state.activeRandomEventId&&/^[1-9]$/.test(event.key)){
+      const index=Number(event.key)-1,cards=E.getReignStatus(scenario,state).cards;
+      const card=cards.find(c=>!state.reign.decisions[c.part.id]);
+      if(card?.choices.find(c=>c.index===index)?.enabled){event.preventDefault();playReign(card.event.id,index);}return;
+    }
     if(/^[1-9]$/.test(event.key)){const index=Number(event.key)-1,item=E.getChoices(scenario,state).find(c=>c.index===index);if(item?.enabled){event.preventDefault();play(index);}}
   });
   try{
-    state=scenario.draft===true?null:E.createState(scenario,{playerName:scenario.player?.defaultName||'플레이어'});
+    state=scenario.draft===true?null:E.createState(scenario,{playerName:scenario.player?.defaultName||'집정관'});
     awaitingName=Boolean(state&&playerSettings().askName!==false);
     const auto=storage.get('autosave');if(state&&auto&&auto.signature===signature())try{state=E.restoreState(scenario,auto.state);awaitingName=false;}catch{status('이전 자동 저장을 읽지 못해 새 회차를 시작합니다.',true);}
     rememberEnding();render();
   }catch(error){status('시나리오를 시작할 수 없습니다: '+error.message,true);byId('scenario-title').textContent='시나리오를 확인해 주세요';}
   // Public handoff: raw manuscripts are JSON; the downloadable player stays blank.
-  globalThis.HistoryCrossroads={getScenario:()=>E.clone(scenario),importScenario,importText,newScenario,ready:Promise.resolve(null)};
+  globalThis.HistoryCrossroads={getScenario:()=>E.clone(scenario),getState:()=>E.clone(state),importScenario,importText,newScenario,ready:Promise.resolve(null)};
   const scenarioPath=new URL(location.href).searchParams.get('scenario');
   if(scenarioPath){
     const savedContext=storage.get('sourceContext');

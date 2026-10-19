@@ -12,13 +12,13 @@
   const NAME_KEY = 'hc:authorName';
   const PAGE = 24;
   const MAX_BYTES = 1024 * 1024;
-  const META = 'id,author_id,author_name,title,subtitle,summary,tags,event_count,ending_count,like_count,play_count,report_count,status,created_at,updated_at';
+  const META = 'id,author_id,author_name,title,subtitle,summary,tags,event_count,ending_count,like_count,play_count,report_count,status,created_at,updated_at,schema_version,mode,map_template_id';
   const SORTS = {
     popular: [['like_count', false], ['created_at', false]],
     recent: [['created_at', false]],
     played: [['play_count', false], ['created_at', false]]
   };
-  const state = { user: null, isAdmin: false, tab: 'all', sort: 'popular', q: '', tag: '', items: [], total: 0, likeOffset: 0, liked: new Set(), loading: false, seq: 0 };
+  const state = { user: null, isAdmin: false, tab: 'all', sort: 'popular', q: '', tag: '', items: [], total: 0, liked: new Set(), loading: false, seq: 0 };
   let toastTimer;
 
   function toast(message) { const node = $('toast'); node.textContent = message; node.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { node.hidden = true; }, 3800); }
@@ -27,6 +27,7 @@
   function friendlyError(error) {
     if (!error) return '알 수 없는 오류가 났습니다.';
     const msg = String(error.message || error);
+    if (/schema_version|map_template_id/.test(msg) && /column|schema cache/i.test(msg)) return '갤러리 데이터베이스의 V2 업데이트가 필요합니다. 관리자는 supabase/migrate-v2.sql을 적용해 주세요.';
     if (error.code === '23505') return '이미 처리된 요청입니다.';
     if (error.code === '42501' || /row-level security|permission denied/i.test(msg)) return '권한이 없습니다. 로그인 상태를 확인해 주세요.';
     if (error.code === '23514') return '저장할 수 없는 내용입니다. 시나리오 형식과 크기(1 MB 이하)를 확인해 주세요.';
@@ -53,6 +54,13 @@
     if (result.errors.length) return '시나리오 검사에서 문제가 있습니다.\n' + result.errors.slice(0, 8).map(e => '· ' + e).join('\n');
     if (new TextEncoder().encode(JSON.stringify(data)).byteLength > MAX_BYTES) return '갤러리에는 1 MB 이하의 시나리오만 올릴 수 있습니다.';
     return '';
+  }
+  function featureBadges(item) {
+    const version = Number(item.schema_version || item.schemaVersion) === 2 ? 2 : 1;
+    const mode = version === 2 && item.mode === 'reign' ? '치세' : '연대기';
+    const templateId = version === 2 ? item.map_template_id || item.map?.templateId : null;
+    const template = templateId && window.MapTemplates ? window.MapTemplates.get(templateId) : null;
+    return `<span class="format-badge">V${version}</span><span class="mode-badge">${mode}</span>${templateId ? `<span class="map-badge">지도 · ${esc(template ? template.name : templateId)}</span>` : ''}`;
   }
   function workingScenario() {
     try {
@@ -126,25 +134,19 @@
   }
   async function load(reset) {
     const seq = ++state.seq;
-    if (reset) { state.items = []; state.total = 0; state.likeOffset = 0; }
+    if (reset) { state.items = []; state.total = 0; }
     state.loading = true; renderList();
     try {
       let rows = [], total = 0;
       const from = state.items.length, to = from + PAGE - 1;
       if (state.tab === 'liked') {
         if (!state.user) { state.loading = false; renderList('아직 좋아요한 시나리오가 없습니다.'); return; }
-        // Page through the likes themselves; some liked scenarios may be hidden, deleted or filtered out.
-        const likes = await client.from('likes').select('scenario_id,created_at', { count: 'exact' }).order('created_at', { ascending: false }).range(state.likeOffset, state.likeOffset + PAGE - 1);
-        if (likes.error) throw likes.error;
-        total = likes.count || 0;
-        if (seq === state.seq) state.likeOffset += likes.data.length;
-        const ids = likes.data.map(l => l.scenario_id);
-        if (ids.length) {
-          const res = await applyFilters(client.from('scenarios').select(META).in('id', ids));
-          if (res.error) throw res.error;
-          const byId = new Map(res.data.map(r => [r.id, r]));
-          rows = ids.map(id => byId.get(id)).filter(Boolean);
-        }
+        // Sort and filter the whole visible liked set before pagination, not one page of likes.
+        let query = applyFilters(client.from('scenarios').select(META + ',likes!inner(user_id)', { count: 'exact' }).eq('likes.user_id', state.user.id));
+        SORTS[state.sort].forEach(([col, ascending]) => { query = query.order(col, { ascending }); });
+        const res = await query.range(from, to);
+        if (res.error) throw res.error;
+        rows = res.data; total = res.count || 0;
       } else if (state.tab === 'mine' && !registered()) {
         state.loading = false; renderList('', 'login'); return;
       } else {
@@ -207,6 +209,7 @@
         ${item.summary ? `<span class="card-summary">${esc(item.summary)}</span>` : ''}
       </button>
       <div class="card-tags">${tagChips(item.tags)}</div>
+      <div class="scenario-format-badges">${featureBadges(item)}</div>
       <p class="card-meta"><span>${esc(item.author_name)}</span><span>${esc(when(item.created_at))}</span><span>사건 ${item.event_count} · 엔딩 ${item.ending_count}</span></p>
       <div class="card-actions">${hidden ? `<span class="like-static">♥ ${item.like_count}</span>` : likeButton(item)}<span class="play-count" aria-label="플레이 ${item.play_count}회">▶ ${item.play_count}</span><button type="button" class="btn primary play-button" data-act="play" data-id="${item.id}">플레이</button></div>
       ${extra}
@@ -232,7 +235,7 @@
       grid.innerHTML = `<div class="empty-state"><p>${esc(empty)}</p>${state.tab === 'all' || state.tab === 'mine' ? '<button type="button" class="btn primary" data-act="upload">내 시나리오 올리기</button>' : ''}</div>`;
     } else grid.innerHTML = state.items.map(cardMarkup).join('');
     status.textContent = state.loading ? '불러오는 중…' : (state.items.length ? (state.tab === 'liked' ? `좋아요한 시나리오 ${state.items.length.toLocaleString()}개` : `${state.total.toLocaleString()}개 중 ${state.items.length.toLocaleString()}개`) : '');
-    $('more-button').hidden = state.loading || (state.tab === 'liked' ? state.likeOffset >= state.total : state.items.length >= state.total);
+    $('more-button').hidden = state.loading || state.items.length >= state.total;
   }
   function updateItem(id, patch) {
     state.items.forEach(item => { if (item.id === id) Object.assign(item, patch); });
@@ -314,6 +317,7 @@
     const owner = state.user && item.author_id === state.user.id;
     $('detail-content').innerHTML = `<p class="eyebrow">${esc(item.author_name)} · ${esc(when(item.created_at))}${item.updated_at && item.updated_at !== item.created_at ? ` (수정 ${esc(when(item.updated_at))})` : ''}</p>
       <h2>${esc(item.title)}</h2>${item.subtitle ? `<p class="detail-sub">${esc(item.subtitle)}</p>` : ''}
+      <div class="scenario-format-badges">${featureBadges(item)}</div>
       ${hidden ? '<p class="hidden-badge">신고가 쌓여 숨겨진 시나리오입니다.</p>' : ''}
       <div class="card-tags">${tagChips(item.tags)}</div>
       ${item.summary ? `<p class="detail-summary">${esc(item.summary)}</p>` : ''}
@@ -355,9 +359,10 @@
       : { title: item ? item.title : '', subtitle: item ? item.subtitle : '', summary: item ? item.summary : '', tags: item ? (item.tags || []).join(', ') : '', author: item ? item.author_name : '' };
     const working = workingScenario();
     const sourceBlock = upload.mode === 'edit' ? '' : `<fieldset class="source-pick"><legend>${upload.mode === 'replace' ? '새 내용' : '올릴 시나리오'}</legend>
-        <label class="source-option${working.data ? '' : ' disabled'}"><input type="radio" name="up-source" value="working" ${upload.source === 'working' ? 'checked' : ''} ${working.data ? '' : 'disabled'}><span><strong>지금 작업 중인 시나리오</strong><small>${working.data ? `「${esc(working.data.title)}」 · 사건 ${(working.data.events || []).length}개 · 엔딩 ${(working.data.endings || []).length}개` : esc(working.problem)}</small></span></label>
+        <label class="source-option${working.data ? '' : ' disabled'}"><input type="radio" name="up-source" value="working" ${upload.source === 'working' ? 'checked' : ''} ${working.data ? '' : 'disabled'}><span><strong>지금 작업 중인 시나리오</strong><small>${working.data ? `「${esc(working.data.title)}」 · 사건 ${(working.data.events || []).length}개 · 엔딩 ${(working.data.endings || []).length}개` : esc(working.problem)}</small>${working.data ? `<span class="scenario-format-badges">${featureBadges(working.data)}</span>` : ''}</span></label>
         <label class="source-option"><input type="radio" name="up-source" value="file" ${upload.source === 'file' ? 'checked' : ''}><span><strong>JSON 파일 선택</strong><small>${upload.fileName ? esc(upload.fileName) : '내보내기로 저장한 시나리오 파일'}</small></span></label>
         ${upload.source === 'file' ? '<button type="button" class="btn secondary" data-act="pick-file">파일 고르기</button>' : ''}
+        ${upload.source === 'file' && picked.data ? `<div class="scenario-format-badges">${featureBadges(picked.data)}</div>` : ''}
         ${picked.problem ? `<p class="form-error">${esc(picked.problem)}</p>` : ''}
       </fieldset>`;
     const metaBlock = upload.mode === 'replace' ? `<p class="g-help">「${esc(meta.title)}」의 사건·선택지·엔딩을 새 내용으로 바꿉니다. 좋아요와 플레이 수는 그대로 유지됩니다.</p>` : `

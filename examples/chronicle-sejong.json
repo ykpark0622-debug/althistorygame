@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 2,
+  "id": "chronicle_sejong_v2",
+  "title": "세종의 갈림길",
+  "subtitle": "지도·모드 기능 예시",
+  "description": "역사 소재를 단순화한 기능 예시입니다. 수치·지도 효과와 대체 경로는 창작이며, 기준 역사는 이 예시에서 작성자가 지정한 비교 경로입니다.",
+  "start": "tsushima_1419",
+  "stats": [
+    {
+      "id": "treasury",
+      "name": "재정",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#bb9b52"
+    },
+    {
+      "id": "morale",
+      "name": "민심",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#648d75"
+    },
+    {
+      "id": "military",
+      "name": "군사",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#ad705e"
+    },
+    {
+      "id": "diplomacy",
+      "name": "외교",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#6c91b0"
+    }
+  ],
+  "flags": [
+    {
+      "id": "expedition",
+      "name": "대마도 원정",
+      "initial": false
+    },
+    {
+      "id": "settlers",
+      "name": "북방 사민",
+      "initial": false
+    },
+    {
+      "id": "letters",
+      "name": "새 문자의 보급",
+      "initial": false
+    }
+  ],
+  "events": [
+    {
+      "id": "tsushima_1419",
+      "title": "바다 건너의 위협",
+      "body": "왜구의 습격이 이어집니다. 이종무는 군사를 준비하고, 조정에서는 원정의 비용과 이후 교섭을 논합니다.",
+      "choices": [
+        {
+          "text": "원정을 실시한 뒤 소 씨와 교섭한다",
+          "effects": {
+            "treasury": -10,
+            "military": 8,
+            "diplomacy": 3
+          },
+          "historical": true,
+          "setFlags": {
+            "expedition": true
+          },
+          "territory": [
+            {
+              "prov": "tsushima",
+              "marker": "원정 후 교섭"
+            }
+          ],
+          "result": "군사가 돌아온 뒤에도 바다 건너와의 교섭은 계속됩니다. 원정은 영구 병합으로 처리되지 않습니다."
+        },
+        {
+          "text": "교역을 조건으로 왜구 단속을 요구한다",
+          "effects": {
+            "treasury": 5,
+            "diplomacy": 8,
+            "military": -4
+          },
+          "territory": [
+            {
+              "prov": "tsushima",
+              "influence": "joseon"
+            }
+          ],
+          "result": "교역을 매개로 관계를 묶었습니다. 군사력을 쓰지 않는 영향권 경로입니다."
+        },
+        {
+          "text": "막대한 비용을 들여 영구 주둔한다",
+          "effects": {
+            "treasury": -25,
+            "morale": -18,
+            "military": -8,
+            "diplomacy": -12
+          },
+          "territory": [
+            {
+              "prov": "tsushima",
+              "to": "joseon",
+              "occupation": null
+            }
+          ],
+          "result": "조선의 색이 대마도에 칠해집니다. 바다 건너의 주둔 비용은 백성에게 돌아갑니다."
+        }
+      ],
+      "next": "sagun_1432",
+      "when": [],
+      "date": "1419년",
+      "speaker": "이종무",
+      "chapter": "바다와 국경"
+    },
+    {
+      "id": "sagun_1432",
+      "title": "압록강 상류의 거점",
+      "body": "최윤덕의 북방 군사 활동을 뒷받침할 성과 보급이 필요합니다. 새 거점을 어떻게 유지하시겠습니까?",
+      "choices": [
+        {
+          "text": "거점을 설치하고 보급을 지원한다",
+          "effects": {
+            "treasury": -10,
+            "military": 8,
+            "morale": -3
+          },
+          "historical": true,
+          "territory": [
+            {
+              "prov": "sagun",
+              "to": "joseon"
+            }
+          ],
+          "result": "4군 지역에 조선의 거점을 세웁니다. 군사적 성과에도 유지 비용이 듭니다."
+        },
+        {
+          "text": "기존 방어선을 유지하고 교섭한다",
+          "effects": {
+            "diplomacy": 8,
+            "treasury": 3,
+            "military": -3
+          },
+          "result": "국경의 색은 유지되지만 외교와 재정에 여유가 생겼습니다."
+        }
+      ],
+      "next": "six_1434",
+      "when": [],
+      "date": "1432~1433년",
+      "speaker": "최윤덕"
+    },
+    {
+      "id": "six_1434",
+      "title": "두만강의 성과 사람",
+      "body": "김종서는 성을 세우는 것만으로는 국경을 유지할 수 없다고 아룁니다. 남쪽 백성을 이주시킬지 결정해야 합니다.",
+      "choices": [
+        {
+          "text": "사민과 둔전을 함께 지원한다",
+          "effects": {
+            "treasury": -12,
+            "morale": -8,
+            "military": 10
+          },
+          "historical": true,
+          "setFlags": {
+            "settlers": true
+          },
+          "territory": [
+            {
+              "prov": "hoeryeong",
+              "to": "joseon"
+            },
+            {
+              "prov": "gyeongwon",
+              "to": "joseon"
+            }
+          ],
+          "result": "새 성에 사람과 곡식이 들어갑니다. 이주한 백성의 부담은 남지만 거점은 뿌리내립니다."
+        },
+        {
+          "text": "군사 거점만 설치한다",
+          "effects": {
+            "treasury": -5,
+            "military": 6,
+            "morale": 2
+          },
+          "territory": [
+            {
+              "prov": "hoeryeong",
+              "to": "joseon"
+            },
+            {
+              "prov": "gyeongwon",
+              "occupation": "joseon"
+            }
+          ],
+          "result": "먼 국경을 지킬 백성과 보급이 부족합니다. 뒤의 사건에서 결과가 돌아옵니다."
+        }
+      ],
+      "next": "letters_1446",
+      "when": [],
+      "date": "1434년 이후",
+      "speaker": "김종서"
+    },
+    {
+      "id": "letters_1446",
+      "title": "백성이 쓰는 문자",
+      "body": "새 문자를 보급할지, 조정의 반대를 받아들여 늦출지 결정합니다. 이 선택은 지도보다 사람들의 삶에 흔적을 남깁니다.",
+      "choices": [
+        {
+          "text": "훈민정음을 널리 알린다",
+          "effects": {
+            "treasury": -5,
+            "morale": 16
+          },
+          "historical": true,
+          "setFlags": {
+            "letters": true
+          },
+          "result": "지도는 바뀌지 않습니다. 백성이 말을 글로 옮길 길이 열립니다."
+        },
+        {
+          "text": "반대를 달래며 공표를 미룬다",
+          "effects": {
+            "treasury": 5,
+            "diplomacy": 3,
+            "morale": -8
+          },
+          "result": "당장의 마찰은 줄었지만 새로운 문자의 보급은 더뎌집니다."
+        }
+      ],
+      "next": "END",
+      "when": [],
+      "date": "1446년",
+      "speaker": "집현전",
+      "chapter": "국경 밖의 역사"
+    },
+    {
+      "id": "protest",
+      "title": "성문 앞의 호소",
+      "body": "부역과 이주에 지친 백성이 모였습니다. 대신들은 조속한 대응을 청합니다.",
+      "choices": [
+        {
+          "text": "구휼하고 부역을 줄인다",
+          "effects": {
+            "treasury": -8,
+            "morale": 14
+          },
+          "result": "창고의 곡식이 줄었지만 사람들은 성문에서 물러납니다."
+        },
+        {
+          "text": "강경하게 해산한다",
+          "effects": {
+            "military": 3,
+            "morale": -9
+          },
+          "result": "거리는 조용해졌지만 불만은 남았습니다."
+        }
+      ],
+      "next": "RETURN",
+      "when": [],
+      "speaker": "황희",
+      "chapter": "돌발 사건"
+    }
+  ],
+  "endings": [
+    {
+      "id": "northern_legacy",
+      "title": "사람이 지키는 국경",
+      "summary": "국경의 거점과 백성의 삶을 함께 남겼습니다. 지도와 정책이 한 통치의 기록이 되었습니다.",
+      "body": "국경의 거점과 백성의 삶을 함께 남겼습니다. 지도와 정책이 한 통치의 기록이 되었습니다.",
+      "kind": "good",
+      "priority": 20,
+      "immediate": false,
+      "when": [
+        {
+          "kind": "flag",
+          "key": "settlers",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "kind": "flag",
+          "key": "letters",
+          "op": "eq",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "thin_border",
+      "title": "성만 남은 국경",
+      "summary": "지도에는 넓은 경계가 남았지만 거점을 유지할 사람과 곡식은 부족합니다.",
+      "body": "지도에는 넓은 경계가 남았지만 거점을 유지할 사람과 곡식은 부족합니다.",
+      "kind": "mixed",
+      "priority": 10,
+      "immediate": false,
+      "when": [
+        {
+          "kind": "flag",
+          "key": "settlers",
+          "op": "eq",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": "legacy",
+      "title": "서로 다른 실록",
+      "summary": "각 결정은 국경과 백성의 삶에 서로 다른 흔적을 남겼습니다.",
+      "body": "각 결정은 국경과 백성의 삶에 서로 다른 흔적을 남겼습니다.",
+      "kind": "mixed",
+      "priority": 0,
+      "immediate": false,
+      "when": []
+    }
+  ],
+  "defaultEnding": "legacy",
+  "randomEvents": [
+    {
+      "id": "low_morale",
+      "title": "백성의 호소",
+      "eventId": "protest",
+      "when": [
+        {
+          "kind": "stat",
+          "key": "morale",
+          "op": "lte",
+          "value": 45
+        }
+      ],
+      "chance": 35,
+      "priority": 10,
+      "once": false,
+      "cooldown": 1
+    }
+  ],
+  "player": {
+    "askName": true,
+    "label": "국왕의 이름",
+    "defaultName": "세종",
+    "placeholder": "이름을 입력하세요"
+  },
+  "mode": "chronicle",
+  "map": {
+    "templateId": "eastasia1419",
+    "playerCountry": "joseon",
+    "countries": [],
+    "initial": {}
+  }
+}

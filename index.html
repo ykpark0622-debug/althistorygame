@@ -4,12 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#173b36">
-  <meta name="description" content="시나리오 JSON을 불러오거나 AI로 만들어 플레이하고, 흐름도에서 사건·선택지·수치·조건을 직접 만드는 선택형 이야기 도구.">
+  <meta name="description" content="연대기·치세 모드와 선택에 따라 바뀌는 지도로 대체역사를 만드세요. 사건·선택지·수치·조건을 흐름도에서 편집하고 JSON으로 공유하는 선택형 게임 도구.">
   <title>역사의 갈림길</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="flowchart.css">
   <link rel="stylesheet" href="launcher.css">
   <link rel="stylesheet" href="community.css">
+  <link rel="stylesheet" href="map-view.css">
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -22,6 +23,7 @@
     <div class="main-column">
       <section class="scenario-heading"><div><p class="eyebrow">A STORY YOU WILL WRITE</p><h1 id="scenario-title"></h1><p id="scenario-subtitle" class="scenario-subtitle"></p></div><span class="fiction-tag">선택형 이야기</span></section>
       <div id="status-message" class="status-message" role="status" aria-live="polite" hidden></div>
+      <section id="player-map-panel" aria-label="선택으로 바뀌는 지도" hidden><div id="map-reference-tools" class="map-reference-bar"></div><div id="player-map"></div></section>
       <section id="story-panel" class="story-panel" aria-label="현재 사건" tabindex="-1"></section>
       <footer class="story-footer"><span class="keyboard-note">숫자 키 <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> 으로도 선택할 수 있습니다.</span><button class="text-button" id="journal-button">지나온 선택 보기 <span aria-hidden="true">↗</span></button></footer>
       <p class="fiction-note" id="scenario-description"></p>
@@ -41,6 +43,8 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   <input id="scenario-import" type="file" accept=".json,application/json" hidden>
   <script src="config.js"></script>
+  <script src="map-templates.js"></script>
+  <script src="map-view.js"></script>
   <script src="engine.js"></script>
   <script src="bootstrap.js"></script>
   <script src="flowchart.js"></script>

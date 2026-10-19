@@ -14,7 +14,7 @@
     ? GameEngine.clone(value) : JSON.parse(JSON.stringify(value));
   const tabs = [
     ['overview', '기본 설정'], ['stats', '수치'], ['flags', '선택 기록'],
-    ['events', '사건·선택지'], ['flowchart', '분기 흐름도'], ['randomEvents', '돌발 사건'], ['endings', '엔딩'], ['json', 'JSON']
+    ['events', '사건·선택지'], ['flowchart', '분기 흐름도'], ['map', '지도·초기 영토'], ['reign', '치세·연도'], ['randomEvents', '돌발 사건'], ['endings', '엔딩'], ['json', 'JSON']
   ];
   const mark = () => { if (current) current.dirty = true; };
 
@@ -98,6 +98,132 @@
 
   function notice(text) { return $('p', 'notice small', text); }
 
+  function upgrade(scenario) { scenario.schemaVersion = 2; if (!scenario.mode) scenario.mode = 'chronicle'; }
+  function mapConfig(scenario) {
+    const template = scenario.map && globalThis.MapTemplates?.get(scenario.map.templateId);
+    if (!template) return null;
+    const countries = new Map((template.countries || []).map(country => [country.id, { ...country }]));
+    (scenario.map.countries || []).forEach(country => countries.set(country.id, { ...(countries.get(country.id) || {}), ...country }));
+    return { template, countries: [...countries.values()] };
+  }
+  function initialMapState(scenario) {
+    const config = mapConfig(scenario); if (!config) return null;
+    if (globalThis.MapView?.initialState) return { ...MapView.initialState(scenario), stats: {}, flags: {} };
+    const initial = scenario.map.initial || {};
+    return { stats: {}, flags: {}, map: { owners: { ...Object.fromEntries(config.template.provinces.map(province => [province.id, province.owner])), ...(initial.owners || {}) },
+      occupation: { ...(initial.occupation || {}) }, influence: { ...(initial.influence || {}) }, markers: { ...(initial.markers || {}) } } };
+  }
+  function paintMap(container, scenario, onProvince) {
+    if (!globalThis.MapView?.render || !mapConfig(scenario)) { container.append(notice('지도 템플릿을 먼저 선택하세요.')); return; }
+    try { MapView.render(container, scenario, initialMapState(scenario), { onProvince }); }
+    catch (error) { container.append(notice('지도 표시: ' + error.message)); }
+  }
+  function changedV2(scenario, onChange) { upgrade(scenario); mark(); if (onChange) onChange(); }
+  function conditionsEditor(scenario, list, title, onChange) {
+    const wrap = section(title, '아래 조건을 모두 만족해야 합니다. 영토 조건은 지도를 선택한 뒤 사용할 수 있습니다.');
+    wrap.classList.add('v2-condition-editor');
+    const rows = $('div'); wrap.append(rows);
+    const changed = () => { mark(); if (onChange) onChange(); };
+    function renderRows() {
+      rows.replaceChildren();
+      const config = mapConfig(scenario), kinds = [['stat', '수치'], ['flag', '선택 기록']];
+      if (config || list.some(condition => condition.kind === 'territory')) kinds.push(['territory', '영토·점령·영향권']);
+      if (!list.length) rows.append($('p', 'small muted', '조건 없음 · 항상 허용'));
+      add.disabled = (!scenario.stats.length && !scenario.flags.length && !config) || list.length >= 100;
+      list.forEach((condition, index) => {
+        const row = $('div', 'v2-condition-row');
+        row.append(select('종류', condition.kind, kinds, value => {
+          condition.kind = value;
+          if (value === 'territory') { upgrade(scenario); condition.key = config?.template.provinces[0]?.id || ''; condition.field = 'owner'; condition.op = 'eq'; condition.value = config?.countries[0]?.id || ''; }
+          else { delete condition.field; condition.key = (value === 'flag' ? scenario.flags : scenario.stats)[0]?.id || ''; condition.op = value === 'flag' ? 'eq' : 'gte'; condition.value = value === 'flag' ? true : 50; }
+          changed(); renderRows();
+        }));
+        if (condition.kind === 'territory') {
+          row.append(select('지역', condition.key, (config?.template.provinces || []).map(province => [province.id, province.name + ' · ' + province.id]), value => { condition.key = value; changedV2(scenario, onChange); }),
+            select('비교할 상태', condition.field || 'owner', [['owner', '소유국'], ['occupation', '군사 점령'], ['influence', '영향권'], ['marker', '표식']], value => { condition.field = value; condition.value = value === 'marker' ? '' : config?.countries[0]?.id || null; changedV2(scenario, onChange); renderRows(); }),
+            select('비교', condition.op, [['eq', '같음'], ['ne', '다름']], value => { condition.op = value; changedV2(scenario, onChange); }));
+          if (condition.field === 'marker') {
+            row.append(checkbox('표식 없음(null)과 비교', condition.value === null, value => { condition.value = value ? null : ''; changedV2(scenario, onChange); renderRows(); }));
+            if (condition.value !== null) row.append(input('표식 문구', condition.value, value => { condition.value = value; changedV2(scenario, onChange); }));
+          } else row.append(select('대상 국가', condition.value === null ? '__none__' : condition.value, [['__none__', '없음'], ...(config?.countries || []).map(country => [country.id, country.name])], value => { condition.value = value === '__none__' ? null : value; changedV2(scenario, onChange); }));
+        } else {
+          const flag = condition.kind === 'flag';
+          row.append(select('대상', condition.key, (flag ? scenario.flags : scenario.stats).map(item => [item.id, item.name + ' · ' + item.id]), value => { condition.key = value; changed(); }),
+            select('비교', condition.op, flag ? [['eq', '같음'], ['ne', '다름']] : [['gte', '이상 ≥'], ['lte', '이하 ≤'], ['eq', '같음'], ['ne', '다름'], ['gt', '초과 >'], ['lt', '미만 <']], value => { condition.op = value; changed(); }));
+          row.append(flag ? select('값', String(condition.value), [['true', '참 · 있음'], ['false', '거짓 · 없음']], value => { condition.value = value === 'true'; changed(); }) : input('기준값', condition.value, value => { condition.value = value; changed(); }, { type: 'number', step: 'any' }));
+        }
+        row.append(button('조건 삭제', () => { list.splice(index, 1); changed(); renderRows(); }, 'danger')); rows.append(row);
+      });
+    }
+    const add = button('＋ 조건 추가', () => {
+      if (list.length >= 100) return;
+      const config = mapConfig(scenario), stat = scenario.stats[0], flag = scenario.flags[0];
+      if (stat) list.push({ kind: 'stat', key: stat.id, op: 'gte', value: 50 });
+      else if (flag) list.push({ kind: 'flag', key: flag.id, op: 'eq', value: true });
+      else if (config) { upgrade(scenario); list.push({ kind: 'territory', key: config.template.provinces[0].id, field: 'owner', op: 'eq', value: config.countries[0].id }); }
+      changed(); renderRows();
+    });
+    add.disabled = (!scenario.stats.length && !scenario.flags.length && !mapConfig(scenario)) || list.length >= 100;
+    renderRows(); wrap.append(add); return wrap;
+  }
+  function territoryEditor(scenario, owner, onChange, title = '영토·점령·영향권 변화') {
+    const wrap = section(title, '소유권·군사 점령·영향권·표식은 별개로 기록됩니다. 변경하지 않을 항목은 그대로 두세요.');
+    wrap.classList.add('v2-territory-editor');
+    const rows = $('div'); wrap.append(rows);
+    const changed = () => changedV2(scenario, onChange);
+    function renderRows() {
+      rows.replaceChildren(); const config = mapConfig(scenario);
+      (owner.territory || []).forEach((effect, index) => {
+        const card = $('div', 'editor-card v2-effect-card');
+        const province = select('변경할 지역', effect.prov, (config?.template.provinces || []).map(item => [item.id, item.name + ' · ' + item.id]), value => { effect.prov = value; changed(); });
+        card.append(province);
+        const picker = $('div', 'v2-map-picker'); picker.hidden = true;
+        card.append(button('지도에서 지역 선택', () => { picker.hidden = !picker.hidden; if (!picker.hidden) { picker.replaceChildren(); paintMap(picker, scenario, value => { effect.prov = typeof value === 'string' ? value : value.id || value.prov; changed(); renderRows(); }); } }), picker);
+        for (const [field, label] of [['to', '소유국'], ['occupation', '군사 점령국'], ['influence', '영향국']]) {
+          const value = Object.prototype.hasOwnProperty.call(effect, field) ? effect[field] === null ? '__clear__' : effect[field] : '__keep__';
+          card.append(select(label, value, [['__keep__', '변경하지 않음'], ...(field === 'to' ? [] : [['__clear__', '없음으로 지우기']]), ...(config?.countries || []).map(country => [country.id, country.name])], next => { if (next === '__keep__') delete effect[field]; else effect[field] = next === '__clear__' ? null : next; changed(); }));
+        }
+        card.append(select('표식', Object.prototype.hasOwnProperty.call(effect, 'marker') ? effect.marker === null ? '__clear__' : '__text__' : '__keep__', [['__keep__', '변경하지 않음'], ['__clear__', '표식 지우기'], ['__text__', '문구 설정']], next => { if (next === '__keep__') delete effect.marker; else effect.marker = next === '__clear__' ? null : ''; changed(); renderRows(); }));
+        if (typeof effect.marker === 'string') card.append(input('표식 문구', effect.marker, value => { effect.marker = value; changed(); }));
+        card.append(button('이 영토 변화 삭제', () => { owner.territory.splice(index, 1); if (!owner.territory.length) delete owner.territory; changed(); renderRows(); }, 'danger')); rows.append(card);
+      });
+      if (!(owner.territory || []).length) rows.append(notice(config ? '영토 변화 없음' : '지도·초기 영토 탭에서 템플릿을 선택하면 영토 변화를 추가할 수 있습니다.'));
+    }
+    const add = button('＋ 영토 변화 추가', () => { const config = mapConfig(scenario); if (!config) return; if (!owner.territory) owner.territory = []; owner.territory.push({ prov: config.template.provinces[0].id }); changed(); renderRows(); });
+    add.disabled = !mapConfig(scenario); renderRows(); wrap.append(add); return wrap;
+  }
+  function rewriteReferences(scenario, kind, oldID, newID) {
+    const visit = value => {
+      if (!value || typeof value !== 'object') return;
+      if (Array.isArray(value)) { value.forEach(visit); return; }
+      if ((kind === 'stat' || kind === 'flag') && value.kind === kind && value.key === oldID) value.key = newID;
+      const field = kind === 'stat' ? 'effects' : kind === 'flag' ? 'setFlags' : null;
+      if (field && value[field] && Object.prototype.hasOwnProperty.call(value[field], oldID)) { value[field][newID] = value[field][oldID]; delete value[field][oldID]; }
+      Object.values(value).forEach(visit);
+    };
+    visit(scenario);
+    if (kind === 'event') {
+      if (scenario.start === oldID) scenario.start = newID;
+      scenario.events.forEach(event => { if (event.next === oldID) event.next = newID; event.choices.forEach(choice => { if (choice.next === oldID) choice.next = newID; }); });
+      (scenario.randomEvents || []).forEach(rule => { if (rule.eventId === oldID) rule.eventId = newID; });
+      (scenario.reign?.turns || []).forEach(turn => { turn.eventIds = (turn.eventIds || []).map(id => id === oldID ? newID : id); });
+      if (scenario.editorLayout?.positions?.[oldID]) { scenario.editorLayout.positions[newID] = scenario.editorLayout.positions[oldID]; delete scenario.editorLayout.positions[oldID]; }
+    }
+    if (kind === 'ending' && scenario.defaultEnding === oldID) scenario.defaultEnding = newID;
+    if (kind === 'part') scenario.events.forEach(event => { if (event.part === oldID) event.part = newID; });
+  }
+  function idInput(label, item, kind, help) {
+    const wrap = $('label', 'field'); wrap.append($('span', '', label)); const node = $('input'); node.value = item.id || '';
+    node.addEventListener('change', () => {
+      const next = node.value.trim(), collections = { stat: current.draft.stats, flag: current.draft.flags, event: current.draft.events, ending: current.draft.endings, part: current.draft.reign?.parts || [] };
+      if (!/^[a-z][a-z0-9_]*$/i.test(next) || ['__proto__', 'prototype', 'constructor'].includes(next.toLowerCase()) || (kind === 'event' && ['END', 'RETURN'].includes(next)) || (collections[kind] || []).some(other => other !== item && other.id === next)) {
+        node.value = item.id; showReport({ errors: ['ID는 영문자로 시작하는 영문·숫자·밑줄이며 같은 종류에서 고유해야 합니다.'], warnings: [] }); return;
+      }
+      const previous = item.id; item.id = next; rewriteReferences(current.draft, kind, previous, next); mark(); render();
+    });
+    wrap.append(node, $('span', 'small muted', help || '값을 확정하면 관련 효과·조건·연결의 ID도 함께 바꿉니다.')); return wrap;
+  }
+
   function eventOptions(inherit) {
     const list = inherit ? [['', '사건의 다음 장면을 따름']] : [];
     list.push(['END', '이야기 종료 → 엔딩 판정']);
@@ -109,7 +235,9 @@
   function allocate(prefix) {
     const draft = current.draft;
     const taken = new Set([draft.id, ...draft.stats.map(item => item.id), ...draft.flags.map(item => item.id),
-      ...draft.events.map(item => item.id), ...draft.endings.map(item => item.id), ...(draft.randomEvents || []).map(item => item.id)]);
+      ...draft.events.map(item => item.id), ...draft.endings.map(item => item.id), ...(draft.randomEvents || []).map(item => item.id),
+      ...(draft.reign?.parts || []).map(item => item.id), ...(draft.reign?.turns || []).map(item => item.id),
+      ...(draft.reign?.turns || []).flatMap(turn => [...(turn.between || []), ...(turn.settlements || [])]).map(item => item.id), ...(draft.map?.countries || []).map(item => item.id)]);
     let index = 1;
     while (taken.has(prefix + '_' + index)) index += 1;
     return prefix + '_' + index;
@@ -165,56 +293,18 @@
   }
 
   function builder(list, title, help) {
-    const wrap = section(title, help || '아래 조건을 모두 만족해야 합니다. 조건이 없으면 항상 허용됩니다.');
-    const rows = $('div');
-    wrap.append(rows);
-
-    function renderRows() {
-      rows.replaceChildren();
-      if (!list.length) rows.append($('p', 'small muted', '조건 없음 · 항상 허용'));
-      list.forEach((condition, index) => {
-        const row = $('div', 'condition-row');
-        const isFlag = condition.kind === 'flag';
-        const keys = (isFlag ? current.draft.flags : current.draft.stats).map(item => [item.id, item.name + ' (' + item.id + ')']);
-        const operators = isFlag
-          ? [['eq', '같음'], ['ne', '다름']]
-          : [['gte', '이상 ≥'], ['lte', '이하 ≤'], ['eq', '같음 ='], ['ne', '다름 ≠'], ['gt', '초과 >'], ['lt', '미만 <']];
-        row.append(
-          select('종류', condition.kind, [['stat', '수치'], ['flag', '선택 기록']], value => {
-            condition.kind = value;
-            condition.key = (value === 'flag' ? current.draft.flags : current.draft.stats)[0]?.id || '';
-            condition.op = value === 'flag' ? 'eq' : 'gte';
-            condition.value = value === 'flag' ? true : 50;
-            renderRows();
-          }, { compact: true }),
-          select('대상', condition.key, keys, value => { condition.key = value; }, { compact: true }),
-          select('비교', condition.op, operators, value => { condition.op = value; }, { compact: true })
-        );
-        row.append(isFlag
-          ? select('값', String(condition.value), [['true', '참 · 있음'], ['false', '거짓 · 없음']], value => { condition.value = value === 'true'; }, { compact: true })
-          : input('기준값', condition.value, value => { condition.value = value; }, { type: 'number', compact: true, step: 'any' }));
-        row.append(button('삭제', () => { list.splice(index, 1); mark(); renderRows(); }, 'danger'));
-        rows.append(row);
-      });
-    }
-    renderRows();
-    const addCondition = button('＋ 조건 추가', () => {
-      const hasStat = current.draft.stats.length > 0;
-      list.push({ kind: hasStat ? 'stat' : 'flag', key: (hasStat ? current.draft.stats : current.draft.flags)[0]?.id || '',
-        op: hasStat ? 'gte' : 'eq', value: hasStat ? 50 : true });
-      mark();
-      renderRows();
-    });
-    addCondition.disabled = !current.draft.stats.length && !current.draft.flags.length;
-    wrap.append(addCondition);
-    if (addCondition.disabled) wrap.append($('p', 'small muted', '조건을 만들려면 수치 또는 선택 기록을 먼저 추가하세요.'));
-    return wrap;
+    return conditionsEditor(current.draft, list, title, mark);
   }
 
   function renderOverview(content) {
     const draft = current.draft;
     content.append($('h2', '', '이야기의 기본 설정'));
-    content.append(notice('제목과 설명부터 바꿔 보세요. 사건·수치·기록의 ID는 다른 항목에서 연결할 때 사용하는 고유 이름입니다. ID를 바꾸면 연결 대상도 직접 수정해야 합니다.'));
+    content.append(notice('제목과 설명부터 바꿔 보세요. 사건·수치·기록의 ID는 다른 항목에서 연결할 때 사용하는 고유 이름입니다. ID 수정은 입력을 마칠 때 관련 연결에도 반영됩니다.'));
+    content.append(select('플레이 방식', draft.mode || 'chronicle', [['chronicle', '연대기 · 사건마다 하나의 결정'], ['reign', '치세 · 여러 분야를 고른 뒤 연도 정산']], value => {
+      if (value === 'reign') { upgrade(draft); draft.mode = value; ensureReign(draft); }
+      else if (draft.schemaVersion === 2) draft.mode = value;
+      mark(); render();
+    }, { help: '지도나 치세 기능을 켜면 버전 2 원고로 저장합니다. 기존 버전 1 원고는 사용하던 방식으로 계속 열립니다.' }));
     content.append(grid(
       input('게임 제목', draft.title, value => { draft.title = value; }),
       input('부제', draft.subtitle, value => { draft.subtitle = value; })
@@ -227,6 +317,120 @@
     renderPlayerSettings(content);
     content.append(notice('본문에는 일반 텍스트와 줄바꿈을 사용할 수 있습니다. HTML·스크립트는 실행되지 않습니다. 게임을 적용하면 기존 플레이를 초기화하고 새 시나리오를 시작합니다.'));
     if (draft.draft) content.append(notice('작성 중인 초안입니다. 빈 상태도 저장할 수 있습니다. 수치, 시작 사건, 기본 엔딩을 만든 뒤 “적용하고 새 게임”으로 플레이하세요.'));
+  }
+
+  function renderMap(content) {
+    const draft = current.draft, templates = globalThis.MapTemplates?.list() || [];
+    content.append($('h2', '', '지도와 시작 영토'), notice('지역을 누르면 시작 소유국·점령·영향권·표식을 편집합니다. 소유권과 군사 점령은 서로 다른 상태입니다.'));
+    content.append(select('지도 템플릿', draft.map?.templateId || '', [['', '지도 사용 안 함'], ...templates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => {
+      if (draft.map && value !== draft.map.templateId && !confirm('지도 템플릿을 바꾸면 현재 지도의 초기 배치를 비웁니다. 사건의 영토 효과·조건은 남으므로 새 지역 ID에 맞게 확인하세요.')) return;
+      if (!value) delete draft.map;
+      else {
+        const template = MapTemplates.get(value); upgrade(draft);
+        const preferred = template.countries.find(country => ['joseon', 'france'].includes(country.id)) || template.countries[0];
+        draft.map = { templateId: value, playerCountry: preferred.id, countries: [], initial: { owners: {}, occupation: {}, influence: {}, markers: {} } };
+      }
+      current.mapProvince = null; current.mapCountry = null; mark(); render();
+    }));
+    const config = mapConfig(draft); if (!config) { content.append(notice(templates.length ? '템플릿을 선택하면 지도와 지역 편집기가 열립니다.' : '지도 템플릿 파일을 불러오지 못했습니다.')); return; }
+    const countryItems = () => mapConfig(draft).countries.map(country => [country.id, country.name]);
+    content.append(select('플레이어 국가', draft.map.playerCountry, countryItems(), value => { draft.map.playerCountry = value; mark(); render(); }));
+    if (config.template.notice) content.append(notice(config.template.notice));
+    const preview = $('div', 'v2-editor-map'), panel = $('div', 'editor-card v2-province-panel');
+    content.append(preview, panel);
+    const initial = draft.map.initial || (draft.map.initial = {});
+    for (const layer of ['owners', 'occupation', 'influence', 'markers']) if (!initial[layer]) initial[layer] = {};
+    function redraw() {
+      preview.replaceChildren(); paintMap(preview, draft, id => { current.mapProvince = typeof id === 'string' ? id : id.id; drawProvince(); });
+    }
+    function drawProvince() {
+      panel.replaceChildren();
+      const province = config.template.provinces.find(item => item.id === current.mapProvince);
+      if (!province) { panel.append($('h3', '', '지역을 선택하세요'), notice('지도의 지역을 누르면 이곳에서 처음 상태를 바꿀 수 있습니다.')); return; }
+      panel.append($('h3', '', province.name + ' · ' + province.id));
+      panel.append(select('시작 소유국', initial.owners[province.id] || province.owner, countryItems(), value => { initial.owners[province.id] = value; mark(); redraw(); }));
+      for (const [field, title] of [['occupation', '군사 점령국'], ['influence', '영향국']]) panel.append(select(title, initial[field][province.id] || '__none__', [['__none__', '없음'], ...countryItems()], value => { if (value === '__none__') delete initial[field][province.id]; else initial[field][province.id] = value; mark(); redraw(); }));
+      panel.append(input('시작 표식', initial.markers[province.id] || '', value => { if (value) initial.markers[province.id] = value; else delete initial.markers[province.id]; mark(); redraw(); }));
+      panel.append(button('이 지역을 템플릿 기본값으로', () => { for (const layer of Object.values(initial)) if (layer && typeof layer === 'object') delete layer[province.id]; mark(); redraw(); drawProvince(); }));
+    }
+    redraw(); drawProvince();
+    const countries = section('국가의 표시 이름과 색상');
+    const selectedCountry = current.mapCountry || draft.map.playerCountry || config.countries[0].id;
+    countries.append(select('편집할 국가', selectedCountry, countryItems(), value => { current.mapCountry = value; render(); }));
+    const country = config.countries.find(item => item.id === selectedCountry) || config.countries[0];
+    function updateCountry(key, value) {
+      if (!draft.map.countries) draft.map.countries = [];
+      let override = draft.map.countries.find(item => item.id === country.id);
+      if (!override) { override = { ...country }; draft.map.countries.push(override); }
+      override[key] = value; mark(); redraw();
+    }
+    countries.append(grid(input('표시 이름', country.name, value => updateCountry('name', value)), input('색상 #RRGGBB', country.color, value => updateCountry('color', value))));
+    countries.append(button('＋ 새 국가 추가', () => { const taken = new Set(mapConfig(draft).countries.map(item => item.id)); let index = 1; while (taken.has('country_' + index)) index++; const id = 'country_' + index; if (!draft.map.countries) draft.map.countries = []; draft.map.countries.push({ id, name: '새 국가', color: '#778899' }); current.mapCountry = id; mark(); render(); }));
+    content.append(countries);
+  }
+
+  function ensureReign(draft) {
+    if (!draft.reign) draft.reign = { parts: [{ id: 'war', name: '전쟁', color: '#a96657' }, { id: 'politics', name: '정치', color: '#648c66' }, { id: 'diplomacy', name: '외교', color: '#6b81ad' }], turns: [] };
+    return draft.reign;
+  }
+  function rulesEditor(draft, turn, field, title) {
+    const wrap = section(title, '위에서 아래로 조건을 검사하고 적용합니다. 앞선 규칙의 수치·기록·영토 변화는 다음 규칙의 조건에도 반영됩니다.');
+    if (!Array.isArray(turn[field])) turn[field] = [];
+    turn[field].forEach((rule, index) => {
+      const card = $('details', 'editor-card v2-reign-rule');
+      card.append($('summary', '', (index + 1) + '. ' + (rule.text || rule.id)));
+      const body = $('div', 'v2-rule-body');
+      body.append(input('결과에 표시할 문구', rule.text, value => { rule.text = value; }, { multiline: true, rows: 2 }), notice('규칙 ID: ' + rule.id));
+      const effects = $('div', 'effects-grid');
+      draft.stats.forEach(stat => effects.append(input(stat.name + ' 변화', rule.effects?.[stat.id] || 0, value => { if (!rule.effects) rule.effects = {}; if (value) rule.effects[stat.id] = value; else delete rule.effects[stat.id]; }, { type: 'number', step: 'any' })));
+      body.append(effects);
+      draft.flags.forEach(flag => body.append(select(flag.name, Object.prototype.hasOwnProperty.call(rule.setFlags || {}, flag.id) ? String(rule.setFlags[flag.id]) : '', [['', '유지'], ['true', '참으로'], ['false', '거짓으로']], value => { if (!rule.setFlags) rule.setFlags = {}; if (value === '') delete rule.setFlags[flag.id]; else rule.setFlags[flag.id] = value === 'true'; })));
+      if (!Array.isArray(rule.when)) rule.when = [];
+      body.append(conditionsEditor(draft, rule.when, '이 결과가 발생할 조건', mark), territoryEditor(draft, rule, mark));
+      const up = button('↑', () => { move(turn[field], index, -1); render(); }); up.disabled = index === 0;
+      const down = button('↓', () => { move(turn[field], index, 1); render(); }); down.disabled = index === turn[field].length - 1;
+      const controls = $('div', 'toolbar'); controls.append(up, down, button('규칙 삭제', () => { turn[field].splice(index, 1); mark(); render(); }, 'danger')); body.append(controls); card.append(body); wrap.append(card);
+    });
+    wrap.append(button('＋ 결과 규칙 추가', () => { turn[field].push({ id: allocate('rule'), text: '결과를 입력하세요.', when: [], effects: {}, setFlags: {} }); mark(); render(); })); return wrap;
+  }
+  function renderReign(content) {
+    const draft = current.draft;
+    content.append($('h2', '', '치세의 분야와 연도'), notice('연도마다 분야별 사건을 고른 뒤 정산합니다. 같은 분야에 조건부 사건을 여러 개 넣으면 목록에서 처음으로 조건을 만족하는 사건이 표시됩니다. 일반 next 연결 대신 아래 연도 목록을 사용합니다.'));
+    if (draft.mode !== 'reign') {
+      content.append(button('치세 모드 사용하기', () => { upgrade(draft); draft.mode = 'reign'; ensureReign(draft); mark(); render(); }, 'primary'), notice('연대기 방식으로 돌아가도 작성한 치세 설정은 삭제하지 않습니다.')); return;
+    }
+    const reign = ensureReign(draft), parts = section('결정할 분야');
+    reign.parts.forEach((part, index) => {
+      const card = $('div', 'editor-card'); card.append(grid(idInput('분야 ID', part, 'part'), input('분야 이름', part.name, value => { part.name = value; }), input('표시 색상', part.color || '#778899', value => { part.color = value; })));
+      card.append(button('분야 삭제', () => { if (!confirm('분야를 삭제할까요? 이 분야에 속한 사건은 다른 분야로 다시 지정해야 합니다.')) return; reign.parts.splice(index, 1); draft.events.forEach(event => { if (event.part === part.id) delete event.part; }); mark(); render(); }, 'danger')); parts.append(card);
+    });
+    parts.append(button('＋ 분야 추가', () => { reign.parts.push({ id: allocate('part'), name: '새 분야', color: '#778899' }); mark(); render(); })); content.append(parts);
+    const list = $('div', 'editor-list');
+    reign.turns.forEach((turn, index) => list.append(button((index + 1) + '. ' + (turn.date || turn.title || turn.id), () => { current.reignIndex = index; render(); }, current.reignIndex === index ? 'selected' : 'secondary')));
+    content.append(list, button('＋ 연도·차례 추가', () => { reign.turns.push({ id: allocate('turn'), date: (reign.turns.length + 1) + '년', title: '새해의 회의', body: '이번 차례에 결정할 사안을 살펴보세요.', eventIds: [], between: [], settlements: [] }); current.reignIndex = reign.turns.length - 1; mark(); render(); }));
+    if (!reign.turns.length) { content.append(notice('첫 연도를 추가한 뒤 분야별 사건을 연결하세요.')); return; }
+    current.reignIndex = Math.max(0, Math.min(current.reignIndex || 0, reign.turns.length - 1));
+    const index = current.reignIndex, turn = reign.turns[index], controls = $('div', 'toolbar');
+    const up = button('↑ 이전으로', () => { current.reignIndex = move(reign.turns, index, -1); render(); }); up.disabled = index === 0;
+    const down = button('↓ 다음으로', () => { current.reignIndex = move(reign.turns, index, 1); render(); }); down.disabled = index === reign.turns.length - 1;
+    controls.append(up, down, button('이 연도 삭제', () => { if (!confirm('이 연도의 연결과 결과 규칙을 삭제할까요? 사건 본문은 남습니다.')) return; reign.turns.splice(index, 1); mark(); render(); }, 'danger'));
+    content.append(controls, grid(input('표시 날짜·연도', turn.date, value => { turn.date = value; }), input('제목', turn.title, value => { turn.title = value; })), input('차례의 설명', turn.body, value => { turn.body = value; }, { multiline: true, rows: 3 }));
+    const cards = section('이번 연도에 나올 사건', '목록 순서가 같은 분야의 조건부 후보 우선순위입니다. 분야를 바꾸면 이 사건을 쓰는 다른 연도에도 반영됩니다.');
+    if (!Array.isArray(turn.eventIds)) turn.eventIds = [];
+    turn.eventIds.forEach((id, eventIndex) => {
+      const event = draft.events.find(item => item.id === id), row = $('div', 'editor-card');
+      row.append($('strong', '', event ? event.title + ' · ' + id : '⚠ 없는 사건: ' + id));
+      if (event) row.append(select('분야', event.part || '', [['', '미지정'], ...reign.parts.map(part => [part.id, part.name])], value => { event.part = value; }));
+      const buttons = $('div', 'toolbar'); const earlier = button('↑', () => { move(turn.eventIds, eventIndex, -1); render(); }); earlier.disabled = eventIndex === 0;
+      const later = button('↓', () => { move(turn.eventIds, eventIndex, 1); render(); }); later.disabled = eventIndex === turn.eventIds.length - 1;
+      buttons.append(earlier, later, button('본문·선택지 편집', () => { const eventPosition = draft.events.findIndex(item => item.id === id); if (eventPosition >= 0) { current.eventIndex = eventPosition; navigate('events'); } }), button('이 연도에서 제외', () => { turn.eventIds.splice(eventIndex, 1); mark(); render(); }, 'danger')); row.append(buttons); cards.append(row);
+    });
+    const ordinaryEvents = draft.events.filter(event => event.next !== 'RETURN' && !(draft.randomEvents || []).some(rule => rule.eventId === event.id) && !turn.eventIds.includes(event.id));
+    let selected = ordinaryEvents[0]?.id || '';
+    cards.append(select('기존 사건 가져오기', selected, ordinaryEvents.map(event => [event.id, event.title + ' · ' + event.id]), value => { selected = value; }));
+    const connect = button('선택한 사건을 이 연도에 추가', () => { if (!selected) return; const event = draft.events.find(item => item.id === selected); if (!event.part && reign.parts.length) event.part = reign.parts[0].id; turn.eventIds.push(selected); mark(); render(); }); connect.disabled = !ordinaryEvents.length; cards.append(connect);
+    const add = button('＋ 새 사건을 만들어 이 연도에 추가', () => { const event = { id: allocate('event'), title: '새 분야 사건', body: '이번 분야에서 결정할 사안을 입력하세요.', part: reign.parts[0]?.id || '', next: 'END', when: [], choices: [{ text: '계속한다.', effects: {}, setFlags: {}, when: [] }] }; draft.events.push(event); if (!draft.start) draft.start = event.id; turn.eventIds.push(event.id); mark(); render(); }); add.disabled = !reign.parts.length; cards.append(add);
+    content.append(cards, rulesEditor(draft, turn, 'between', '연도 시작에 발생하는 일'), rulesEditor(draft, turn, 'settlements', '결정들을 모아 정산할 때 발생하는 일'));
   }
 
   function renderPlayerSettings(content) {
@@ -253,7 +457,7 @@
       card.append($('h3', '', stat.name || '새 수치'));
       card.append(grid(
         input('표시 이름', stat.name, value => { stat.name = value; }),
-        input('연결용 ID', stat.id, value => { stat.id = value; }, { help: 'ID를 바꾸면 기존 효과·조건의 연결도 직접 바꿔야 합니다.' })
+        idInput('연결용 ID', stat, 'stat')
       ));
       card.append(grid(
         input('시작값', stat.initial, value => { stat.initial = value; }, { type: 'number', step: 'any' }),
@@ -282,7 +486,7 @@
       const card = $('section', 'editor-card');
       card.append(grid(
         input('표시 이름', flag.name, value => { flag.name = value; }),
-        input('연결용 ID', flag.id, value => { flag.id = value; }, { help: 'ID를 바꾸면 기존 기록 변경·조건의 연결도 직접 바꿔야 합니다.' })
+        idInput('연결용 ID', flag, 'flag')
       ));
       card.append(checkbox('처음부터 이 기록을 보유함', flag.initial, value => { flag.initial = value; }));
       card.append(button('기록 삭제', () => {
@@ -346,7 +550,7 @@
     const details = section('사건 본문');
     details.append(controls, grid(
       input('제목', event.title, value => { event.title = value; }),
-      input('연결용 ID', event.id, value => { event.id = value; }, { help: 'ID를 바꾸면 시작 사건과 다음 장면 연결도 직접 바꿔야 합니다.' })
+      idInput('연결용 ID', event, 'event')
     ), grid(
       input('장 / 부', event.chapter, value => { event.chapter = value; }),
       input('날짜 / 시점', event.date, value => { event.date = value; }),
@@ -356,6 +560,7 @@
       { help: '선택지에 별도 연결이 있으면 선택지 설정을 우선합니다. 등장 조건을 만족하지 않은 사건은 이 기본 연결을 따라 건너뜁니다.' }));
     if (!Array.isArray(event.when)) event.when = [];
     details.append(builder(event.when, '사건 등장 조건'));
+    if (draft.mode === 'reign') details.append(select('치세 카드 분야', event.part || '', [['', '분야 미지정'], ...(draft.reign?.parts || []).map(part => [part.id, part.name])], value => { if (value) event.part = value; else delete event.part; }, { help: '치세·연도 탭의 해당 연도 사건 목록에도 이 사건을 넣으세요. 치세에서는 일반 next 연결 대신 분야별 카드를 고릅니다.' }));
     content.append(details);
     renderChoices(content, event);
   }
@@ -367,6 +572,8 @@
       card.append($('h4', '', '선택지 ' + (index + 1)));
       card.append(input('버튼에 표시할 문장', choice.text, value => { choice.text = value; }));
       card.append(input('보충 설명', choice.description, value => { choice.description = value; }, { multiline: true, rows: 2 }));
+      card.append(input('선택 후 결과 본문', choice.result, value => { choice.result = value; upgrade(current.draft); }, { multiline: true, rows: 3 }),
+        checkbox('실제 역사에서 선택한 경로로 표시', choice.historical === true, value => { choice.historical = value; upgrade(current.draft); }, '표시된 선택지만 역사 비교의 기준으로 사용합니다. 가상의 선택을 실제 역사로 표시하지 마세요.'));
       if (!choice.effects || typeof choice.effects !== 'object') choice.effects = {};
       if (!choice.setFlags || typeof choice.setFlags !== 'object') choice.setFlags = {};
       const effects = $('div', 'effects-grid');
@@ -403,6 +610,7 @@
       }));
       if (!Array.isArray(choice.when)) choice.when = [];
       card.append(builder(choice.when, '선택 가능한 조건', '조건을 모두 만족할 때 이 선택지를 고를 수 있습니다. 충족하지 못한 선택지는 플레이 화면에서 잠깁니다.'));
+      card.append(territoryEditor(current.draft, choice, mark));
       const toolbar = $('div', 'toolbar');
       const up = button('↑', () => { move(event.choices, index, -1); render(); });
       const down = button('↓', () => { move(event.choices, index, 1); render(); });
@@ -571,7 +779,7 @@
     }, 'danger'));
     details.append(toolbar, grid(
       input('엔딩 제목', ending.title, value => { ending.title = value; }),
-      input('연결용 ID', ending.id, value => { ending.id = value; }, { help: '기본 엔딩의 ID를 바꾸면 위의 기본 엔딩 지정도 바꿔야 합니다.' })
+      idInput('연결용 ID', ending, 'ending')
     ), grid(
       select('결말 분위기', ending.kind, [['good', '밝은 결말'], ['mixed', '복합적인 결말'], ['bad', '어두운 결말']], value => { ending.kind = value; }),
       input('우선순위', ending.priority, value => { ending.priority = value; }, { type: 'number', step: '1' })
@@ -791,7 +999,7 @@
     });
     const content = $('main', 'editor-content' + (current.page === 'flowchart' ? ' flowchart-content' : ''));
     if (current.page !== 'flowchart') {
-      ({ overview: renderOverview, stats: renderStats, flags: renderFlags, events: renderEventList, randomEvents: renderRandomEvents, endings: renderEndings, json: renderJSON })[current.page](content);
+      ({ overview: renderOverview, stats: renderStats, flags: renderFlags, events: renderEventList, map: renderMap, reign: renderReign, randomEvents: renderRandomEvents, endings: renderEndings, json: renderJSON })[current.page](content);
     }
     const report = $('div', 'notice');
     report.id = 'editor-report'; report.hidden = true; report.setAttribute('role', 'status'); report.setAttribute('aria-live', 'polite');
@@ -804,6 +1012,7 @@
         scenario: current.draft,
         onChange: mark,
         onOpenRandomEvents: () => navigate('randomEvents'),
+        onOpenReign: () => navigate('reign'),
         onOpenEvent: eventId => {
           const index = current.draft.events.findIndex(event => event.id === eventId);
           if (index >= 0) { current.eventIndex = index; navigate('events'); }
@@ -831,7 +1040,7 @@
     if (current && !close(false)) return;
     const dialog = document.getElementById('editor-dialog');
     if (!dialog || !document.getElementById('editor-root')) throw new Error('편집기 dialog 요소가 없습니다.');
-    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: tabs.some(([id]) => id === options.page) ? options.page : 'overview', eventIndex: 0, endingIndex: 0, randomIndex: 0, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
+    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: tabs.some(([id]) => id === options.page) ? options.page : 'overview', eventIndex: 0, endingIndex: 0, randomIndex: 0, reignIndex: 0, mapProvince: null, mapCountry: null, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
     if (!dialog.dataset.editorBound) {
       dialog.dataset.editorBound = 'true';
       dialog.addEventListener('cancel', event => { event.preventDefault(); close(false); });
@@ -843,4 +1052,5 @@
   }
 
   globalThis.ScenarioEditor = { open, close: () => close(false) };
+  globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences };
 })();

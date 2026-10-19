@@ -1,47 +1,38 @@
 {
-  "version": "1.2.0-community",
-  "builtAt": "2026-10-18",
+  "version": "2.0.0-community",
+  "builtAt": "2026-10-19",
   "scenarioIncluded": false,
+  "examplesSeparate": true,
   "files": [
     {
       "path": ".github/workflows/keep-supabase-awake.yml",
-      "bytes": 1052,
-      "sha256": "7dde1fa5f71cc3f525242dcff389cd2270ed3a6337e56ba73333cbec1c382781"
-    },
-    {
-      "path": ".nojekyll",
-      "bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "path": "README.md",
-      "bytes": 678,
-      "sha256": "68517b4daaec0fb05af6b12c6c82b597c13e0e913090e02f898fc591059a1640"
-    },
-    {
-      "path": "SETUP.md",
-      "bytes": 13105,
-      "sha256": "8371b729621e0600e2cc5bfff97eac95383f42fdcd352198c169f5b5a490d50b"
-    },
-    {
-      "path": "VERSION.txt",
-      "bytes": 154,
-      "sha256": "70f2c2c37df759ccac1967cd57835a2f161c622757c8ec8ac7af255cf13f2890"
+      "bytes": 578,
+      "sha256": "53ebfa400f65cacd7407f68dc07495ff39099d7abf7e7904f219d20178d9ce11"
     },
     {
       "path": "ai-helper.js",
-      "bytes": 17833,
-      "sha256": "3f2d4554d89e7cec134884ce0f75807ade953d118e5d252bae40cd8413135d59"
+      "bytes": 30253,
+      "sha256": "c5b37099b355b5acb478027b0c53b966e484da8e4a046be9e5a5746e4ae163b5"
     },
     {
       "path": "app.js",
-      "bytes": 51984,
-      "sha256": "f9a24e457f269aef087c07c32994bd482c0c61e544eaf2a1e17e0c7c60c11822"
+      "bytes": 61504,
+      "sha256": "d840186ad613f0c967e9453094a99a8b32aa09556aedfa699512ae488679a626"
     },
     {
       "path": "bootstrap.js",
       "bytes": 154,
       "sha256": "befa602242cdb167ded3f552c1d0b5a5bf7ecdaf28b0c020b614db6a87297df3"
+    },
+    {
+      "path": "build-maps.cjs",
+      "bytes": 5015,
+      "sha256": "bd12b62b320600c06e7fb9adbebce3a09de2d0abc8c27e2e3edf3acaa9913bad"
+    },
+    {
+      "path": "build.cjs",
+      "bytes": 2366,
+      "sha256": "44af962c8f16283c33c795b5d1b9a757001e6097bfb5221c3beac592314350d7"
     },
     {
       "path": "community-bridge.js",
@@ -50,48 +41,58 @@
     },
     {
       "path": "community.css",
-      "bytes": 9931,
-      "sha256": "3514ca241beda417da3a335625787d2ef1600d46ba4c40c39d639b533ebd0132"
+      "bytes": 10497,
+      "sha256": "9e5aa69ee8853f0e5efe649df7c2ae95f1e3e6e940e894f901688d3e82174415"
     },
     {
       "path": "config.js",
-      "bytes": 688,
-      "sha256": "6c0b1f8fa6b0c99e70574e2ae79320b6b159772e687c7d0a4555298d080c9f79"
+      "bytes": 504,
+      "sha256": "4100d201c385d72eaab8c04e905556aa65523453c27cfa8c3a352820f56560d2"
     },
     {
       "path": "editor.js",
-      "bytes": 50847,
-      "sha256": "7cc5845704a03fd6ace8d7144f279d0a64b93e5de6e16462dbb9bf5a83e88d92"
+      "bytes": 76248,
+      "sha256": "d26d21d5d43bc55a91d155c15bf035b0663fc0d52d567af6e8b8eaaa62ccbdf6"
     },
     {
       "path": "engine.js",
-      "bytes": 30422,
-      "sha256": "98d0dafd89e1c29e9ac8b1a802242c273dbbc964ae531411d8540a512d2b8b0c"
+      "bytes": 51143,
+      "sha256": "dcde25300dd68622845055a62a9497e4c1fdb65436934cd6e1e7329450dd8f7f"
+    },
+    {
+      "path": "examples/chronicle-sejong.json",
+      "bytes": 10236,
+      "sha256": "8a2c2616f1b920826ae07b00003fb285b435155f80eb923fcc43a7ba92a49e0c"
+    },
+    {
+      "path": "examples/reign-france.json",
+      "bytes": 20783,
+      "sha256": "205b73b187c6e5ca4775e5ab5537fe4c76ce5f21ba5e1ad56b633bc67bd35abb"
     },
     {
       "path": "flowchart.css",
-      "bytes": 18937,
-      "sha256": "1ad9e0ab75f1c90e26b08eec8c5d8c5b465ba5df5efedafa5c83437dcac27cb6"
+      "bytes": 21960,
+      "sha256": "660931c8dc7c115642b426776e1d430fa88bf807980a081cf24cdf0c30506e19"
     },
     {
       "path": "flowchart.js",
-      "bytes": 64918,
-      "sha256": "dd75648ad0fbb991a590ba8be11444b5686e95263241f22134b04e3ceaeddc2d"
+      "bytes": 72758,
+      "sha256": "2daf9669d0886d6b7b13c6de1cfd9e54278c8d3fc312e5db53c5bc7c19f6649f"
     },
     {
       "path": "gallery.html",
-      "bytes": 4117,
-      "sha256": "9223768beac9ee80f21d8c2c09ca39b025c5069138c8e567894dc9c45d9a96a2"
+      "bytes": 4423,
+      "sha256": "3d14feb9442037b71a9ffe030de088226ae0b783ce7bc3d7f6cbdf114506d30e"
     },
     {
       "path": "gallery.js",
-      "bytes": 39464,
-      "sha256": "98d21cd38d3eb75114fc62b2ed72fa967c0dfa6ded60a45aa9f240170faa595b"
+      "bytes": 40294,
+      "sha256": "a068355b1623b4c518835c695a6be973709a20133ef3e0ce093322e3cbcf04a4"
     },
     {
       "path": "index.html",
-      "bytes": 4725,
-      "sha256": "483d53ec0c0606c2b98ad5dd752c521b662aae7558fd7a4994ae9402d1205478"
+      "bytes": 5251,
+      "sha256": "dbc5153aa8a129b28785a72252624de1b026e6f74d001eb322c6c152a08621ab"
     },
     {
       "path": "launcher.css",
@@ -99,14 +100,59 @@
       "sha256": "5fba7ae63a1386758fa7c19c35fe32f6150b993a585578b3f3bb97590da47af4"
     },
     {
+      "path": "map-templates.js",
+      "bytes": 480185,
+      "sha256": "d4ae538572d3f9001f916f8a2a535a1a8d5d1f2e4a845fa741a53b43d7aca032"
+    },
+    {
+      "path": "map-view.css",
+      "bytes": 3353,
+      "sha256": "882abcea90530e6328cbcd29d054aa47c8319e2c864dd69727f03c5f4e944086"
+    },
+    {
+      "path": "map-view.js",
+      "bytes": 8405,
+      "sha256": "46ee2d0562e66c8a353b6132903ae21bde9ef1d3384379ec1b97043d6a688f2a"
+    },
+    {
+      "path": "privacy.html",
+      "bytes": 6566,
+      "sha256": "7bd7ae129bc2484f5ff892208a5c160d3081ade9effc151b17c6a9ef1fc66ee2"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3072,
+      "sha256": "3c90e058d48eb89ae1963ce16383b04ccf69db77849524288418df74a2df0834"
+    },
+    {
       "path": "robots.txt",
       "bytes": 24,
       "sha256": "c70abcf98d7c268caa7a66739104962b1f5304d39762201e1074cacfcaba3134"
     },
     {
+      "path": "run-tests.cjs",
+      "bytes": 552,
+      "sha256": "5797856b5362f6b5323bc03e0874c514b21e2eadad60c326e5b8dc8ff719c823"
+    },
+    {
+      "path": "SCHEMA-V2.md",
+      "bytes": 4886,
+      "sha256": "36a0e7f9f7b3758ab261a12cbc80d9d4ba9a0e5fec7203ffcfa3c0272cc6b626"
+    },
+    {
+      "path": "serve.cjs",
+      "bytes": 997,
+      "sha256": "6c5df413ed0e6a69c04f6519f1004c238e288e820e4e012366f51c220d067eab"
+    },
+    {
+      "path": "SETUP.md",
+      "bytes": 15016,
+      "sha256": "f1f03990b4baa3219e84c96166f79c8f573ffd82d086dcfdfb846d7f61c3783d"
+    },
+    {
       "path": "standalone.html",
-      "bytes": 267670,
-      "sha256": "432825f1862a13c01f2e790466ef76d5d0c60e8fc4e185688333a6d4cfa4bbe9"
+      "bytes": 838794,
+      "sha256": "9c8d734c18204e680db4049f0d35fa0faaecb6a3f1f4d52352cab628359ee899"
     },
     {
       "path": "styles.css",
@@ -114,9 +160,64 @@
       "sha256": "eeb47b4057274cad9ef5c46829c7d66b9b46808ea15deca10c81c0b180997b71"
     },
     {
+      "path": "supabase/migrate-v2.sql",
+      "bytes": 4153,
+      "sha256": "2b1af1687558a1c55c64e868c164c5a25f2cfe9b020f6b67888a1494813150d0"
+    },
+    {
       "path": "supabase/schema.sql",
-      "bytes": 18457,
-      "sha256": "b70bdd004391b872cd0ee1bf30f8ad600f26e906f5292491d32ef9dae8dab5db"
+      "bytes": 22238,
+      "sha256": "18cb234cfdfe07cdac062e08d08bbed7be257fe1faf7f670b90f818eec447f9d"
+    },
+    {
+      "path": "TEST-RESULTS.txt",
+      "bytes": 2478,
+      "sha256": "678941e2b776ec384e1a2866070fc1db10cb60c6a15d2aba934ffca8840e3e8c"
+    },
+    {
+      "path": "tests/ai-gallery-v2.cjs",
+      "bytes": 8005,
+      "sha256": "0ade66ffac798c372edb3d6198c139c27da3bc9afce63d55d0a8f48761ebcb4c"
+    },
+    {
+      "path": "tests/editor-v2-smoke.cjs",
+      "bytes": 13464,
+      "sha256": "8088210d0b774b4c9dc7f1338ed46954437587ad95b673a72777e8096d810fdb"
+    },
+    {
+      "path": "tests/engine-v2.cjs",
+      "bytes": 18439,
+      "sha256": "4fab157f9862d98829aabbd3ae828d4b37dfb9479633a7e310d6ff15a7271a9d"
+    },
+    {
+      "path": "tests/fixtures/v1-engine.cjs",
+      "bytes": 30422,
+      "sha256": "98d0dafd89e1c29e9ac8b1a802242c273dbbc964ae531411d8540a512d2b8b0c"
+    },
+    {
+      "path": "tests/flow-reign-smoke.cjs",
+      "bytes": 3717,
+      "sha256": "56992b3545e3213411be58e3c3fc74398d11b28cd01c4a1c3ff69d80e1e2850e"
+    },
+    {
+      "path": "tests/release-compat.cjs",
+      "bytes": 40999,
+      "sha256": "fbcc411a92c7d4aa3493d8e698169372b09125d1cfced9917aca9a7aa0eadf3a"
+    },
+    {
+      "path": "tools/map-source/eastasia1419.json",
+      "bytes": 110189,
+      "sha256": "2ddf44470ec799c9578dd025db0d6c96615940225b8d1ce8d7303d9913054418"
+    },
+    {
+      "path": "tools/map-source/world1754.json",
+      "bytes": 195780,
+      "sha256": "facad4967abdd8f72df8cd1a65bab3066a56752a44aa8e839563e15a7cd1c5fd"
+    },
+    {
+      "path": "UPDATE-GUIDE.txt",
+      "bytes": 4673,
+      "sha256": "0b39196fc2ab47818fd8eeb13bfb6929708f7ab9b5d31f1fc2cef5be136f1c63"
     },
     {
       "path": "vendor/supabase.js",
@@ -127,6 +228,11 @@
       "path": "vercel.json",
       "bytes": 343,
       "sha256": "ab5fa98fd13c1d266cde6551747391cf08b24066920bc363f367bc0ef507e430"
+    },
+    {
+      "path": "VERSION.txt",
+      "bytes": 177,
+      "sha256": "4ea48938bd13e7d88d0e5b607b8eaae782bfdd6b02a5af69b3e3a25e2f375e5e"
     }
   ]
 }

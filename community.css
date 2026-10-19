@@ -129,3 +129,9 @@ a.launcher-gallery span{color:var(--gold)}
   .gallery-page .header-actions{width:100%;justify-content:space-between}
   .site-footer{flex-direction:column;gap:6px;padding:20px 16px}
 }
+/* Format badges are derived from database metadata; raw SVG is never loaded here. */
+.scenario-format-badges{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:8px 0}
+.scenario-format-badges>span{display:inline-block;font-size:10px;line-height:1.4;padding:3px 6px;border-radius:4px;border:1px solid #d9e1d7;background:#f3f6ed;color:#405a46}
+.scenario-format-badges .format-badge{font-weight:700;background:#e8eee5}
+.scenario-format-badges .mode-badge{background:#e6edf0;color:#385c6e}
+.scenario-format-badges .map-badge{background:#f1eadc;color:#78603c}
