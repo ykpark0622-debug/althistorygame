@@ -73,13 +73,36 @@ test('prompt includes selected map IDs, mode and base scenario without SVG', () 
   for (const template of MapTemplates.list()) {
     const actual = MapTemplates.get(template.id);
     const prompt = A.buildPrompt({ mode: 'reign', mapTemplateId: template.id, baseScenario: A.buildExample() });
-    assert.ok(prompt.includes(actual.provinces[0].id));
-    assert.ok(prompt.includes(actual.countries[0].id));
+    const countryLine = prompt.split('\n').find(line => line.startsWith('국가 목록: '));
+    const provinceLine = prompt.split('\n').find(line => line.startsWith('지역 목록: '));
+    assert.ok(countryLine && provinceLine);
+    const countries = JSON.parse(countryLine.slice('국가 목록: '.length));
+    const provinces = JSON.parse(provinceLine.slice('지역 목록: '.length));
+    const countryIds = new Set(actual.countries.map(country => country.id));
+    const provinceIds = new Set(actual.provinces.map(province => province.id));
+    assert.ok(countries.length > 0 && countries.every(country => countryIds.has(country.id)));
+    assert.ok(provinces.length > 0 && provinces.length <= 300 && provinces.every(province => provinceIds.has(province.id)));
+    assert.equal(new Set(provinces.map(province => province.id)).size, provinces.length);
+    assert.ok(prompt.includes('- templateId: ' + template.id + ' /'));
     assert.ok(prompt.includes('mode:"reign"'));
     assert.ok(prompt.includes('[현재 시나리오]'));
     assert.ok(!prompt.includes(actual.provinces[0].path));
   }
   assert.throws(() => A.buildPrompt({ mapTemplateId: 'missing' }), /지도/);
+});
+
+test('dense world prompt is bounded and keeps player country and existing targets',()=>{
+ const previous=globalThis.MapTemplates;
+ const template={id:'dense_test',name:'Dense test',countries:[{id:'country_a',name:'A',color:'#123456'},{id:'country_b',name:'B',color:'#654321'}],provinces:Array.from({length:50000},(_,i)=>({id:'r'+i,name:'Region '+i,owner:i<25000?'country_a':'country_b',path:'M0,0L1,1Z'}))};
+ globalThis.MapTemplates={get:id=>id==='dense_test'?template:previous.get(id),list:()=>previous.list()};
+ try{
+  const prompt=A.buildPrompt({mode:'chronicle',mapTemplateId:'dense_test',baseScenario:{schemaVersion:2,map:{templateId:'dense_test',playerCountry:'country_b'},events:[{choices:[{territory:[{prov:'r49999',to:'country_a'}]}]}]}});
+  assert.ok(prompt.length<100000);
+  assert.ok(prompt.includes('r49999'));assert.ok(prompt.includes('r25000'));
+  assert.ok(prompt.includes('최대')||prompt.includes('300개만'));
+  assert.ok(!prompt.includes('"id":"r20000"'));
+  assert.ok(!prompt.includes(template.provinces[0].path));
+ }finally{globalThis.MapTemplates=previous;}
 });
 
 async function gallerySortTest() {

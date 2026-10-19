@@ -1,0 +1,18 @@
+{
+  "type": "map",
+  "schemaVersion": 1,
+  "id": "eastasia_1592_map",
+  "title": "동아시아 1592년 · 편집용 기본 지도",
+  "description": "현대 행정구역에 1592년 무렵의 세력권을 대략 칠한 편집용 지도입니다. 당시 국경이나 지방 구획을 정확히 재현하지 않습니다. 지역을 눌러 소유국·점령·영향권·표식을 바꾸고, 국가 이름과 색상을 자유롭게 편집하세요.",
+  "map": {
+    "templateId": "regional_eastasia_1592",
+    "playerCountry": "joseon",
+    "countries": [],
+    "initial": {
+      "owners": {},
+      "occupation": {},
+      "influence": {},
+      "markers": {}
+    }
+  }
+}

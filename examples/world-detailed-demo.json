@@ -1,0 +1,733 @@
+{
+  "schemaVersion": 2,
+  "id": "world_detailed_demo_v21",
+  "mode": "reign",
+  "title": "세계의 갈림길",
+  "subtitle": "세계 세부 지도 체험 · 분야별 결정으로 남기는 세 해의 기록",
+  "description": "현대 행정구역 위에서 지도·분기·수치·정산 기능을 체험하는 가상 시나리오입니다. 실제 전쟁이나 특정 연도의 국경을 재현하지 않습니다. 기존 역사 예제와 구분해서 사용하세요.",
+  "player": {
+    "askName": true,
+    "label": "통치자의 이름",
+    "defaultName": "통치자",
+    "placeholder": "이름을 입력하세요"
+  },
+  "start": "border_1",
+  "stats": [
+    {
+      "id": "treasury",
+      "name": "재정",
+      "initial": 60,
+      "min": 0,
+      "max": 100,
+      "color": "#a18537"
+    },
+    {
+      "id": "morale",
+      "name": "민심",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#4c8064"
+    },
+    {
+      "id": "military",
+      "name": "군사",
+      "initial": 55,
+      "min": 0,
+      "max": 100,
+      "color": "#ac5847"
+    },
+    {
+      "id": "diplomacy",
+      "name": "외교",
+      "initial": 50,
+      "min": 0,
+      "max": 100,
+      "color": "#456c9e"
+    }
+  ],
+  "flags": [
+    {
+      "id": "alliance",
+      "name": "이웃과의 협약",
+      "initial": false
+    },
+    {
+      "id": "reform",
+      "name": "지방 개혁",
+      "initial": false
+    },
+    {
+      "id": "advance",
+      "name": "국경 너머 주둔",
+      "initial": false
+    }
+  ],
+  "map": {
+    "templateId": "world-detailed",
+    "playerCountry": "fra",
+    "countries": [],
+    "initial": {
+      "owners": {},
+      "occupation": {},
+      "influence": {},
+      "markers": {}
+    }
+  },
+  "events": [
+    {
+      "id": "border_1",
+      "part": "war",
+      "title": "국경에서 온 보고",
+      "body": "Lille-1의 수비대가 지원을 요청합니다. 이웃의 Brussels에서도 공동 경비를 제안했습니다. 군사적 결정이 지도에 어떤 흔적을 남길지 살펴보세요.",
+      "choices": [
+        {
+          "text": "수비대를 보강하고 국경을 안정시킨다",
+          "effects": {
+            "treasury": -8,
+            "military": 9
+          },
+          "territory": [
+            {
+              "prov": "gb_fra_89947881b7359252146825",
+              "marker": "수비대 보강"
+            }
+          ],
+          "setFlags": {},
+          "result": "국경 안의 방어를 강화했습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "협상을 기다리지 않고 이웃 지역에 주둔한다",
+          "effects": {
+            "treasury": -15,
+            "military": 6,
+            "diplomacy": -15
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "occupation": "fra"
+            }
+          ],
+          "setFlags": {
+            "advance": true
+          },
+          "result": "이웃 지역에 주둔했습니다. 빗금은 소유권과 다른 점령 상태를 나타냅니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "tax_1",
+      "part": "politics",
+      "title": "지방 재정의 선택",
+      "body": "주민은 부담을 줄여 달라고 요청합니다. 관료들은 세입을 늘려야 다음 해의 사업을 유지할 수 있다고 말합니다.",
+      "choices": [
+        {
+          "text": "세금을 완화하고 지방의 신뢰를 얻는다",
+          "effects": {
+            "treasury": -12,
+            "morale": 12
+          },
+          "territory": [
+            {
+              "prov": "gb_fra_89947881b7359252146825",
+              "marker": "세금 완화"
+            }
+          ],
+          "setFlags": {},
+          "result": "재정은 줄었지만 주민의 신뢰를 얻었습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "임시세를 거두어 사업 자금을 확보한다",
+          "effects": {
+            "treasury": 15,
+            "morale": -18
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "세입을 확보했습니다. 민심이 45 이하이면 대응이 필요한 시위가 발생할 수 있습니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "pact_1",
+      "part": "diplomacy",
+      "title": "공동 경비 협약",
+      "body": "이웃은 병력 철수와 교역 확대를 함께 협의하자고 제안했습니다. 합의 여부는 다음 해에 받을 외교 카드도 바꿉니다.",
+      "choices": [
+        {
+          "text": "협약을 맺고 공동 경비와 교역을 시작한다",
+          "effects": {
+            "treasury": -5,
+            "diplomacy": 14
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "influence": "fra"
+            }
+          ],
+          "setFlags": {
+            "alliance": true
+          },
+          "result": "협약이 체결되어 다음 해 공동 항만 사업을 논의합니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "독자 노선을 택한다",
+          "effects": {
+            "treasury": 5,
+            "diplomacy": -6
+          },
+          "territory": [],
+          "setFlags": {
+            "alliance": false
+          },
+          "result": "공동 협약은 성립하지 않았습니다. 다음 해에는 단독 협상 카드가 나타납니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "border_2",
+      "part": "war",
+      "title": "군대의 임무를 정하다",
+      "body": "주둔 비용과 훈련 비용이 함께 늘고 있습니다. 병력을 어디에 배치할지 결정하세요.",
+      "choices": [
+        {
+          "text": "상호 철수하고 국경 방어에 집중한다",
+          "effects": {
+            "treasury": 5,
+            "military": 3,
+            "diplomacy": 6
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "occupation": null
+            }
+          ],
+          "setFlags": {
+            "advance": false
+          },
+          "result": "주둔 병력을 철수하고 외교적 긴장을 낮췄습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "주둔을 계속하고 영유권을 주장한다",
+          "effects": {
+            "treasury": -15,
+            "military": 8,
+            "diplomacy": -15
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "to": "fra",
+              "occupation": null
+            }
+          ],
+          "setFlags": {
+            "advance": true
+          },
+          "result": "지도의 소유국 색이 바뀌었습니다. 이 영토 변화는 가상의 게임 결과입니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "reform_2",
+      "part": "politics",
+      "title": "지방 개혁의 비용",
+      "body": "관료들은 세입을 정비하고 항만을 연결하는 개혁안을 올렸습니다. 당장의 비용을 감당하면 연말에 민심이 회복됩니다.",
+      "choices": [
+        {
+          "text": "지방 개혁을 시행한다",
+          "effects": {
+            "treasury": -15,
+            "morale": 5
+          },
+          "territory": [
+            {
+              "prov": "gb_fra_89947881b77451289058418",
+              "marker": "지방 개혁"
+            }
+          ],
+          "setFlags": {
+            "reform": true
+          },
+          "result": "개혁을 시작했습니다. 연말 정산에서 추가 결과를 확인하세요.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "지출을 줄이고 다음 기회를 기다린다",
+          "effects": {
+            "treasury": 8,
+            "morale": -5
+          },
+          "territory": [],
+          "setFlags": {
+            "reform": false
+          },
+          "result": "당장의 재정은 안정됐지만 지방 사업은 미뤄졌습니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "port_2",
+      "part": "diplomacy",
+      "title": "협약이 연 공동 항만",
+      "body": "첫해의 협약 덕분에 공동 항만 사업이 열렸습니다. 앞선 선택이 이번 사건을 등장시켰습니다.",
+      "choices": [
+        {
+          "text": "교역망에 공동 투자한다",
+          "effects": {
+            "treasury": -7,
+            "diplomacy": 10
+          },
+          "territory": [
+            {
+              "prov": "gb_fra_89947881b77451289058418",
+              "influence": "bel",
+              "marker": "공동 항만"
+            }
+          ],
+          "setFlags": {},
+          "result": "항만에 이웃의 영향권이 생기고 정산에서 교역 수입을 얻습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "협약은 유지하되 추가 투자를 보류한다",
+          "effects": {
+            "treasury": 4
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "협약은 유지하며 지출을 아꼈습니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [
+        {
+          "kind": "flag",
+          "key": "alliance",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "next": "END"
+    },
+    {
+      "id": "alone_2",
+      "part": "diplomacy",
+      "title": "독자 노선의 협상",
+      "body": "첫해에 협약을 맺지 않아 단독 협상에 나섭니다. 외교적 고립을 줄일 기회입니다.",
+      "choices": [
+        {
+          "text": "통상 특사를 보내 관계를 회복한다",
+          "effects": {
+            "treasury": -8,
+            "diplomacy": 10
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "특사를 보내 관계를 회복했습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "국내 시장에 집중한다",
+          "effects": {
+            "treasury": 8,
+            "diplomacy": -5
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "국내 세입을 늘리는 대신 외교적 부담을 남겼습니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [
+        {
+          "kind": "flag",
+          "key": "alliance",
+          "op": "eq",
+          "value": false
+        }
+      ],
+      "next": "END"
+    },
+    {
+      "id": "legacy_3",
+      "part": "war",
+      "title": "주둔의 끝을 정하다",
+      "body": "세 번째 해가 되었습니다. 군사적 개입의 결과를 어떻게 정리할지 결정하세요.",
+      "choices": [
+        {
+          "text": "영토를 돌려주고 상호 안전을 보장한다",
+          "effects": {
+            "military": -3,
+            "diplomacy": 12
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "to": "bel",
+              "occupation": null
+            }
+          ],
+          "setFlags": {
+            "advance": false
+          },
+          "result": "영토를 반환하고 평화의 조건을 정리했습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "국경 너머의 영유를 유지한다",
+          "effects": {
+            "treasury": -10,
+            "military": 8,
+            "diplomacy": -12
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "to": "fra",
+              "occupation": null
+            }
+          ],
+          "setFlags": {
+            "advance": true
+          },
+          "result": "영유를 유지했습니다. 결말은 국력과 국내 사정도 함께 판단합니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "people_3",
+      "part": "politics",
+      "title": "마지막 예산",
+      "body": "남은 재정을 어디에 쓸지 정하세요. 수치의 조합에 따라 개혁과 위기의 결말이 갈립니다.",
+      "choices": [
+        {
+          "text": "주민의 생활을 회복하는 데 쓴다",
+          "effects": {
+            "treasury": -12,
+            "morale": 14
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "민생에 남은 자원을 배정했습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "국고를 비축한다",
+          "effects": {
+            "treasury": 10,
+            "morale": -5
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "국고를 비축했습니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "peace_3",
+      "part": "diplomacy",
+      "title": "세 해의 약속",
+      "body": "우호 관계와 국내의 신뢰가 다음 시대를 결정합니다. 마지막 약속을 남기세요.",
+      "choices": [
+        {
+          "text": "공존과 교역의 원칙을 선포한다",
+          "effects": {
+            "diplomacy": 10,
+            "morale": 5
+          },
+          "territory": [
+            {
+              "prov": "gb_bel_21686613b18913386279163",
+              "influence": null
+            }
+          ],
+          "setFlags": {},
+          "result": "새로운 교역과 평화의 원칙을 남겼습니다.",
+          "historical": true,
+          "when": []
+        },
+        {
+          "text": "국가의 위신을 최우선으로 내세운다",
+          "effects": {
+            "military": 5,
+            "diplomacy": -5
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "강한 국가를 약속했습니다.",
+          "historical": false,
+          "when": []
+        }
+      ],
+      "when": [],
+      "next": "END"
+    },
+    {
+      "id": "protest",
+      "title": "광장에 모인 사람들",
+      "body": "세금과 주둔 비용에 대한 불만이 시위로 이어졌습니다. 대응을 결정하면 진행하던 해의 나머지 분야로 돌아갑니다.",
+      "when": [],
+      "next": "RETURN",
+      "choices": [
+        {
+          "text": "대표자를 만나 부담을 낮춘다",
+          "effects": {
+            "treasury": -6,
+            "morale": 12
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "시위대 대표와 협의했습니다.",
+          "historical": false,
+          "when": []
+        },
+        {
+          "text": "강경 대응으로 질서를 회복한다",
+          "effects": {
+            "military": -4,
+            "morale": -6,
+            "diplomacy": -3
+          },
+          "territory": [],
+          "setFlags": {},
+          "result": "질서를 회복했으나 불만이 남았습니다.",
+          "historical": false,
+          "when": []
+        }
+      ]
+    }
+  ],
+  "randomEvents": [
+    {
+      "id": "protest_rule",
+      "title": "낮은 민심으로 시위 발생",
+      "eventId": "protest",
+      "chance": 35,
+      "priority": 10,
+      "once": false,
+      "cooldown": 2,
+      "when": [
+        {
+          "kind": "stat",
+          "key": "morale",
+          "op": "lte",
+          "value": 45
+        }
+      ]
+    }
+  ],
+  "endings": [
+    {
+      "id": "collapse",
+      "title": "국고의 붕괴",
+      "body": "국고가 바닥났습니다. 국가의 약속을 지탱할 자원이 남지 않았습니다.",
+      "kind": "bad",
+      "priority": 100,
+      "immediate": true,
+      "chance": 100,
+      "when": [
+        {
+          "kind": "stat",
+          "key": "treasury",
+          "op": "lte",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "renewal",
+      "title": "개혁과 공존의 시대",
+      "body": "주민의 신뢰와 이웃의 협력을 함께 얻었습니다. 지도의 흔적은 지난 세 해의 결정을 보여 줍니다.",
+      "kind": "good",
+      "priority": 20,
+      "when": [
+        {
+          "kind": "stat",
+          "key": "morale",
+          "op": "gte",
+          "value": 60
+        },
+        {
+          "kind": "stat",
+          "key": "diplomacy",
+          "op": "gte",
+          "value": 65
+        }
+      ],
+      "immediate": false
+    },
+    {
+      "id": "expansion",
+      "title": "넓어진 국경, 무거운 책임",
+      "body": "국경은 넓어졌지만 주둔과 외교의 비용을 다음 시대에 남겼습니다.",
+      "kind": "mixed",
+      "priority": 10,
+      "when": [
+        {
+          "kind": "flag",
+          "key": "advance",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "immediate": false
+    },
+    {
+      "id": "balance",
+      "title": "다음 세대에 남긴 나라",
+      "body": "이웃과 국내의 요구 사이에서 나라를 이어 갔습니다. 기록을 돌아보고 다른 조합의 선택도 시험해 보세요.",
+      "kind": "mixed",
+      "priority": 0,
+      "when": [],
+      "immediate": false
+    }
+  ],
+  "defaultEnding": "balance",
+  "reign": {
+    "parts": [
+      {
+        "id": "war",
+        "name": "전쟁",
+        "color": "#ae5747"
+      },
+      {
+        "id": "politics",
+        "name": "정치",
+        "color": "#a58634"
+      },
+      {
+        "id": "diplomacy",
+        "name": "외교",
+        "color": "#456c9e"
+      }
+    ],
+    "turns": [
+      {
+        "id": "year1",
+        "date": "첫해",
+        "title": "국경의 회의",
+        "body": "전쟁·정치·외교에서 하나씩 고른 뒤 정산하세요. 지도의 휠을 굴려 세부 지역을 확대하고, ‘내 나라’로 프랑스 일대를 볼 수 있습니다.",
+        "eventIds": [
+          "border_1",
+          "tax_1",
+          "pact_1"
+        ],
+        "between": [],
+        "settlements": [
+          {
+            "id": "supply",
+            "text": "수비대와 지방 행정을 유지하는 비용을 지불했습니다.",
+            "effects": {
+              "treasury": -3
+            }
+          }
+        ]
+      },
+      {
+        "id": "year2",
+        "date": "둘째 해",
+        "title": "선택이 돌아오는 해",
+        "body": "첫해의 선택에 따라 외교 사건이 달라집니다. 지도와 수치, 갈림길 기록을 함께 확인하세요.",
+        "eventIds": [
+          "border_2",
+          "reform_2",
+          "port_2",
+          "alone_2"
+        ],
+        "between": [],
+        "settlements": [
+          {
+            "id": "reform_return",
+            "text": "지방 개혁의 효과로 주민의 신뢰가 회복되었습니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "reform",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {
+              "morale": 8
+            }
+          },
+          {
+            "id": "trade",
+            "text": "첫해의 협약을 바탕으로 교역 수입을 얻었습니다.",
+            "when": [
+              {
+                "kind": "flag",
+                "key": "alliance",
+                "op": "eq",
+                "value": true
+              }
+            ],
+            "effects": {
+              "treasury": 12
+            }
+          }
+        ]
+      },
+      {
+        "id": "year3",
+        "date": "셋째 해",
+        "title": "남겨질 역사",
+        "body": "세 해의 결정을 마무리합니다. 정산 뒤 수치와 선택 기록에 따라 결말이 열립니다.",
+        "eventIds": [
+          "legacy_3",
+          "people_3",
+          "peace_3"
+        ],
+        "between": [],
+        "settlements": []
+      }
+    ]
+  }
+}

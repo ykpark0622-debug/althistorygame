@@ -37,6 +37,60 @@ language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.admins where user_id = auth.uid())
 $$;
 
+-- Map documents are checked separately from playable scenario documents.
+-- Only compact template references and editable data are shared; no SVG/HTML is executed.
+create or replace function public.hc_gallery_data_valid(doc jsonb) returns boolean
+language plpgsql immutable set search_path = '' as $$
+declare layer_name text; layer jsonb; entry record; country jsonb;
+begin
+  if coalesce(jsonb_typeof(doc), '') <> 'object' then return false; end if;
+  if doc ->> 'type' = 'map' then
+    if not coalesce(doc -> 'schemaVersion' = '1'::jsonb, false)
+      or coalesce(jsonb_typeof(doc -> 'id'), '') <> 'string' or length(btrim(doc ->> 'id')) = 0
+      or coalesce(jsonb_typeof(doc -> 'title'), '') <> 'string' or length(btrim(doc ->> 'title')) not between 1 and 200
+      or coalesce(jsonb_typeof(doc -> 'description'), '') <> 'string'
+      or coalesce(jsonb_typeof(doc -> 'map'), '') <> 'object'
+      or coalesce(jsonb_typeof(doc #> '{map,templateId}'), '') <> 'string' or length(btrim(doc #>> '{map,templateId}')) = 0
+      or coalesce(jsonb_typeof(doc #> '{map,playerCountry}'), '') <> 'string'
+      or coalesce(jsonb_typeof(doc #> '{map,countries}'), '') <> 'array'
+      or coalesce(jsonb_typeof(doc #> '{map,initial}'), '') <> 'object' then return false; end if;
+    if jsonb_array_length(doc #> '{map,countries}') > 1000 then return false; end if;
+    for country in select value from jsonb_array_elements(doc #> '{map,countries}') loop
+      if coalesce(jsonb_typeof(country), '') <> 'object'
+        or coalesce(jsonb_typeof(country -> 'id'), '') <> 'string' or length(btrim(country ->> 'id')) = 0
+        or coalesce(jsonb_typeof(country -> 'name'), '') <> 'string' or length(btrim(country ->> 'name')) = 0
+        or coalesce(jsonb_typeof(country -> 'color'), '') <> 'string'
+        or not coalesce(country ->> 'color' ~ '^#[0-9a-fA-F]{6}$', false) then return false; end if;
+    end loop;
+    foreach layer_name in array array['owners','occupation','influence','markers'] loop
+      layer := doc #> array['map','initial',layer_name];
+      if coalesce(jsonb_typeof(layer), '') <> 'object' then return false; end if;
+      for entry in select key, value from jsonb_each(layer) loop
+        if length(entry.key) = 0 then return false; end if;
+        if jsonb_typeof(entry.value) <> 'string' then
+          if layer_name = 'owners' or jsonb_typeof(entry.value) <> 'null' then return false; end if;
+        end if;
+      end loop;
+    end loop;
+    return true;
+  end if;
+  return coalesce(
+    doc ->> 'schemaVersion' in ('1', '2')
+    and jsonb_typeof(doc -> 'events') = 'array'
+    and jsonb_typeof(doc -> 'endings') = 'array'
+    and jsonb_typeof(doc -> 'stats') = 'array'
+    and (doc ->> 'schemaVersion' = '1' or (
+      coalesce(doc ->> 'mode', 'chronicle') in ('chronicle', 'reign')
+      and (not (doc ? 'map') or (jsonb_typeof(doc -> 'map') = 'object'
+        and jsonb_typeof(doc #> '{map,templateId}') = 'string'
+        and length(doc #>> '{map,templateId}') > 0))
+      and (coalesce(doc ->> 'mode', 'chronicle') <> 'reign' or (
+        jsonb_typeof(doc -> 'reign') = 'object'
+        and jsonb_typeof(doc #> '{reign,parts}') = 'array'
+        and jsonb_typeof(doc #> '{reign,turns}') = 'array'))
+    )), false);
+end $$;
+
 -- ---------------------------------------------------------------------------
 -- 시나리오
 -- ---------------------------------------------------------------------------
@@ -49,24 +103,7 @@ create table if not exists public.scenarios (
   summary       text not null default '' check (char_length(summary) <= 1000),
   tags          text[] not null default '{}' check (cardinality(tags) <= 5),
   data          jsonb not null
-                constraint scenarios_data_shape check (
-                  coalesce(jsonb_typeof(data) = 'object', false)
-                  and coalesce(data ->> 'schemaVersion' in ('1', '2'), false)
-                  and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
-                  and coalesce(jsonb_typeof(data -> 'endings') = 'array', false)
-                  and coalesce(jsonb_typeof(data -> 'stats') = 'array', false)
-                  and coalesce((data ->> 'schemaVersion' = '1' or (
-                    coalesce(data ->> 'mode', 'chronicle') in ('chronicle', 'reign')
-                    and (not (data ? 'map') or (jsonb_typeof(data -> 'map') = 'object'
-                      and jsonb_typeof(data #> '{map,templateId}') = 'string'
-                      and length(data #>> '{map,templateId}') > 0))
-                    and (coalesce(data ->> 'mode', 'chronicle') <> 'reign' or (
-                      jsonb_typeof(data -> 'reign') = 'object'
-                      and jsonb_typeof(data #> '{reign,parts}') = 'array'
-                      and jsonb_typeof(data #> '{reign,turns}') = 'array'
-                    ))
-                  )), false)
-                )
+                constraint scenarios_data_shape check (public.hc_gallery_data_valid(data))
                 constraint scenarios_data_size check (octet_length(data::text) <= 1048576),
   event_count   integer not null default 0,
   ending_count  integer not null default 0,
@@ -78,66 +115,41 @@ create table if not exists public.scenarios (
   updated_at    timestamptz not null default now()
 );
 
--- (이전 버전으로 만든 표에도 같은 검사가 걸리도록 다시 붙입니다)
 alter table public.scenarios drop constraint if exists scenarios_data_shape;
-alter table public.scenarios add constraint scenarios_data_shape check (
-  coalesce(jsonb_typeof(data) = 'object', false)
-  and coalesce(data ->> 'schemaVersion' in ('1', '2'), false)
-  and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
-  and coalesce(jsonb_typeof(data -> 'endings') = 'array', false)
-  and coalesce(jsonb_typeof(data -> 'stats') = 'array', false)
-  and coalesce((data ->> 'schemaVersion' = '1' or (
-    coalesce(data ->> 'mode', 'chronicle') in ('chronicle', 'reign')
-    and (not (data ? 'map') or (jsonb_typeof(data -> 'map') = 'object'
-      and jsonb_typeof(data #> '{map,templateId}') = 'string'
-      and length(data #>> '{map,templateId}') > 0))
-    and (coalesce(data ->> 'mode', 'chronicle') <> 'reign' or (
-      jsonb_typeof(data -> 'reign') = 'object'
-      and jsonb_typeof(data #> '{reign,parts}') = 'array'
-      and jsonb_typeof(data #> '{reign,turns}') = 'array'
-    ))
-  )), false)
-) not valid;
+alter table public.scenarios add constraint scenarios_data_shape
+  check (public.hc_gallery_data_valid(data)) not valid;
 
--- V2 목록의 표시 정보. 목록마다 본문 JSON을 내려받지 않도록 서버가 계산합니다.
+-- Derived metadata is never client-writable; every write derives it from the JSON.
+alter table public.scenarios add column if not exists content_kind text not null default 'scenario';
 alter table public.scenarios add column if not exists schema_version integer not null default 1;
 alter table public.scenarios add column if not exists mode text not null default 'chronicle';
 alter table public.scenarios add column if not exists map_template_id text;
+alter table public.scenarios drop constraint if exists scenarios_content_kind_meta;
+alter table public.scenarios add constraint scenarios_content_kind_meta check (content_kind in ('scenario', 'map'));
 alter table public.scenarios drop constraint if exists scenarios_schema_version_meta;
 alter table public.scenarios add constraint scenarios_schema_version_meta check (schema_version in (1, 2));
 alter table public.scenarios drop constraint if exists scenarios_mode_meta;
-alter table public.scenarios add constraint scenarios_mode_meta check (mode in ('chronicle', 'reign'));
-
+alter table public.scenarios add constraint scenarios_mode_meta check (mode in ('chronicle', 'reign', 'map'));
 create or replace function public.hc_scenarios_metadata_v2() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
+  new.content_kind := case when new.data ->> 'type' = 'map' then 'map' else 'scenario' end;
   new.schema_version := case when new.data ->> 'schemaVersion' = '2' then 2 else 1 end;
-  new.mode := case when new.schema_version = 2 then coalesce(new.data ->> 'mode', 'chronicle') else 'chronicle' end;
-  new.map_template_id := case when new.schema_version = 2 then new.data #>> '{map,templateId}' else null end;
+  new.mode := case when new.content_kind = 'map' then 'map'
+    when new.schema_version = 2 then coalesce(new.data ->> 'mode', 'chronicle') else 'chronicle' end;
+  new.map_template_id := case when new.content_kind = 'map' or new.schema_version = 2 then new.data #>> '{map,templateId}' else null end;
   return new;
 end $$;
 drop trigger if exists hc_scenarios_metadata_v2 on public.scenarios;
-create trigger hc_scenarios_metadata_v2 before insert or update of data on public.scenarios
+create trigger hc_scenarios_metadata_v2 before insert or update on public.scenarios
   for each row execute function public.hc_scenarios_metadata_v2();
 
--- 기존 정상 원고의 표시 정보만 보충합니다. 원고와 작성·수정 시각은 바꾸지 않습니다.
-update public.scenarios set data = data
-where coalesce(jsonb_typeof(data) = 'object', false)
-  and coalesce(data ->> 'schemaVersion' in ('1', '2'), false)
-  and coalesce(jsonb_typeof(data -> 'events') = 'array', false)
-  and coalesce(jsonb_typeof(data -> 'endings') = 'array', false)
-  and coalesce(jsonb_typeof(data -> 'stats') = 'array', false)
-  and coalesce((data ->> 'schemaVersion' = '1' or (
-    coalesce(data ->> 'mode', 'chronicle') in ('chronicle', 'reign')
-    and (not (data ? 'map') or (jsonb_typeof(data -> 'map') = 'object'
-      and jsonb_typeof(data #> '{map,templateId}') = 'string'
-      and length(data #>> '{map,templateId}') > 0))
-    and (coalesce(data ->> 'mode', 'chronicle') <> 'reign' or (
-      jsonb_typeof(data -> 'reign') = 'object'
-      and jsonb_typeof(data #> '{reign,parts}') = 'array'
-      and jsonb_typeof(data #> '{reign,turns}') = 'array'
-    ))
-  )), false);
+-- Existing documents and creation/update timestamps remain unchanged.
+update public.scenarios set data = data where public.hc_gallery_data_valid(data);
+
+create index if not exists scenarios_kind_popular_idx on public.scenarios (content_kind, status, like_count desc, created_at desc);
+create index if not exists scenarios_kind_recent_idx on public.scenarios (content_kind, status, created_at desc);
+create index if not exists scenarios_kind_author_idx on public.scenarios (content_kind, author_id, created_at desc);
 
 create index if not exists scenarios_popular_idx on public.scenarios (status, like_count desc, created_at desc);
 create index if not exists scenarios_recent_idx  on public.scenarios (status, created_at desc);
@@ -166,7 +178,7 @@ begin
   end if;
   select count(*) into overall from public.scenarios where author_id = p_user;
   if overall >= lim.total then
-    raise exception '한 사람이 올릴 수 있는 시나리오는 %개까지입니다. 예전 시나리오를 지우고 올려 주세요.', lim.total using errcode = 'P0001';
+    raise exception '한 사람이 올릴 수 있는 시나리오와 지도는 합쳐서 %개까지입니다. 예전 게시물을 지우고 올려 주세요.', lim.total using errcode = 'P0001';
   end if;
   insert into public.upload_log (user_id) values (p_user);
 end $$;
@@ -202,8 +214,12 @@ begin
   end if;
 
   if tg_op = 'INSERT' or new.data is distinct from old.data then
-    new.event_count := jsonb_array_length(new.data -> 'events');
-    new.ending_count := jsonb_array_length(new.data -> 'endings');
+    if new.data ->> 'type' = 'map' then
+      new.event_count := 0; new.ending_count := 0;
+    else
+      new.event_count := jsonb_array_length(new.data -> 'events');
+      new.ending_count := jsonb_array_length(new.data -> 'endings');
+    end if;
   end if;
 
   if tg_op = 'UPDATE' and (new.data is distinct from old.data or new.title is distinct from old.title
@@ -219,6 +235,7 @@ end $$;
 drop trigger if exists hc_scenarios_before_write on public.scenarios;
 create trigger hc_scenarios_before_write before insert or update on public.scenarios
   for each row execute function public.hc_scenarios_before_write();
+
 
 alter table public.scenarios enable row level security;
 
@@ -361,7 +378,8 @@ create trigger hc_scenarios_after_content_change after update on public.scenario
 -- 플레이 수 올리기: 누구나 호출 가능, 공개 시나리오만
 create or replace function public.increment_play(p_id uuid) returns void
 language sql security definer set search_path = '' as $$
-  update public.scenarios set play_count = play_count + 1 where id = p_id and status = 'public';
+  update public.scenarios set play_count = play_count + 1
+   where id = p_id and status = 'public' and content_kind = 'scenario';
 $$;
 
 -- 관리자: 공개/숨김 바꾸기. 다시 공개하면 기존 신고는 처리 완료로 표시하고 신고 수를 0으로 돌립니다.

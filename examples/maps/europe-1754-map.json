@@ -1,0 +1,18 @@
+{
+  "type": "map",
+  "schemaVersion": 1,
+  "id": "europe_1754_map",
+  "title": "유럽과 지중해 1754년 · 편집용 기본 지도",
+  "description": "현대 행정구역에 1754년 무렵의 세력권을 대략 칠한 편집용 지도입니다. 당시 국경·제후국 경계를 정확히 재현하지 않습니다. 지역을 눌러 세부 소유권과 국가 이름·색상을 수정한 뒤, 새 시나리오의 시작 지도로 사용할 수 있습니다.",
+  "map": {
+    "templateId": "regional_europe_med_1754",
+    "playerCountry": "france",
+    "countries": [],
+    "initial": {
+      "owners": {},
+      "occupation": {},
+      "influence": {},
+      "markers": {}
+    }
+  }
+}

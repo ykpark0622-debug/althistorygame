@@ -1,0 +1,72 @@
+'use strict';
+// Delayed/failing synthetic chunks exercise editor races without a network service.
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {chromium}=require(path.resolve(path.dirname(process.execPath),'../node_modules/playwright'));
+const root=path.resolve(__dirname,'..');
+(async()=>{
+  const browser=await chromium.launch({channel:'chrome',headless:true});
+  try{
+    const page=await browser.newPage(),errors=[];
+    page.on('pageerror',error=>errors.push(String(error)));page.on('dialog',dialog=>dialog.accept());
+    await page.route('**/*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><dialog id="editor-dialog"><div id="editor-root"></div></dialog></body></html>'}));
+    await page.goto('https://lazy-editor.test/');
+    await page.evaluate(()=>{
+      const regions=[{id:'eastasia',name:'동아시아',defaultEra:'1592'},{id:'europe_med',name:'유럽과 지중해',defaultEra:'modern'},{id:'asia',name:'아시아 전체',defaultEra:'modern'},{id:'world',name:'세계',defaultEra:'modern'}];
+      const ids=regions.map(r=>'regional_'+r.id+'_'+r.defaultEra),loaded={},pending={};
+      window.__ensures=[];
+      window.__template=id=>({id,name:id,width:200,height:100,countries:[{id:'joseon',name:'조선',color:'#4477aa'}],provinces:[{id:'left',name:'한양',owner:'joseon',path:'M0,0h100v100H0Z',cx:50,cy:50,bbox:[0,0,100,100]}]});
+      window.__finish=(id,fail=false)=>{const request=pending[id];delete pending[id];if(fail)request.reject(new Error('시험 연결 실패'));else{loaded[id]=window.__template(id);request.resolve(loaded[id]);}};
+      window.MapTemplates={get:id=>loaded[id]||null,list:()=>ids.map(id=>({id,name:id,provinceCount:1})),regions:()=>regions,eras:region=>[{id:regions.find(r=>r.id===region).defaultEra,name:'기본 시대'}],regionalId:(r,e)=>'regional_'+r+'_'+e,selection:id=>{const r=regions.find(r=>'regional_'+r.id+'_'+r.defaultEra===id);return r?{regionId:r.id,eraId:r.defaultEra}:null;},ensure(id){window.__ensures.push(id);if(loaded[id])return Promise.resolve(loaded[id]);if(pending[id])return pending[id].promise;let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});pending[id]={promise,resolve,reject};return promise;}};
+      window.MapView={render(holder,scenario){holder.dataset.templateId=scenario.map.templateId;},initialState(){return {map:{owners:{left:'joseon'},occupation:{},influence:{},markers:{}}};}};
+      localStorage.setItem('history-crossroads:web:v1:scenario','{"untouched":"story"}');
+      localStorage.setItem('history-crossroads:web:v1:autosave','{"untouched":"save"}');
+    });
+    for(const file of ['engine.js','map-document.js','editor.js','map-maker.js'])await page.addScriptTag({content:fs.readFileSync(path.join(root,file),'utf8')});
+    await page.evaluate(()=>{window.__opened=MapMaker.open();});
+    assert.deepEqual(await page.evaluate(()=>window.__ensures),['regional_eastasia_1592']);
+    await page.evaluate(()=>window.__finish('regional_eastasia_1592'));
+    await page.getByLabel('지도 제목',{exact:true}).waitFor();
+    assert.equal(await page.evaluate(()=>localStorage.getItem('history-crossroads:web:v1:autosave')),'{"untouched":"save"}');
+    console.log('PASS map-maker default requests only East Asia and leaves game progress intact');
+    await page.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('europe_med');
+    await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
+    await page.getByLabel('지도 제목',{exact:true}).fill('로딩 중 쓴 제목');
+    await page.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('asia');
+    await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
+    await page.evaluate(()=>window.__finish('regional_europe_med_modern'));
+    assert.equal(await page.locator('.v2-editor-map').getAttribute('data-template-id'),'regional_eastasia_1592');
+    await page.evaluate(()=>window.__finish('regional_asia_modern'));
+    await page.waitForFunction(()=>document.querySelector('.v2-editor-map').dataset.templateId==='regional_asia_modern');
+    assert.equal(await page.getByLabel('지도 제목',{exact:true}).inputValue(),'로딩 중 쓴 제목');
+    console.log('PASS latest region preparation wins when an older chunk finishes first; live text survives');
+    await page.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('world');
+    await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
+    await page.evaluate(()=>window.__finish('regional_world_modern',true));
+    await page.locator('#editor-report').filter({hasText:'기존 지도와 편집 내용은 유지했습니다'}).waitFor();
+    assert.equal(await page.locator('.v2-editor-map').getAttribute('data-template-id'),'regional_asia_modern');
+    await page.getByRole('button',{name:'지도 저장',exact:true}).click();
+    assert.equal((await page.evaluate(()=>MapMaker.getStored())).map.templateId,'regional_asia_modern');
+    await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
+    await page.evaluate(()=>window.__finish('regional_world_modern'));
+    await page.waitForFunction(()=>document.querySelector('.v2-editor-map').dataset.templateId==='regional_world_modern');
+    console.log('PASS failed chunk preserves editable map and saved data; same preparation button retries');
+    await page.getByRole('button',{name:'닫기',exact:true}).click();
+    await page.evaluate(()=>{window.__pending=MapMaker.importDocument({type:'map',schemaVersion:1,id:'imported',title:'새 파일',description:'',map:{templateId:'regional_other_modern',playerCountry:'joseon',initial:{}}});});
+    await page.evaluate(()=>{ScenarioEditor.close();window.__finish('regional_other_modern');});
+    await page.evaluate(()=>window.__pending);
+    assert.equal(await page.locator('#editor-dialog').evaluate(el=>el.open),false);
+    console.log('PASS closing the workspace cancels a pending import and cannot reopen a stale dialog');
+    await page.evaluate(()=>{
+      const scenario=GameEngine.createBlankScenario();scenario.schemaVersion=2;scenario.mode='chronicle';scenario.map={templateId:'old_scenario_map',playerCountry:'joseon',initial:{}};
+      window.__oldEditor=ScenarioEditor.open(scenario,()=>{});
+      window.__newMaker=MapMaker.importDocument({type:'map',schemaVersion:1,id:'new_map',title:'마지막으로 고른 지도',description:'',map:{templateId:'new_maker_map',playerCountry:'joseon',initial:{}}});
+    });
+    await page.evaluate(()=>window.__finish('old_scenario_map'));
+    assert.equal(await page.locator('#editor-dialog').evaluate(el=>el.open),false);
+    await page.evaluate(()=>window.__finish('new_maker_map'));
+    await page.getByLabel('지도 제목',{exact:true}).waitFor();
+    assert.equal(await page.getByLabel('지도 제목',{exact:true}).inputValue(),'마지막으로 고른 지도');
+    console.log('PASS a newer map-maker request supersedes an older scenario-editor loading request');
+    assert.deepEqual(errors,[]);
+  }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

@@ -61,6 +61,7 @@ function setup(){
  const context=vm.createContext({document:doc,console,confirm:()=>true,requestAnimationFrame:()=>1,cancelAnimationFrame(){},setTimeout,clearTimeout,Blob,URL,crypto:require('node:crypto').webcrypto});
  context.globalThis=context;context.window=context;
  for(const file of ['map-templates.js','engine.js'])vm.runInContext(fs.readFileSync(path.join(base,file),'utf8'),context);
+ require('./preloaded-map-fixture.cjs')(context);
  let mapClick;
  context.MapView={render(container,scenario,state,options){mapClick=options.onProvince;},initialState(scenario){const t=context.MapTemplates.get(scenario.map.templateId);return {map:{owners:{...Object.fromEntries(t.provinces.map(p=>[p.id,p.owner])),...(scenario.map.initial?.owners||{})},occupation:{},influence:{},markers:{}}};}};
  context.ScenarioFlowchart={mount(){return ()=>{};}};
@@ -80,4 +81,28 @@ test('reign form builds parts, turn, card and ordered rules',()=>{const t=setup(
 test('reference rename updates effects, conditions, start, next, turn and layout',()=>{const t=setup();const data=t.realm({stats:[],flags:[],endings:[],start:'old',events:[{id:'old',next:'old',choices:[{next:'old',when:[{kind:'stat',key:'score'}],effects:{score:2},setFlags:{won:true}}]}],randomEvents:[{eventId:'old',when:[{kind:'flag',key:'won'}]}],reign:{parts:[],turns:[{eventIds:['old'],between:[{effects:{score:-1},setFlags:{won:false}}]}]},editorLayout:{positions:{old:{x:40,y:50}}}});t.context.ScenarioEditorV2.rewriteReferences(data,'stat','score','gold');t.context.ScenarioEditorV2.rewriteReferences(data,'flag','won','victory');t.context.ScenarioEditorV2.rewriteReferences(data,'event','old','new');assert.equal(data.start,'new');assert.equal(data.events[0].choices[0].effects.gold,2);assert.equal(data.events[0].choices[0].when[0].key,'gold');assert.equal(data.reign.turns[0].between[0].setFlags.victory,false);assert.equal(data.randomEvents[0].eventId,'new');assert.equal(data.editorLayout.positions.new.x,40);});
 test('normal choice editor writes result, historical and territory',()=>{const t=setup();let saved;const s=t.context.GameEngine.createBlankScenario();s.schemaVersion=2;s.mode='chronicle';s.map=t.realm({templateId:'eastasia1419',playerCountry:'joseon',initial:{}});s.events=t.realm([{id:'first',title:'첫 사건',body:'본문',when:[],next:'END',choices:[{text:'선택',effects:{},setFlags:{},when:[]}]}]);s.start='first';t.context.ScenarioEditor.open(s,next=>saved=next,{page:'events'});t.change('선택 후 결과 본문','선택한 결과','input');const historic=t.doc.all.find(node=>node.tagName==='LABEL'&&node.children.some(child=>child.textContent==='실제 역사에서 선택한 경로로 표시'));historic.children[0].checked=true;historic.children[0].dispatch('change');t.click('＋ 영토 변화 추가');t.change('변경할 지역','tsushima');t.change('소유국','joseon');t.click('초안 저장');assert.equal(saved.events[0].choices[0].result,'선택한 결과');assert.equal(saved.events[0].choices[0].historical,true);assert.equal(saved.events[0].choices[0].territory[0].to,'joseon');assert.equal(saved.events[0].choices[0].territory[0].prov,'tsushima');});
 test('territory condition form edits layer, province and country',()=>{const t=setup();let saved;const s=t.context.GameEngine.createBlankScenario();s.schemaVersion=2;s.mode='chronicle';s.map=t.realm({templateId:'eastasia1419',playerCountry:'joseon',initial:{}});s.events=t.realm([{id:'first',title:'첫 사건',body:'본문',when:[],next:'END',choices:[{text:'선택',effects:{},setFlags:{},when:[]}]}]);s.start='first';t.context.ScenarioEditor.open(s,next=>saved=next,{page:'events'});t.buttons('＋ 조건 추가')[0].click();t.change('지역','tsushima');t.change('비교할 상태','influence');t.change('대상 국가','joseon');t.click('초안 저장');assert.equal(saved.events[0].when[0].kind,'territory');assert.equal(saved.events[0].when[0].key,'tsushima');assert.equal(saved.events[0].when[0].field,'influence');assert.equal(saved.events[0].when[0].value,'joseon');assert.equal(t.context.GameEngine.validateScenario(saved,t.realm({allowDraft:true})).errors.length,0);});
+test('dense map effect search stays bounded and preserves selection outside results',()=>{
+ const t=setup();let saved;
+ vm.runInContext(`{
+ const dense={id:'dense_test',countries:[{id:'country_a',name:'A',color:'#123456'}],provinces:Array.from({length:50000},(_,i)=>({id:'r'+i,name:i===43210?'Needle':'Region'+i,owner:'country_a'}))};
+ const previous=MapTemplates;globalThis.MapTemplates={get:id=>id==='dense_test'?dense:previous.get(id),list:()=>previous.list()};
+ }`,t.context);
+ const s=t.context.GameEngine.createBlankScenario();s.schemaVersion=2;s.mode='chronicle';s.map=t.realm({templateId:'dense_test',playerCountry:'country_a',initial:{}});s.start='first';
+ s.events=t.realm([{id:'first',title:'사건',body:'본문',when:[{kind:'territory',key:'r49999',field:'owner',op:'eq',value:'country_a'}],next:'END',choices:[{text:'선택',effects:{},setFlags:{},when:[],territory:[{prov:'r49999',to:'country_a'}]}]}]);
+ t.context.ScenarioEditor.open(s,next=>saved=next,{page:'events'});
+ assert.ok(t.field('변경할 지역').children.length<=101);
+ assert.equal(t.field('변경할 지역').value,'r49999');
+ t.change('변경할 지역 검색','Needle','input');
+ assert.equal(t.field('변경할 지역').children.length,2);
+ assert.equal(t.field('변경할 지역').value,'r49999');
+ t.change('변경할 지역','r43210');
+ t.change('변경할 지역 검색','no matching region','input');
+ assert.equal(t.field('변경할 지역').children.length,1);
+ assert.equal(t.field('변경할 지역').value,'r43210');
+ t.change('지역 검색','Needle','input');
+ assert.equal(t.field('지역').value,'r49999');
+ t.change('지역','r43210');t.click('초안 저장');
+ assert.equal(saved.events[0].choices[0].territory[0].prov,'r43210');
+ assert.equal(saved.events[0].when[0].key,'r43210');
+});
 console.log('Editor V2 smoke: '+cases+' passed');
