@@ -1,4 +1,4 @@
 역사의 갈림길 — 역사 국가 지도 5종 · 지역·시대 선택기 통합 · 지도 제작·공유
-Version: 2.8.0-community
+Version: 2.8.1-community
 Build date: 2026-10-20
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)
