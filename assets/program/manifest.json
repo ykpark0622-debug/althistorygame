@@ -1,7 +1,7 @@
 {
   "format": "hc-program-parts-v1",
-  "bytes": 34079659,
-  "sha256": "a320dd8fe98938683036005d2c12c13bf1b6ff69c09941b774d7127d0724c922",
+  "bytes": 35772302,
+  "sha256": "adb48b378c655f9e2721c063f5fd7f6aa70384b55bb3505590edc683944f6a6e",
   "files": [
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -164,9 +164,19 @@
       "sha256": "c3942629b4943a3fbb412477890eed5c4d6b60e862e9709b1e2e2123ba53ebc4"
     },
     {
-      "path": "assets/program/standalone.033.eb54835fc348a9e3.txt",
-      "bytes": 525227,
-      "sha256": "eb54835fc348a9e3582f40fa7e04647c38240a73b57ba8ecf97ea8a0301f3ec0"
+      "path": "assets/program/standalone.033.854252f2cc7cd794.txt",
+      "bytes": 1048576,
+      "sha256": "854252f2cc7cd794fec6d0437792d9afc8886ed0dd765e3d1bd3c915262d9afc"
+    },
+    {
+      "path": "assets/program/standalone.034.4f63bb48565dfe6e.txt",
+      "bytes": 1048576,
+      "sha256": "4f63bb48565dfe6ee161c4a6d29f175242d6e01d54ef463a9feb13fab82fdb97"
+    },
+    {
+      "path": "assets/program/standalone.035.3d79ba78619203b8.txt",
+      "bytes": 120718,
+      "sha256": "3d79ba78619203b88856c229f44ae16980751e994dd0bb5268ad96bfc4c6de1f"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "registryBytes": 42641,
+  "registryBytes": 48623,
   "priorMonolithBytes": 24500024,
   "templates": [
     {
@@ -139,6 +139,36 @@
       "regions": 525,
       "bytes": 841907,
       "gzipBytes": 231915
+    },
+    {
+      "id": "historical_europe_1444",
+      "regions": 2431,
+      "bytes": 2033978,
+      "gzipBytes": 497742
+    },
+    {
+      "id": "historical_europe_1648",
+      "regions": 2431,
+      "bytes": 2013530,
+      "gzipBytes": 495580
+    },
+    {
+      "id": "historical_world_1550",
+      "regions": 5939,
+      "bytes": 6803254,
+      "gzipBytes": 1798632
+    },
+    {
+      "id": "historical_world_1914",
+      "regions": 5939,
+      "bytes": 6847058,
+      "gzipBytes": 1795443
+    },
+    {
+      "id": "historical_world_1939",
+      "regions": 5939,
+      "bytes": 6856408,
+      "gzipBytes": 1797026
     }
   ]
 }

@@ -46,7 +46,7 @@ test('1419 frontier and 1754 colonial preset differ from modern ownership',()=>{
 test('modern preset preserves country owners and cropped lists include regional descriptors',()=>{
   const t=maps.get(maps.regionalId('eastasia','modern'));
   for(const p of t.provinces)assert.equal(p.owner,worldById.get(p.id).owner);
-  const listing=maps.list();assert.equal(listing.length,23);assert.equal(listing.filter(t=>t.regionId).length,14);
+  const listing=maps.list();assert.equal(listing.length,28);assert.equal(listing.filter(t=>t.regionId).length,14);
   assert.equal(listing.find(t=>t.id==='europe-balanced')?.recommended,true);
   assert.equal(listing.find(t=>t.id==='world-balanced')?.recommended,true);
 });

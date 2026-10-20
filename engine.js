@@ -77,6 +77,7 @@
     if (!config) return null;
     const result = { owners: {}, occupation: {}, influence: {}, markers: {} };
     config.provinces.forEach(province => { result.owners[province.id] = province.owner; if (province.influence !== undefined && province.influence !== null) result.influence[province.id] = province.influence; });
+    for (const layer of ['occupation', 'markers']) Object.assign(result[layer], config.template.historicalInitial?.[layer] || {});
     for (const layer of Object.keys(result)) for (const [province, value] of Object.entries(config.initial[layer] || {})) {
       if (layer !== 'owners' && value === null) delete result[layer][province];
       else result[layer][province] = value;

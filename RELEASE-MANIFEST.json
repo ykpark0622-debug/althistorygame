@@ -1,5 +1,5 @@
 {
-  "version": "2.7.0-community",
+  "version": "2.8.0-community",
   "builtAt": "2026-10-20",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -29,6 +29,11 @@
       "path": "BALANCED-WORLD.md",
       "bytes": 2613,
       "sha256": "57f9d09907cb9414187579cdddb504b74ede8fb56c8d2a044676f15967efa883"
+    },
+    {
+      "path": "HISTORICAL-MAP-SOURCES.md",
+      "bytes": 13284,
+      "sha256": "8a88a81caca05e5f7631a88eb5e8941a3849b54b2e1b633165a52a3c8b72af2a"
     },
     {
       "path": "MAP-LOADING.md",
@@ -64,6 +69,11 @@
       "path": "SETUP.md",
       "bytes": 15633,
       "sha256": "6717c3358dd954e54e3cab5fc70a6e8b675ab1c9214eae9cc67c563ad67cefc2"
+    },
+    {
+      "path": "TEST-ASSET-BUILD-V2.8.txt",
+      "bytes": 3524,
+      "sha256": "3ccac16d6801d611a3dfcc46154738c113d5d7e1869b7fd0b7dfdf76c1f42c54"
     },
     {
       "path": "TEST-RESULTS-V2.1.txt",
@@ -114,6 +124,11 @@
       "path": "TEST-RESULTS-V2.7.txt",
       "bytes": 18562,
       "sha256": "a8c2ba3dcdf430f9435174e78e8d62f19bc49b036c1cd913d78cb538638c1067"
+    },
+    {
+      "path": "TEST-RESULTS-V2.8.txt",
+      "bytes": 20187,
+      "sha256": "dc02c671585a12b54bc11b0ad425e0ac77c60b5932bf0eedba8cade229a6aab2"
     },
     {
       "path": "TEST-RESULTS.txt",
@@ -177,8 +192,8 @@
     },
     {
       "path": "VERSION.txt",
-      "bytes": 216,
-      "sha256": "b37b590f072bb9a01c664ec229c21cff1a206e02c235c1d116bd6343e98374ad"
+      "bytes": 218,
+      "sha256": "8c26f2c1bb986f0df019f722e9ab7927c59bb0459147aa7c9d5a16bfae6c400c"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -202,8 +217,8 @@
     },
     {
       "path": "assets/maps/SIZES.json",
-      "bytes": 2938,
-      "sha256": "e9b2f5489d2be8b00aba0aa3e6382ee86ce28c7d1b31d399d5bd17e06314b5cb"
+      "bytes": 3558,
+      "sha256": "e9304d00f97d52475e555a88eeb24b6253eca2df3a7bd8d7aea0eb996777da79"
     },
     {
       "path": "assets/maps/balanced_asia_modern.14b319f83d6c9c43.json",
@@ -246,9 +261,34 @@
       "sha256": "d59f6cc7714f5ef9c8505053697d06d6c74230a992f9f0f986010ad0dea0961e"
     },
     {
+      "path": "assets/maps/historical_europe_1444.7889dd429209a472.json",
+      "bytes": 184814,
+      "sha256": "7889dd429209a4724656450c5c03d9862facb2992ab2249ba926cc827008fff9"
+    },
+    {
+      "path": "assets/maps/historical_europe_1648.352ef8f0c7e0e01a.json",
+      "bytes": 164366,
+      "sha256": "352ef8f0c7e0e01ae615189cc709207df7cb073a08b7405c811ca12494a0dd12"
+    },
+    {
+      "path": "assets/maps/historical_world_1550.ef60ec42d0f4069c.json",
+      "bytes": 429236,
+      "sha256": "ef60ec42d0f4069c702515efe9792efee6a28d48502daa53f9d14b7310edb143"
+    },
+    {
+      "path": "assets/maps/historical_world_1914.56cc02311b6497ab.json",
+      "bytes": 473040,
+      "sha256": "56cc02311b6497abf5978194e47b8ce2ebaf8a748617ad924138cf0cd8f89ee7"
+    },
+    {
+      "path": "assets/maps/historical_world_1939.ac9bd8f60c09177d.json",
+      "bytes": 482390,
+      "sha256": "ac9bd8f60c09177d7965692690e6d80c5f73ca829f30f0f0ee509d94a8e6b633"
+    },
+    {
       "path": "assets/maps/manifest.json",
-      "bytes": 38529,
-      "sha256": "6d7fd8843b5aa4660ce69c62114eea47f5cf5499afc17aced0a9314142869f9b"
+      "bytes": 45331,
+      "sha256": "b89fda9415eb1dfbf9cfe0e031b120b853bdb1e9cc7d828670193df9ae5839e7"
     },
     {
       "path": "assets/maps/regional_asia_1754.98b0a77511fa0f6b.json",
@@ -662,8 +702,8 @@
     },
     {
       "path": "assets/program/manifest.json",
-      "bytes": 6359,
-      "sha256": "d5408b6cd8a9c9f571ced547510935857350af3c24673078223acb9781257598"
+      "bytes": 6735,
+      "sha256": "c032806b94d869ce03b69df4b41d58e381ddc0690420761e364614ae6e215283"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -826,9 +866,19 @@
       "sha256": "c3942629b4943a3fbb412477890eed5c4d6b60e862e9709b1e2e2123ba53ebc4"
     },
     {
-      "path": "assets/program/standalone.033.eb54835fc348a9e3.txt",
-      "bytes": 525227,
-      "sha256": "eb54835fc348a9e3582f40fa7e04647c38240a73b57ba8ecf97ea8a0301f3ec0"
+      "path": "assets/program/standalone.033.854252f2cc7cd794.txt",
+      "bytes": 1048576,
+      "sha256": "854252f2cc7cd794fec6d0437792d9afc8886ed0dd765e3d1bd3c915262d9afc"
+    },
+    {
+      "path": "assets/program/standalone.034.4f63bb48565dfe6e.txt",
+      "bytes": 1048576,
+      "sha256": "4f63bb48565dfe6ee161c4a6d29f175242d6e01d54ef463a9feb13fab82fdb97"
+    },
+    {
+      "path": "assets/program/standalone.035.3d79ba78619203b8.txt",
+      "bytes": 120718,
+      "sha256": "3d79ba78619203b88856c229f44ae16980751e994dd0bb5268ad96bfc4c6de1f"
     },
     {
       "path": "bootstrap.js",
@@ -842,8 +892,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 8952,
-      "sha256": "26c18e27f34ada8b0892b9211cfd28b4d965eecd21a64c1e42eb4c1cf079d538"
+      "bytes": 9212,
+      "sha256": "94e8eb72840bf10142b69bec7c9eec8c1a1166f6cc12148372fa9f962580c652"
     },
     {
       "path": "community-bridge.js",
@@ -862,13 +912,13 @@
     },
     {
       "path": "editor.js",
-      "bytes": 103033,
-      "sha256": "a95fb26fe2735a9c42fa6516ad9cc4a51a92f2c5c384c060b311f5d6d5d5316f"
+      "bytes": 104809,
+      "sha256": "24e0e431ea6e66ccf2ab56852f00bb1de9f22cd3928661937e341cad9042a666"
     },
     {
       "path": "engine.js",
-      "bytes": 51143,
-      "sha256": "dcde25300dd68622845055a62a9497e4c1fdb65436934cd6e1e7329450dd8f7f"
+      "bytes": 51274,
+      "sha256": "54db14581d5863bbc282645bb827ae2270de82637386897fce8962949604182f"
     },
     {
       "path": "examples/balanced-asia.map.json",
@@ -911,6 +961,16 @@
       "sha256": "92041a777246b260500f2549e14323b73f41c02cd2b35c04264dbf2cbb5cc3a9"
     },
     {
+      "path": "examples/maps/INDEX.json",
+      "bytes": 1644,
+      "sha256": "1078438335efb4d02cddb72dee2350d5f1990cb7d2f127f1a9acf1e3151ac614"
+    },
+    {
+      "path": "examples/maps/README.md",
+      "bytes": 1807,
+      "sha256": "cb8dfacbaa23fd26d0023398e7e96303fff3bf571c7ca01a432af12006837aa5"
+    },
+    {
       "path": "examples/maps/eastasia-1592-map.json",
       "bytes": 669,
       "sha256": "3388631cc3f4dff608d72191c3a2d07814c58a6f06ebbdef290512ae183c500e"
@@ -919,6 +979,31 @@
       "path": "examples/maps/europe-1754-map.json",
       "bytes": 691,
       "sha256": "d77f834abc46db11566f649df390c24cbe54c316d3939eb31bde5654ccbb2dfc"
+    },
+    {
+      "path": "examples/maps/historical_europe_1444.map.json",
+      "bytes": 232324,
+      "sha256": "4228c6c4282bba10e8171fbe7c2f3d6f1585966a4f4471c732d76bf3d26d29a7"
+    },
+    {
+      "path": "examples/maps/historical_europe_1648.map.json",
+      "bytes": 194595,
+      "sha256": "df63c26db34539227db3151349996dcd5cd56a4b72a8df5a50ea039487c3c729"
+    },
+    {
+      "path": "examples/maps/historical_world_1550.map.json",
+      "bytes": 483561,
+      "sha256": "bb3eed85a407a84aca45221c1dd0d30888689b4b6c311c12b404ac965c73f450"
+    },
+    {
+      "path": "examples/maps/historical_world_1914.map.json",
+      "bytes": 559473,
+      "sha256": "c04d0709b23f368fcc639602db7a8ec1f72f2a05506477f339ab33ecb6d146b8"
+    },
+    {
+      "path": "examples/maps/historical_world_1939.map.json",
+      "bytes": 573881,
+      "sha256": "4315718d285cb9b6e508324efe71b730ddbac0dc7b799c8dce4300d384c7a715"
     },
     {
       "path": "examples/regional-europe-demo.json",
@@ -961,6 +1046,11 @@
       "sha256": "1fcd1ef9d6d0ebbbd77ce8c059e0c72bc25224b91affd9ac9355d855559e9223"
     },
     {
+      "path": "historical-maps.html",
+      "bytes": 5612,
+      "sha256": "e92a7f942fed8108452688ae79556ab36be841cc5f8821426dc00eca8a2349be"
+    },
+    {
       "path": "index.html",
       "bytes": 6098,
       "sha256": "4caf09426582bc7474f093017e017d3c80772ee3f41a0b0b251f2c55b2445ea1"
@@ -972,8 +1062,8 @@
     },
     {
       "path": "map-document.js",
-      "bytes": 14565,
-      "sha256": "0948a8e96eb8a395cf1bcd9b1bad0f1c749a8a79307a709680c3085712568bcf"
+      "bytes": 14776,
+      "sha256": "adc80bbe14ec3003461bdc5ab150a8afca01f8a9cfdbac42b5c323179f37c3c2"
     },
     {
       "path": "map-maker.css",
@@ -992,8 +1082,8 @@
     },
     {
       "path": "map-templates.js",
-      "bytes": 42641,
-      "sha256": "4e63a5a3cf5e9f66ffcd98cebe1873765432caad9188300d7f4fac9d7c341d28"
+      "bytes": 48623,
+      "sha256": "edbd7efc6750d681df5a4ee2215a3d6de9fdd9b867d6a9ae132c676785b6c840"
     },
     {
       "path": "map-view.css",
@@ -1002,8 +1092,8 @@
     },
     {
       "path": "map-view.js",
-      "bytes": 22745,
-      "sha256": "298d87e7e0dc4197aa12f654362edea888dc6570fe898c6966adf2bc33ac50f1"
+      "bytes": 22946,
+      "sha256": "4db8d6cd989559a258e80792b8177cb3f21d5e5b2bf634a0aa6c6a6aad372763"
     },
     {
       "path": "privacy.html",
@@ -1022,8 +1112,8 @@
     },
     {
       "path": "run-tests.cjs",
-      "bytes": 946,
-      "sha256": "9aecd117ad5da382d425b3a14c825f02ebd05eca1761511648a9f9d5bb43bd66"
+      "bytes": 1009,
+      "sha256": "c570ec6aebe462fa250a0f070594019d5b21fff1cd82327aae531e4b9146d28e"
     },
     {
       "path": "serve.cjs",
@@ -1032,8 +1122,8 @@
     },
     {
       "path": "standalone.html",
-      "bytes": 7592,
-      "sha256": "60c0abb5077d57d4ac3852f84d7ca21c8c0815d4d53a8f0185fe9aa33a89c625"
+      "bytes": 7900,
+      "sha256": "a9672f801c016dfdc8ad96f249563bf030025146e6d2a347250b9eff5e5c1de5"
     },
     {
       "path": "styles.css",
@@ -1087,8 +1177,8 @@
     },
     {
       "path": "tests/balanced-regions.cjs",
-      "bytes": 11162,
-      "sha256": "50c6e92253dc591fee2b46c5b6c57723747dd886e5f5589e693ec3855835eb8c"
+      "bytes": 11164,
+      "sha256": "8c7c425324e6b7181d98eac64021aa93a095952c1b2cb052f54c441a1678ffa6"
     },
     {
       "path": "tests/detailed-map.cjs",
@@ -1131,6 +1221,11 @@
       "sha256": "082820e4416db35e4a8fdc0fad9fdce2976bfe35ce38a1a20a5289d107abf074"
     },
     {
+      "path": "tests/fixtures/v27-map-manifest.json",
+      "bytes": 38529,
+      "sha256": "6d7fd8843b5aa4660ce69c62114eea47f5cf5499afc17aced0a9314142869f9b"
+    },
+    {
       "path": "tests/flow-reign-smoke.cjs",
       "bytes": 3717,
       "sha256": "56992b3545e3213411be58e3c3fc74398d11b28cd01c4a1c3ff69d80e1e2850e"
@@ -1144,6 +1239,21 @@
       "path": "tests/gallery-maps.cjs",
       "bytes": 7148,
       "sha256": "5c670347243b72b0561ba480e57141383c6eff615005455c493daaa362606784"
+    },
+    {
+      "path": "tests/historical-map-data.cjs",
+      "bytes": 2271,
+      "sha256": "be50922ba85a6fc49e0dd17164bc2c9f494f0a6bb4f177bc171eb84b37ef1e9b"
+    },
+    {
+      "path": "tests/historical-presets-browser.cjs",
+      "bytes": 13117,
+      "sha256": "92065bf67d52c8d81367e88b0260ebf02570dbe80de5c85bc42ef92d26f7f165"
+    },
+    {
+      "path": "tests/historical-presets.cjs",
+      "bytes": 9492,
+      "sha256": "5eab2ae76e60e7021a23f9d7dc1ccb54464c08cbb557d5cf9bfb1f6bdd75da1d"
     },
     {
       "path": "tests/home-navigation-browser.cjs",
@@ -1173,7 +1283,7 @@
     {
       "path": "tests/map-build-fallback.cjs",
       "bytes": 2654,
-      "sha256": "7f14aae8cdcb8032d35e1292c22298c5307513091613ca487d3c4a01a108c102"
+      "sha256": "7a23d53811a0e7011b7eed56f62d8badbbb2947258ea1ee5f8dbfb190adf8030"
     },
     {
       "path": "tests/map-document.cjs",
@@ -1183,7 +1293,7 @@
     {
       "path": "tests/map-loader.cjs",
       "bytes": 14057,
-      "sha256": "c4ab459974c5b69e49ab48af5095cfc1011a3b35075942a4f2bd130f87b9eb26"
+      "sha256": "5b4f68b2bd8a59d4611cf44174fecda49f8016e6956f486086b3e52f954de9ba"
     },
     {
       "path": "tests/map-maker-browser.cjs",
@@ -1218,7 +1328,7 @@
     {
       "path": "tests/regional-maps.cjs",
       "bytes": 5617,
-      "sha256": "cce63694710eafcaa47781f8eabc0f8ba48a7db6c39d301387c5a6d017bcf7c4"
+      "sha256": "5d677f2c8cca0fab6b79b612e7589ad67556c65604ef14f3cc7113dc989782fc"
     },
     {
       "path": "tests/regional-renderer-browser.cjs",
@@ -1247,8 +1357,8 @@
     },
     {
       "path": "tests/world-balanced.cjs",
-      "bytes": 9792,
-      "sha256": "6eb7edea15996430dd58faac8f196221e9ef54e8a15d025ac104ce7cab6bb5b0"
+      "bytes": 9793,
+      "sha256": "b1f4499f1bf3cc7cbe196f550358e4fcce8460a96bf7ac95241a7f50627c3e62"
     },
     {
       "path": "tests/world-ui-browser.cjs",
@@ -1276,9 +1386,14 @@
       "sha256": "6ecca146dc58e4bab2a8f5b5b062107f7fe129dd6849ed2e5fdebdec0630cb76"
     },
     {
+      "path": "tools/build-historical-definitions.cjs",
+      "bytes": 11598,
+      "sha256": "2c0f7c3f7eb0b9dd93c4828065d56ad823de37f8e8aee10e76d9b9267c1f483e"
+    },
+    {
       "path": "tools/build-map-assets.cjs",
-      "bytes": 9231,
-      "sha256": "dc943ea6d5df212142ec48549b5ea84508977b3dcf09fbde16db3005095f2987"
+      "bytes": 9722,
+      "sha256": "6db935c55762fa1f4f59bf2f7e7a6a7f7392b394a1cc443fb472c17d51a34d4f"
     },
     {
       "path": "tools/build-map-regions.cjs",
@@ -1321,6 +1436,81 @@
       "sha256": "cc68b26572fe209bc74b9a992bad9f30cd799964fc7cd4d0e3a66a2f31e9d9f4"
     },
     {
+      "path": "tools/map-source/historical-presets.cjs",
+      "bytes": 4835,
+      "sha256": "aaeee2a874b78b9754621599923dbbe24836d2f21a1ab17a0cfdd826121ebb14"
+    },
+    {
+      "path": "tools/map-source/historical-presets.json",
+      "bytes": 1685445,
+      "sha256": "7447ba9dc08ded77ebccc41e0ea35fe3aa5f0d774aa0ec8bb1703f5c574465ee"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1444.geojson",
+      "bytes": 789131,
+      "sha256": "031dc9cdc4a268bfa01599c07c9ab5859601bb6a4da5cb4db9b6503d512ba7c9"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1550.geojson",
+      "bytes": 838415,
+      "sha256": "64a6d52f9103174887861ad0c39061eadf393ce9d78c1922e577607b7d3c04f6"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1648.geojson",
+      "bytes": 802222,
+      "sha256": "117731d7c21051be619d431a6be516bdb959b2510d74a2bed5a207b5528c0617"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1914.geojson",
+      "bytes": 1334901,
+      "sha256": "25e98f6daf8579dd0872ce7c5e2c8d5f5dade449ab36f5f2b6876cf6d491f8e4"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1939.geojson",
+      "bytes": 1368607,
+      "sha256": "81ffaf775c7fedc1f0c9a7f1324365de97bea6d00f787796aa863159d166c78c"
+    },
+    {
+      "path": "tools/map-source/history-input/early-corrections.cjs",
+      "bytes": 14801,
+      "sha256": "075218508a6fd0b48497b2f2e1ec49fb624eb4e7f2dfe14d3a71d615e3b13328"
+    },
+    {
+      "path": "tools/map-source/history-input/early-review.json",
+      "bytes": 33308,
+      "sha256": "bd3d954fb1fc6fdd7c858712e283223e5254f69a21a822cbf646388f876517ba"
+    },
+    {
+      "path": "tools/map-source/history-input/early-review.md",
+      "bytes": 9830,
+      "sha256": "25ad13f14e3704dbe9ec065783eb37ec987f6fef7f28e02314ad2883d9ce4b92"
+    },
+    {
+      "path": "tools/map-source/history-input/geographic-gaps.cjs",
+      "bytes": 3297,
+      "sha256": "364a4a22b909d6e1255a0862dd2b51da18164ce51c24a96e17a968f989d837ee"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-boundary-reference.geojson",
+      "bytes": 62318,
+      "sha256": "81aa9fac4230bcb6d3a3fa17c8664d9862895686b2be46cc85731b789057aae3"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-corrections.cjs",
+      "bytes": 18021,
+      "sha256": "52385d190c79451bb6c823d5e1a23b21e018b08839002bfb07d8f7eca48dc4e4"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-review.json",
+      "bytes": 37283,
+      "sha256": "2a376d5c3cd32bcf5d6e6d4fdcecfd873266eebd51431d349b82cd237f8b7602"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-review.md",
+      "bytes": 5990,
+      "sha256": "e23aa19d9c1fb7d0540b58a5e8cad73ad0008aae5b82297d328572d368eb8b91"
+    },
+    {
       "path": "tools/map-source/legacy-templates.json",
       "bytes": 479775,
       "sha256": "bfe6e62eea043a40c3f7138b939f3f527352a32ee933e8c31eee73a3a38c1091"
@@ -1329,6 +1519,11 @@
       "path": "tools/map-source/licenses/balanced-regions.json",
       "bytes": 2755,
       "sha256": "9c70f9954e50653ce496d5cd3860fe27adc9a2bd4f76923509c093959c7f8e32"
+    },
+    {
+      "path": "tools/map-source/licenses/cliopatria-CC-BY-4.0.md",
+      "bytes": 843,
+      "sha256": "6a9a0bf9d15c10bccfe64ddafafaebc5b6d584ddf8ea6feb4ecb7225a050ff31"
     },
     {
       "path": "tools/map-source/licenses/europe-balanced-build.json",
@@ -1349,6 +1544,11 @@
       "path": "tools/map-source/licenses/geoBoundariesOpen-meta.csv",
       "bytes": 486138,
       "sha256": "d6f81bc9d3239f63fc36a62c6e3774ae892cedd5c653b8873fe1148311929eea"
+    },
+    {
+      "path": "tools/map-source/licenses/historical-provenance.json",
+      "bytes": 2724,
+      "sha256": "3ff5f9e00d8b43f046de68d7109a5e9ad53b20d37f5c07fb02bb963a7d4da593"
     },
     {
       "path": "tools/map-source/licenses/world-balanced-build.json",
@@ -1382,8 +1582,8 @@
     },
     {
       "path": "vercel.json",
-      "bytes": 29793,
-      "sha256": "bc5ea400c4bfed9e826c24a7f3e82ba2245eecb55cceafd6b7c1785c251f1706"
+      "bytes": 31374,
+      "sha256": "636efe9ab901799a753190683266ff16d313e632b4e7db01ffe0e6d4f1802c69"
     }
   ]
 }

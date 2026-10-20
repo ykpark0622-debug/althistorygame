@@ -9,7 +9,7 @@
  const ownerOf=(view,p)=>view.context.map.owners?.[p.id]||p.owner;
  const geometryOffset=template=>`translate(${-Number(template.offsetX||0)} ${-Number(template.offsetY||0)})`;
  function config(scenario){const template=root.MapTemplates?.get(scenario.map?.templateId);if(!template)return null;const countries=new Map(template.countries.map(c=>[c.id,c]));for(const c of scenario.map.countries||[])countries.set(c.id,{...countries.get(c.id),...c});return {template,countries};}
- function initialState(scenario){const cfg=config(scenario);if(!cfg)return null;const map={owners:{},occupation:{},influence:{},markers:{}};for(const p of cfg.template.provinces){map.owners[p.id]=p.owner;if(p.influence)map.influence[p.id]=p.influence;}for(const key of Object.keys(map))Object.assign(map[key],scenario.map.initial?.[key]||{});return {map};}
+ function initialState(scenario){const cfg=config(scenario);if(!cfg)return null;const map={owners:{},occupation:{},influence:{},markers:{}};for(const p of cfg.template.provinces){map.owners[p.id]=p.owner;if(p.influence)map.influence[p.id]=p.influence;}for(const key of ['occupation','markers'])Object.assign(map[key],cfg.template.historicalInitial?.[key]||{});for(const key of Object.keys(map))for(const [id,value]of Object.entries(scenario.map.initial?.[key]||{})){if(key!=='owners'&&value===null)delete map[key][id];else map[key][id]=value;}return {map};}
  function geometry(template){
   let cached=geometryCache.get(template);if(cached)return cached;
   const dense=template.provinces.length>1000;

@@ -39,14 +39,17 @@
     return id && globalThis.MapTemplates?.list().find(template => template.id === id);
   }
   function mapSetupSelection(templateId) {
+    const historical=globalThis.MapTemplates?.list().find(template=>template.id===templateId&&template.historicalRegionId);
+    if(historical)return{regionId:historical.historicalRegionId,eraId:historical.historicalEraId};
     const regionId = Object.keys(balancedRegionTemplates).find(id => balancedRegionTemplates[id] === templateId && balancedMapForRegion(id));
     return regionId ? { regionId, eraId: 'balanced_modern' } : globalThis.MapTemplates?.selection?.(templateId) || null;
   }
   function mapSetupEras(regionId) {
     const eras = globalThis.MapTemplates?.eras?.(regionId) || [], balanced = balancedMapForRegion(regionId);
-    if (!balanced) return eras;
+    const historical=(globalThis.MapTemplates?.list()||[]).filter(template=>template.historicalRegionId===regionId).map(template=>({id:template.historicalEraId,name:template.name+' ('+template.provinceCount.toLocaleString('ko-KR')+'개 지역)',notice:template.historicalNotice||'현대 균형 구획에 역사 국가와 영토를 근사 배치한 편집용 기본안입니다.'}));
+    if (!balanced) return [...historical,...eras];
     return [{ id: 'balanced_modern', name: '현대 · 균형 지도 (' + balanced.provinceCount.toLocaleString('ko-KR') + '개 지역)', notice: '현대 행정구역을 바탕으로 지역 수를 조정한 편집용 기본안입니다. 시대별 실제 국경을 재현한 지도는 아닙니다. 지도 준비 후 국가명·색·소유권을 바꿔 시나리오에 맞추세요.' },
-      ...eras.map(era => ({ ...era, name: era.name + ' · 세부 지도' }))];
+      ...historical,...eras.map(era => ({ ...era, name: era.name + ' · 세부 지도' }))];
   }
   function mapSetupDefault(region) {
     // Retain the existing first-time era for the four added continental crops.
@@ -54,6 +57,8 @@
     return { regionId: region.id, eraId: ['europe_med', 'world'].includes(region.id) && balancedMapForRegion(region.id) ? 'balanced_modern' : region.defaultEra };
   }
   function mapSetupTemplateId(regionId, eraId) {
+    const historical=globalThis.MapTemplates?.list().find(template=>template.historicalRegionId===regionId&&template.historicalEraId===eraId);
+    if(historical)return historical.id;
     return eraId === 'balanced_modern' ? balancedMapForRegion(regionId)?.id || null : globalThis.MapTemplates?.regionalId?.(regionId, eraId) || null;
   }
 
@@ -225,8 +230,9 @@
     const template = scenario.map && globalThis.MapTemplates?.get(scenario.map.templateId);
     if (!template) return null;
     const initial = scenario.map.initial || {}, owners = initial.owners || {}, used = new Set();
-    template.provinces.forEach(province => used.add(owners[province.id] || province.owner));
+    template.provinces.forEach(province => { used.add(owners[province.id] || province.owner); if(province.influence)used.add(province.influence); });
     for (const layer of ['occupation', 'influence']) Object.values(initial[layer] || {}).forEach(id => { if (id) used.add(id); });
+    for (const layer of ['occupation', 'influence']) Object.values({...(template.historicalInitial?.[layer]||{}),...(initial[layer]||{})}).forEach(id=>{if(id)used.add(id);});
     (scenario.map.countries || []).forEach(country => used.add(country.id));
     territoryReferences(scenario).countries.forEach(id => used.add(id));
     if (scenario.map.playerCountry) used.add(scenario.map.playerCountry);
@@ -263,7 +269,7 @@
       } else if (previousTemplate?.id !== template.id) {
         // Custom bounds in regional templates use the same world geometry with
         // different origins. Legacy templates can use unrelated projections.
-        const worldOrigin = value => value && (value.regionId || value.balancedRegionId || ['world-detailed', 'world-balanced', 'europe-balanced'].includes(value.id)) && Number.isFinite(value.offsetX || 0) && Number.isFinite(value.offsetY || 0);
+        const worldOrigin = value => value && (value.regionId || value.balancedRegionId || value.historicalBaseId || ['world-detailed', 'world-balanced', 'europe-balanced'].includes(value.id)) && Number.isFinite(value.offsetX || 0) && Number.isFinite(value.offsetY || 0);
         if (worldOrigin(previousTemplate) && worldOrigin(template) && bounds.length === 4 && bounds.every(Number.isFinite)) {
           const dx = (previousTemplate.offsetX || 0) - (template.offsetX || 0), dy = (previousTemplate.offsetY || 0) - (template.offsetY || 0);
           const translated = [Math.max(0, bounds[0] + dx), Math.max(0, bounds[1] + dy), Math.min(template.width, bounds[2] + dx), Math.min(template.height, bounds[3] + dy)];
@@ -281,7 +287,7 @@
       if (needed.has(country.id) && !known.has(country.id)) { countries.push(moveCountryOverride(country)); known.add(country.id); }
     });
     const represented = new Set(template.provinces.map(province => initial.owners[province.id] || province.owner));
-    const preferred = template.countries.find(country => represented.has(country.id) && ['joseon', 'france', 'kor', 'fra'].includes(country.id)) || template.countries.find(country => represented.has(country.id)) || countries[0];
+    const preferred = template.countries.find(country => represented.has(country.id) && country.id===template.defaultPlayerCountry) || template.countries.find(country => represented.has(country.id) && ['joseon', 'france', 'kor', 'fra'].includes(country.id)) || template.countries.find(country => represented.has(country.id)) || countries[0];
     const present = new Set(represented);
     for (const layer of ['occupation', 'influence']) Object.values(initial[layer]).forEach(id => { if (id) present.add(id); });
     const previousPlayer = scenario.map?.playerCountry;
@@ -292,8 +298,9 @@
     const config = mapConfig(scenario); if (!config) return null;
     if (globalThis.MapView?.initialState) return { ...MapView.initialState(scenario), stats: {}, flags: {} };
     const initial = scenario.map.initial || {};
-    return { stats: {}, flags: {}, map: { owners: { ...Object.fromEntries(config.template.provinces.map(province => [province.id, province.owner])), ...(initial.owners || {}) },
-      occupation: { ...(initial.occupation || {}) }, influence: { ...(initial.influence || {}) }, markers: { ...(initial.markers || {}) } } };
+    const map={owners:Object.fromEntries(config.template.provinces.map(province=>[province.id,province.owner])),occupation:{...(config.template.historicalInitial?.occupation||{})},influence:Object.fromEntries(config.template.provinces.filter(province=>province.influence).map(province=>[province.id,province.influence])),markers:{...(config.template.historicalInitial?.markers||{})}};
+    for(const layer of Object.keys(map))for(const [id,value]of Object.entries(initial[layer]||{})){if(layer!=='owners'&&value===null)delete map[layer][id];else map[layer][id]=value;}
+    return {stats:{},flags:{},map};
   }
   function paintMap(container, scenario, onProvince) {
     if (!globalThis.MapView?.render || !mapConfig(scenario)) { container.append(notice('지도 템플릿을 먼저 선택하세요.')); return; }
@@ -614,8 +621,9 @@
       if (!province) { panel.append($('h3', '', '지역을 선택하세요'), notice('지도의 지역을 누르면 이곳에서 처음 상태를 바꿀 수 있습니다.')); return; }
       panel.append($('h3', '', province.name + ' · ' + province.id));
       panel.append(select('시작 소유국', initial.owners[province.id] || province.owner, countryItems(), value => { initial.owners[province.id] = value; mark(); redraw(); }));
-      for (const [field, title] of [['occupation', '군사 점령국'], ['influence', '영향국']]) panel.append(select(title, initial[field][province.id] || '__none__', [['__none__', '없음'], ...countryItems()], value => { if (value === '__none__') delete initial[field][province.id]; else initial[field][province.id] = value; mark(); redraw(); }));
-      panel.append(input('시작 표식', initial.markers[province.id] || '', value => { if (value) initial.markers[province.id] = value; else delete initial.markers[province.id]; mark(); redraw(); }));
+      const effective=initialMapState(draft).map;
+      for (const [field, title] of [['occupation', '군사 점령국'], ['influence', '영향국']]) panel.append(select(title, effective[field][province.id] || '__none__', [['__none__', '없음'], ...countryItems()], value => { if (value === '__none__') { if(config.template.historicalInitial?.[field]?.[province.id]||(field==='influence'&&province.influence))initial[field][province.id]=null;else delete initial[field][province.id]; } else initial[field][province.id] = value; mark(); redraw(); }));
+      panel.append(input('시작 표식', effective.markers[province.id] || '', value => { if (value) initial.markers[province.id] = value; else if(config.template.historicalInitial?.markers?.[province.id])initial.markers[province.id]=null;else delete initial.markers[province.id]; mark(); redraw(); }));
       panel.append(button('이 지역을 템플릿 기본값으로', () => { for (const layer of Object.values(initial)) if (layer && typeof layer === 'object') delete layer[province.id]; mark(); redraw(); drawProvince(); }));
     }
     redraw(); drawProvince();

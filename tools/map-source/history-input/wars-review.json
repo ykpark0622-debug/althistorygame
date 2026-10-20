@@ -1,0 +1,780 @@
+{
+  "names": {
+    "German Empire": "독일 제국",
+    "Germany": "독일국",
+    "Nazi Germany": "독일국",
+    "German Reich": "독일국",
+    "Austria-Hungary": "오스트리아·헝가리 제국",
+    "Austro-Hungarian Empire": "오스트리아·헝가리 제국",
+    "Russian Empire": "러시아 제국",
+    "Soviet Union": "소비에트 연방",
+    "USSR": "소비에트 연방",
+    "Union of Soviet Socialist Republics": "소비에트 연방",
+    "Ottoman Empire": "오스만 제국",
+    "British Empire": "대영 제국",
+    "United Kingdom": "영국",
+    "United Kingdom of Great Britain and Ireland": "그레이트브리튼 아일랜드 연합왕국",
+    "United Kingdom of Great Britain and Northern Ireland": "영국",
+    "Kingdom of Italy": "이탈리아 왕국",
+    "Italy": "이탈리아 왕국",
+    "France": "프랑스 공화국",
+    "French Republic": "프랑스 공화국",
+    "French Third Republic": "프랑스 제3공화국",
+    "Spain": "스페인",
+    "Kingdom of Spain": "스페인 왕국",
+    "Spanish State": "스페인국",
+    "Portugal": "포르투갈 공화국",
+    "Portuguese Republic": "포르투갈 공화국",
+    "Netherlands": "네덜란드 왕국",
+    "Kingdom of the Netherlands": "네덜란드 왕국",
+    "Belgium": "벨기에 왕국",
+    "Kingdom of Belgium": "벨기에 왕국",
+    "Switzerland": "스위스 연방",
+    "Denmark": "덴마크 왕국",
+    "Kingdom of Denmark": "덴마크 왕국",
+    "Norway": "노르웨이 왕국",
+    "Kingdom of Norway": "노르웨이 왕국",
+    "Sweden": "스웨덴 왕국",
+    "Kingdom of Sweden": "스웨덴 왕국",
+    "Finland": "핀란드 공화국",
+    "Republic of Finland": "핀란드 공화국",
+    "Poland": "폴란드 공화국",
+    "Second Polish Republic": "폴란드 제2공화국",
+    "Republic of Poland": "폴란드 공화국",
+    "Estonia": "에스토니아 공화국",
+    "Latvia": "라트비아 공화국",
+    "Lithuania": "리투아니아 공화국",
+    "Czechoslovakia": "체코슬로바키아 공화국",
+    "Protectorate of Bohemia and Moravia": "보헤미아·모라비아 보호령",
+    "Bohemia and Moravia": "보헤미아·모라비아 보호령",
+    "Slovakia": "슬로바키아 공화국",
+    "Slovak Republic": "슬로바키아 공화국",
+    "Hungary": "헝가리 왕국",
+    "Kingdom of Hungary": "헝가리 왕국",
+    "Romania": "루마니아 왕국",
+    "Kingdom of Romania": "루마니아 왕국",
+    "Bulgaria": "불가리아 왕국",
+    "Kingdom of Bulgaria": "불가리아 왕국",
+    "Tsardom of Bulgaria": "불가리아 왕국",
+    "Greece": "그리스 왕국",
+    "Kingdom of Greece": "그리스 왕국",
+    "Serbia": "세르비아 왕국",
+    "Kingdom of Serbia": "세르비아 왕국",
+    "Montenegro": "몬테네그로 왕국",
+    "Kingdom of Montenegro": "몬테네그로 왕국",
+    "Yugoslavia": "유고슬라비아 왕국",
+    "Kingdom of Yugoslavia": "유고슬라비아 왕국",
+    "Albania": "알바니아",
+    "Principality of Albania": "알바니아 공국",
+    "Albanian Kingdom": "알바니아 왕국",
+    "Italian Albania": "알바니아 왕국 · 이탈리아 점령",
+    "Turkey": "튀르키예 공화국",
+    "Republic of Turkey": "튀르키예 공화국",
+    "Japan": "일본 제국",
+    "Empire of Japan": "일본 제국",
+    "Japanese Empire": "일본 제국",
+    "Republic of China": "중화민국",
+    "China": "중화민국",
+    "Chinese Republic": "중화민국",
+    "Manchukuo": "만주국",
+    "Manchoukuo": "만주국",
+    "Mengjiang": "몽강연합자치정부",
+    "Mongol United Autonomous Government": "몽강연합자치정부",
+    "Tibet": "티베트",
+    "Mongolia": "몽골",
+    "Mongolian People's Republic": "몽골 인민공화국",
+    "Bogd Khanate of Mongolia": "복드 칸국",
+    "Siam": "시암 왕국",
+    "Thailand": "타이 왕국",
+    "Kingdom of Siam": "시암 왕국",
+    "Persia": "페르시아",
+    "Qajar Iran": "카자르조 페르시아",
+    "Qajar Persia": "카자르조 페르시아",
+    "Iran": "이란",
+    "Pahlavi Iran": "팔라비조 이란",
+    "Afghanistan": "아프가니스탄",
+    "Emirate of Afghanistan": "아프가니스탄 토후국",
+    "Kingdom of Afghanistan": "아프가니스탄 왕국",
+    "Nepal": "네팔 왕국",
+    "Kingdom of Nepal": "네팔 왕국",
+    "Bhutan": "부탄 왕국",
+    "Kingdom of Bhutan": "부탄 왕국",
+    "British India": "영국령 인도",
+    "British Raj": "영국령 인도",
+    "French Indochina": "프랑스령 인도차이나",
+    "Dutch East Indies": "네덜란드령 동인도",
+    "Dutch New Guinea": "네덜란드령 뉴기니",
+    "British Malaya": "영국령 말라야",
+    "British Burma": "영국령 버마",
+    "Philippine Islands": "미국령 필리핀",
+    "Insular Government of the Philippine Islands": "미국령 필리핀",
+    "Commonwealth of the Philippines": "필리핀 자치령",
+    "Canada": "캐나다 자치령",
+    "Dominion of Canada": "캐나다 자치령",
+    "Newfoundland": "뉴펀들랜드 자치령",
+    "Dominion of Newfoundland": "뉴펀들랜드 자치령",
+    "Australia": "오스트레일리아 연방",
+    "Commonwealth of Australia": "오스트레일리아 연방",
+    "New Zealand": "뉴질랜드 자치령",
+    "Dominion of New Zealand": "뉴질랜드 자치령",
+    "Union of South Africa": "남아프리카 연방",
+    "South Africa": "남아프리카 연방",
+    "Irish Free State": "아일랜드 자유국",
+    "Ireland": "아일랜드",
+    "United States": "미합중국",
+    "United States of America": "미합중국",
+    "Mexico": "멕시코",
+    "United Mexican States": "멕시코 합중국",
+    "Brazil": "브라질",
+    "Argentina": "아르헨티나",
+    "Chile": "칠레",
+    "Peru": "페루",
+    "Bolivia": "볼리비아",
+    "Paraguay": "파라과이",
+    "Uruguay": "우루과이",
+    "Colombia": "콜롬비아",
+    "Ecuador": "에콰도르",
+    "Venezuela": "베네수엘라",
+    "Ethiopian Empire": "에티오피아 제국",
+    "Abyssinia": "에티오피아 제국",
+    "Ethiopia": "에티오피아 제국",
+    "Liberia": "라이베리아 공화국",
+    "Republic of Liberia": "라이베리아 공화국",
+    "Egypt": "이집트",
+    "Khedivate of Egypt": "이집트 케디브국",
+    "Kingdom of Egypt": "이집트 왕국",
+    "Anglo-Egyptian Sudan": "영국·이집트 공동통치 수단",
+    "German East Africa": "독일령 동아프리카",
+    "German South West Africa": "독일령 남서아프리카",
+    "German South-West Africa": "독일령 남서아프리카",
+    "Kamerun": "독일령 카메룬",
+    "German Cameroon": "독일령 카메룬",
+    "Togoland": "독일령 토고",
+    "German New Guinea": "독일령 뉴기니",
+    "German Samoa": "독일령 사모아",
+    "Belgian Congo": "벨기에령 콩고",
+    "French West Africa": "프랑스령 서아프리카",
+    "French Equatorial Africa": "프랑스령 적도아프리카",
+    "Italian East Africa": "이탈리아령 동아프리카",
+    "Italian Libya": "이탈리아령 리비아",
+    "Italian Somaliland": "이탈리아령 소말릴란드",
+    "British Somaliland": "영국령 소말릴란드",
+    "French Somaliland": "프랑스령 소말릴란드",
+    "Portuguese Angola": "포르투갈령 앙골라",
+    "Portuguese Mozambique": "포르투갈령 모잠비크",
+    "Saudi Arabia": "사우디아라비아 왕국",
+    "Kingdom of Saudi Arabia": "사우디아라비아 왕국",
+    "Emirate of Nejd and Hasa": "네지드·하사 토후국",
+    "Emirate of Jabal Shammar": "자발 샴마르 토후국",
+    "Mutawakkilite Kingdom of Yemen": "예멘 무타와킬 왕국",
+    "Kingdom of Iraq": "이라크 왕국",
+    "Mandatory Palestine": "영국 위임통치 팔레스타인",
+    "Emirate of Transjordan": "트란스요르단 토후국",
+    "French Mandate for Syria and the Lebanon": "프랑스 위임통치 시리아·레바논",
+    "Principality of Andorra": "안도라 공국",
+    "Republic of El Salvador": "엘살바도르 공화국",
+    "Kingdom of Monaco": "모나코 공국",
+    "Denmark-Norway": "덴마크 왕국",
+    "Dominican Republic": "도미니카 공화국",
+    "Empire of Haiti": "아이티 공화국",
+    "Republic of Haiti": "아이티 공화국",
+    "Oriental Republic of Uruguay": "우루과이 동방공화국",
+    "Swiss Confederation": "스위스 연방",
+    "Netherlands Antilles": "네덜란드령 서인도",
+    "Republic of Peru": "페루 공화국",
+    "New Hebrides": "뉴헤브리디스 공동통치령",
+    "Luxembourg": "룩셈부르크 대공국",
+    "Honduras": "온두라스 공화국",
+    "Republic of Nicaragua": "니카라과 공화국",
+    "Qajar Dynasty": "카자르조 페르시아",
+    "British Gold Coast": "영국령 골드코스트",
+    "Argentine Confederation": "아르헨티나 공화국",
+    "Republic of Ecuador": "에콰도르 공화국",
+    "Brazilian Republic": "브라질 제1공화국",
+    "Republic of Costa Rica": "코스타리카 공화국",
+    "Republic of Chile": "칠레 공화국",
+    "Republic of Colombia": "콜롬비아 공화국",
+    "Republic of Panama": "파나마 공화국",
+    "Greenland": "덴마크령 그린란드",
+    "Rattanakosin Kingdom": "시암 왕국",
+    "Republic of Cuba": "쿠바 공화국",
+    "(Spanish Empire)": "스페인 왕국",
+    "Italian Africa": "이탈리아령 아프리카",
+    "Tangier International Zone": "탕헤르 국제관리구역",
+    "French Africa": "프랑스령 아프리카",
+    "(French Third Republic)": "프랑스 제3공화국",
+    "United Principalities of Moldavia and Wallachia": "루마니아 왕국",
+    "Qatar": "카타르",
+    "Kingdom of Great Britain": "영국",
+    "Emirate of Nejd": "네지드·하사 토후국",
+    "First Hellenic Republic": "그리스 왕국",
+    "Principality of Bulgaria": "불가리아 왕국",
+    "Imamate of Oman": "오만 이맘국",
+    "Sultanate of Muscat and Oman": "무스카트·오만 술탄국",
+    "Guatemala": "과테말라 공화국",
+    "British Colonial Empire": "영국령 해외 식민지",
+    "German Africa": "독일령 아프리카",
+    "British Africa": "영국령 아프리카",
+    "Great Mongol State": "복드 칸국",
+    "Serbs": "세르비아 왕국",
+    "(Netherlands)": "네덜란드 왕국",
+    "(British Empire)": "대영 제국",
+    "Kingdom of Thailand": "타이 왕국",
+    "Argentine Republic": "아르헨티나 공화국",
+    "Unitary State of Brazil": "브라질 공화국",
+    "Pahlavi Dynasty": "팔라비조 이란",
+    "North Yemen": "예멘 무타와킬 왕국",
+    "Éire": "아일랜드",
+    "Communist Party of China": "중국 공산당 근거지",
+    "Hungarian Republic": "헝가리 왕국",
+    "Republic of Latvia": "라트비아 공화국",
+    "Francoist Spain": "스페인국",
+    "Kingdom of Lithuania": "리투아니아 공화국",
+    "French Mandate for Syria and Lebanon": "프랑스 위임통치 시리아·레바논",
+    "Estado Novo": "포르투갈 공화국",
+    "Kingdom of Iceland": "아이슬란드 왕국",
+    "Free City of Danzig": "단치히 자유시",
+    "Principality of Monaco": "모나코 공국",
+    "Republic of Lithuania": "리투아니아 공화국",
+    "British Leeward Islands": "영국령 리워드 제도",
+    "British Bahamas": "영국령 바하마",
+    "Portuguese Cape Verde": "포르투갈령 카보베르데",
+    "British Fiji": "영국령 피지",
+    "Portuguese Guinea": "포르투갈령 기니",
+    "Spanish Guinea": "스페인령 기니",
+    "British Windward Islands": "영국령 윈드워드 제도",
+    "Sheikhdom of Kuwait": "쿠웨이트 셰이크국",
+    "Sultanate of the Maldives": "몰디브 술탄국",
+    "British Malta": "영국령 몰타",
+    "British Mauritius": "영국령 모리셔스",
+    "Nyasaland": "냐살랜드 보호령",
+    "British Cayman Islands": "영국령 케이맨 제도",
+    "British Gibraltar": "영국령 지브롤터",
+    "British Pitcairn Islands": "영국령 핏케언 제도",
+    "French Oceania": "프랑스령 오세아니아",
+    "British Saint Helena": "영국령 세인트헬레나",
+    "British Turks and Caicos Islands": "영국령 터크스 케이커스 제도",
+    "French Wallis and Futuna": "프랑스 보호령 왈리스 푸투나",
+    "Straits Settlements": "해협식민지",
+    "British Solomon Islands": "영국령 솔로몬 제도",
+    "Portuguese Sao Tome and Principe": "포르투갈령 상투메 프린시페",
+    "British Seychelles": "영국령 세이셸",
+    "Portuguese Timor": "포르투갈령 티모르",
+    "Kingdom of Tonga": "통가 왕국",
+    "French Protectorate of Tunisia": "프랑스 보호령 튀니지",
+    "Uganda Protectorate": "우간다 보호령",
+    "French West Indies": "프랑스령 서인도",
+    "Colony and Protectorate of Nigeria": "나이지리아 식민지·보호령",
+    "British Sierra Leone": "영국령 시에라리온",
+    "British Gambia": "영국령 감비아",
+    "Northern Rhodesia": "북로디지아 보호령",
+    "Southern Rhodesia": "남로디지아",
+    "Bechuanaland Protectorate": "베추아날랜드 보호령",
+    "Basutoland": "바수톨란드 보호령",
+    "Swaziland Protectorate": "스와질란드 보호령",
+    "French Algeria": "프랑스령 알제리",
+    "French Protectorate of Morocco": "프랑스 보호령 모로코",
+    "German Togoland": "독일령 토고",
+    "German Pacific Protectorates": "독일령 태평양 보호령",
+    "South Seas Mandate": "일본의 남양군도 위임통치령",
+    "Anglo-Australian-New Zealand Nauru Mandate": "영국·호주·뉴질랜드 위임통치 나우루",
+    "Territory of Papua": "오스트레일리아령 파푸아",
+    "Territory of New Guinea": "오스트레일리아 위임통치 뉴기니",
+    "New Zealand Mandate of Western Samoa": "뉴질랜드 위임통치 서사모아",
+    "Gilbert and Ellice Islands": "영국령 길버트·엘리스 제도",
+    "Danish West Indies": "덴마크령 서인도 제도",
+    "Newfoundland (Commission Government)": "뉴펀들랜드 · 영국 위원회 통치",
+    "Idrisid Emirate of Asir": "이드리스조 아시르 토후국",
+    "Kamaran under British administration": "영국 관리하 카마란섬",
+    "Chinese Communist Party base areas": "중국 공산당 근거지",
+    "Mongol League Autonomous Government": "몽골연맹자치정부",
+    "British East Africa": "영국령 동아프리카",
+    "Moroccan Sultanate (Tangier special zone)": "모로코 술탄국 · 탕헤르 특별구역",
+    "Xinjiang Provincial Government (Sheng Shicai)": "신장성 정부 · 성스차이"
+  },
+  "landmarks": [
+    {
+      "year": 1914,
+      "lon": 13.405,
+      "lat": 52.52,
+      "expectedNameRegex": "German|Germany|독일",
+      "note": "베를린: 독일 제국 본토.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 7.752,
+      "lat": 48.573,
+      "expectedNameRegex": "German|Germany|독일",
+      "note": "스트라스부르: 알자스·로렌은 1918년 이전 독일 제국 영토.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 16.373,
+      "lat": 48.208,
+      "expectedNameRegex": "Austria|Habsburg|오스트리아",
+      "note": "빈: 오스트리아·헝가리 제국.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 18.413,
+      "lat": 43.856,
+      "expectedNameRegex": "Austria|Habsburg|오스트리아",
+      "note": "사라예보: 1908년 병합 후 오스트리아·헝가리 지배. 독립 보스니아·유고슬라비아로 표시하지 않음.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 21.012,
+      "lat": 52.23,
+      "expectedNameRegex": "Russia|러시아",
+      "note": "바르샤바: 러시아 제국의 폴란드 지역. 1918년 독립국 폴란드로 소급하지 않음.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 30.335,
+      "lat": 59.934,
+      "expectedNameRegex": "Russia|러시아",
+      "note": "상트페테르부르크: 러시아 제국.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 28.979,
+      "lat": 41.008,
+      "expectedNameRegex": "Ottoman|오스만",
+      "note": "이스탄불: 오스만 제국.",
+      "source": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+    },
+    {
+      "year": 1914,
+      "lon": 126.978,
+      "lat": 37.566,
+      "expectedNameRegex": "Japan|일본",
+      "note": "경성: 일본 제국의 식민지배. 대한민국/대한제국 소유로 두지 않음.",
+      "source": "https://2021-2025.state.gov/u-s-relations-with-the-republic-of-korea/"
+    },
+    {
+      "year": 1914,
+      "lon": 118.78,
+      "lat": 32.06,
+      "expectedNameRegex": "China|Chinese|중화",
+      "note": "난징: 중화민국. 1914년에는 만주국이 없음.",
+      "source": "https://history.state.gov/historicaldocuments/frus1931-41v01/index"
+    },
+    {
+      "year": 1914,
+      "lon": 39.209,
+      "lat": -6.792,
+      "expectedNameRegex": "German|독일",
+      "note": "다르에스살람: 독일령 동아프리카. 전후 영국 위임통치 탕가니카로 소급하지 않음.",
+      "source": "https://www.nam.ac.uk/explore/east-africa-campaign"
+    },
+    {
+      "year": 1914,
+      "lon": 17.084,
+      "lat": -22.56,
+      "expectedNameRegex": "German|독일",
+      "note": "빈트후크: 독일령 남서아프리카.",
+      "source": "https://ww1.nam.ac.uk/videos/empire-commonwealth-east-africa/"
+    },
+    {
+      "year": 1914,
+      "lon": 11.502,
+      "lat": 3.848,
+      "expectedNameRegex": "German|Kamerun|독일",
+      "note": "야운데: 독일령 카메룬.",
+      "source": "https://ww1.nam.ac.uk/videos/empire-commonwealth-east-africa/"
+    },
+    {
+      "year": 1914,
+      "lon": -75.697,
+      "lat": 45.422,
+      "expectedNameRegex": "Canada|British|캐나다|영국|대영",
+      "note": "오타와: 캐나다 자치령은 제국과의 관계를 유지. 별도 소유자로 표현하면 영국 영향권을 함께 표시.",
+      "source": "https://nzhistory.govt.nz/page/british-empire"
+    },
+    {
+      "year": 1914,
+      "lon": 174.778,
+      "lat": -41.292,
+      "expectedNameRegex": "New Zealand|British|뉴질랜드|영국|대영",
+      "note": "웰링턴: 뉴질랜드 자치령. 1914년 외교·전쟁 독립국처럼 오해되지 않게 영국 영향권 표시.",
+      "source": "https://nzhistory.govt.nz/war/new-zealand-facts"
+    },
+    {
+      "year": 1939,
+      "lon": 16.373,
+      "lat": 48.208,
+      "expectedNameRegex": "German|Germany|독일",
+      "note": "빈: 1938년 병합 이후 독일 지배. 독립 오스트리아 아님.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/invasion-of-poland-fall-1939"
+    },
+    {
+      "year": 1939,
+      "lon": 14.438,
+      "lat": 50.075,
+      "expectedNameRegex": "Bohemia|Moravia|German|Germany|보헤미아|모라비아|독일",
+      "note": "프라하: 1939년 3월 이후 보헤미아·모라비아 보호령/독일 점령. 독립 체코슬로바키아 아님.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/czechoslovakia"
+    },
+    {
+      "year": 1939,
+      "lon": 17.108,
+      "lat": 48.148,
+      "expectedNameRegex": "Slovak|슬로바키아",
+      "note": "브라티슬라바 도심: 슬로바키아국. 남부/페트르잘카 등의 양도는 구획 규모 한계에 유의.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/czechoslovakia"
+    },
+    {
+      "year": 1939,
+      "lon": 21.012,
+      "lat": 52.23,
+      "expectedNameRegex": "Poland|Polish|폴란드",
+      "note": "바르샤바: 1939년 8월에는 폴란드가 존속. 9월 분할을 미리 반영하지 않음.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/invasion-of-poland-fall-1939"
+    },
+    {
+      "year": 1939,
+      "lon": 24.031,
+      "lat": 49.842,
+      "expectedNameRegex": "Poland|Polish|폴란드",
+      "note": "르부프(리비우): 8월 기준 폴란드. 소련 합병은 9월 이후.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/invasion-of-poland-fall-1939"
+    },
+    {
+      "year": 1939,
+      "lon": 25.279,
+      "lat": 54.687,
+      "expectedNameRegex": "Poland|Polish|폴란드",
+      "note": "빌노(빌뉴스): 8월에는 폴란드 지배. 리투아니아 이양은 10월.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/vilna"
+    },
+    {
+      "year": 1939,
+      "lon": 23.903,
+      "lat": 54.898,
+      "expectedNameRegex": "Lithuan|리투아니아",
+      "note": "카우나스: 독립 리투아니아. 소련 편입은 1940년.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/german-soviet-pact"
+    },
+    {
+      "year": 1939,
+      "lon": 24.105,
+      "lat": 56.949,
+      "expectedNameRegex": "Latvia|라트비아",
+      "note": "리가: 독립 라트비아. 소련 편입은 1940년.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/german-soviet-pact"
+    },
+    {
+      "year": 1939,
+      "lon": 24.753,
+      "lat": 59.437,
+      "expectedNameRegex": "Estonia|에스토니아",
+      "note": "탈린: 독립 에스토니아. 소련 편입은 1940년.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/german-soviet-pact"
+    },
+    {
+      "year": 1939,
+      "lon": 28.752,
+      "lat": 47.01,
+      "expectedNameRegex": "Roman|루마니아",
+      "note": "키시너우: 베사라비아는 8월 기준 루마니아. 소련 병합은 1940년.",
+      "source": "https://encyclopedia.ushmm.org/content/en/article/german-soviet-pact"
+    },
+    {
+      "year": 1939,
+      "lon": 19.818,
+      "lat": 41.328,
+      "expectedNameRegex": "Alban|Italy|Italian|알바니아|이탈리아",
+      "note": "티라나: 4월 이후 이탈리아 점령/보호 아래 알바니아 왕국. 완전 독립국으로 묘사하지 않음.",
+      "source": "https://history.state.gov/historicaldocuments/frus1939v02/d326"
+    },
+    {
+      "year": 1939,
+      "lon": 38.757,
+      "lat": 8.98,
+      "expectedNameRegex": "Italian|Italy|Ethiop|이탈리아|에티오피아",
+      "note": "아디스아바바: 이탈리아 점령. 에티오피아 소유자를 보존하면 점령 레이어가 필요.",
+      "source": "https://history.state.gov/historicaldocuments/frus1936v03/ch6"
+    },
+    {
+      "year": 1939,
+      "lon": 125.323,
+      "lat": 43.817,
+      "expectedNameRegex": "Manch|만주",
+      "note": "신징(장춘): 만주국. 일본 영향권을 함께 표시.",
+      "source": "https://history.state.gov/historicaldocuments/frus1931-41v01/index"
+    },
+    {
+      "year": 1939,
+      "lon": 106.551,
+      "lat": 29.563,
+      "expectedNameRegex": "China|Chinese|중화",
+      "note": "충칭: 중화민국의 전시 수도, 일본 직접 소유 아님.",
+      "source": "https://history.state.gov/historicaldocuments/frus1939v04"
+    },
+    {
+      "year": 1939,
+      "lon": 118.797,
+      "lat": 32.061,
+      "expectedNameRegex": "China|Chinese|중화",
+      "note": "난징: 중국의 명목 소유와 일본 점령을 구별. 왕징웨이 정권은 1940년 성립이므로 1939년에 쓰지 않음.",
+      "source": "https://history.state.gov/historicaldocuments/frus1939v04"
+    },
+    {
+      "year": 1939,
+      "lon": 121.474,
+      "lat": 31.23,
+      "expectedNameRegex": "China|Chinese|중화",
+      "note": "상하이: 중국 명목 소유/일본 점령. 국제조계가 1941년까지 남으므로 도시 전체의 완전한 일본 합병 아님.",
+      "source": "https://history.state.gov/historicaldocuments/frus1939v04"
+    },
+    {
+      "year": 1939,
+      "lon": 87.617,
+      "lat": 43.825,
+      "expectedNameRegex": "Republic of China|중화민국",
+      "note": "디화(우루무치): 명목소유중화민국,성스차이성정부.중국공산당근거지가아님.",
+      "source": "https://history.state.gov/historicaldocuments/frus1935v03/d34"
+    },
+    {
+      "year": 1939,
+      "lon": 109.489,
+      "lat": 36.585,
+      "expectedNameRegex": "Republic of China|중화민국",
+      "note": "옌안:중화민국명목소유+중국공산당근거지영향권.독립국가로표현하지않음.",
+      "source": "https://history.state.gov/historicaldocuments/frus1938v03/d259"
+    }
+  ],
+  "corrections": [
+    {
+      "year": 1914,
+      "id": "snapshot-date",
+      "priority": "required",
+      "instruction": "기준일은 1914-07-01 또는 7월 초로 명시. 7월 28일 개전/8월 참전을 이미 반영한 점령선을 혼합하지 않는다. 연도만 지원하는 원자료는 이 기준일로 보정한다."
+    },
+    {
+      "year": 1914,
+      "id": "imperial-europe",
+      "priority": "required",
+      "instruction": "독일에는 알자스·로렌, 동프로이센, 포젠/서프로이센이 포함된다. 오스트리아·헝가리는 보헤미아·모라비아, 슬로바키아, 트란실바니아, 갈리치아, 크로아티아·보스니아를 포함하며 폴란드/체코슬로바키아/유고슬라비아 독립을 소급하지 않는다. 핀란드·발트·바르샤바는 러시아 제국권이다.",
+      "sources": [
+        "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1"
+      ]
+    },
+    {
+      "year": 1914,
+      "id": "colonial-africa",
+      "priority": "required",
+      "instruction": "독일령 카메룬·토고·남서아프리카·동아프리카를 영국·프랑스·벨기에의 전후 위임통치 영토로 미리 바꾸지 않는다. 에티오피아와 라이베리아는 독립국으로 둔다. 지도의 제국 소유권은 실제 현지 통제가 완전했다는 의미가 아니라고 설명한다.",
+      "sources": [
+        "https://www.loc.gov/resource/gdcwdl.wdl_15665/",
+        "https://ww1.nam.ac.uk/videos/empire-commonwealth-east-africa/"
+      ]
+    },
+    {
+      "year": 1914,
+      "id": "dominions",
+      "priority": "recommended",
+      "instruction": "캐나다·오스트레일리아·뉴질랜드·남아프리카·뉴펀들랜드를 플레이용 별도 소유자로 나눈다면 영국 영향권을 얹고 자치령/연방 명칭을 쓴다. 1914년 완전 독립 외교국으로 묘사하지 않는다. 인도 식민통치와 자치령을 같은 지위로 설명하지 않는다.",
+      "sources": [
+        "https://nzhistory.govt.nz/page/british-empire",
+        "https://nzhistory.govt.nz/war/new-zealand-facts"
+      ]
+    },
+    {
+      "year": 1914,
+      "id": "japan-east-asia",
+      "priority": "required",
+      "instruction": "한반도·타이완은 일본 제국 식민지로 표시. 만주국은 아직 없고 만주 대부분은 중화민국이다. 일본의 칭다오 및 독일령 태평양 제도 점령은 1914년 8월 이후이므로 7월 초 기준에는 독일 식민/조차지를 보존.",
+      "sources": [
+        "https://2021-2025.state.gov/u-s-relations-with-the-republic-of-korea/",
+        "https://ww1.nam.ac.uk/theme/year-1914/"
+      ]
+    },
+    {
+      "year": 1939,
+      "id": "snapshot-date",
+      "priority": "required",
+      "instruction": "기준일은 1939-08-01처럼 9월 이전 날짜로 고정한다. 폴란드 분할, 1940년 발트/베사라비아 병합, 프랑스 함락, 1941년 독소전·태평양전쟁의 점령선을 혼합하지 않는다."
+    },
+    {
+      "year": 1939,
+      "id": "central-europe-march",
+      "priority": "required",
+      "instruction": "오스트리아와 주데텐란트는 독일 지배. 보헤미아·모라비아는 독일 보호령 또는 별도 소유자+독일 점령/영향권으로 표시. 슬로바키아는 독일에 종속된 별도 국가. 남부 슬로바키아와 카르파티아 루테니아는 헝가리. 체코슬로바키아 전체를 독립국으로 남기지 않는다.",
+      "sources": [
+        "https://encyclopedia.ushmm.org/content/en/article/czechoslovakia"
+      ]
+    },
+    {
+      "year": 1939,
+      "id": "pre-invasion-east-europe",
+      "priority": "required",
+      "instruction": "폴란드는 독립국으로 바르샤바·르부프·빌노를 보유. 에스토니아·라트비아·리투아니아는 독립국이며 베사라비아는 루마니아. 동부 폴란드나 발트국을 소련 영토로 채우지 않는다.",
+      "sources": [
+        "https://encyclopedia.ushmm.org/content/en/article/invasion-of-poland-fall-1939",
+        "https://encyclopedia.ushmm.org/content/en/article/german-soviet-pact",
+        "https://encyclopedia.ushmm.org/content/en/article/vilna"
+      ]
+    },
+    {
+      "year": 1939,
+      "id": "italian-occupation",
+      "priority": "required",
+      "instruction": "알바니아는 1939년 4월 이후 이탈리아 점령/보호 관계. 에티오피아는 1936년 이후 이탈리아 점령. 별도 역사국가를 플레이 가능하게 유지할 때는 점령 레이어를 함께 둔다. 합병 주장과 국제적 승인을 동일시하지 않는다.",
+      "sources": [
+        "https://history.state.gov/historicaldocuments/frus1939v02/d326",
+        "https://history.state.gov/historicaldocuments/frus1936v03/ch6"
+      ]
+    },
+    {
+      "year": 1939,
+      "id": "china-occupation",
+      "priority": "required",
+      "instruction": "만주국을 별도 소유자+일본 영향권으로 표시. 베이징·톈진·난징·상하이·우한·광저우·하이난의 일본 점령은 중화민국 소유권과 구분해 빗금으로 표시하는 것이 적절하다. 화북/점령해안을 일본 본토처럼 영구 합병 색상으로만 채우지 않는다. 중국 동부 전체가 균질하게 통제된 것은 아니므로 현급 전선 재현이라고 주장하지 않는다. 왕징웨이의 재편 국민정부는 1940년부터이므로 1939년 명칭으로 쓰지 않는다.",
+      "sources": [
+        "https://history.state.gov/historicaldocuments/frus1939v04",
+        "https://www.govinfo.gov/content/pkg/GOVPUB-D101-PURL-gpo89049/pdf/GOVPUB-D101-PURL-gpo89049.pdf"
+      ]
+    },
+    {
+      "year": 1939,
+      "id": "mengjiang-date",
+      "priority": "recommended",
+      "instruction": "기준일을 8월 1일로 잡으면 9월 1일 정식 출범한 몽강연합자치정부라는 후대 통합 명칭보다 몽골연맹자치정부/차남·진북의 자치정부 등 실제 시점 명칭을 쓴다. 원자료가 연도 단위면 지도 설명에 연내 경계 변화 근사임을 밝힌다."
+    },
+    {
+      "year": 1939,
+      "id": "small-states",
+      "priority": "recommended",
+      "instruction": "단치히 자유시·메멜·산마리노·바티칸·모나코·안도라·리히텐슈타인 등은 5,939개 현대 구획에서 한 지역보다 작을 수 있다. 없는 영토를 인위적으로 크게 할당하는 대신 작은 국가 일부는 구획 한계로 생략/근사됨을 명시한다."
+    },
+    {
+      "year": 1939,
+      "id": "xinjiang-party-source-error",
+      "priority": "required",
+      "instruction": "Cliopatria1939 Communist Party of China폴리곤은 실제로신장성30구획이다. 중화민국 명목소유+성스차이신장성정부 영향권으로 고친다. 공산당근거지는옌안중심108~110E,36~38N구획에만 근사영향권을 둔다.",
+      "sources": [
+        "https://history.state.gov/historicaldocuments/frus1935v03/d34",
+        "https://history.state.gov/historicaldocuments/frus1938v03/d259"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "Library of Congress — Africa, 1914 (contemporary map)",
+      "url": "https://www.loc.gov/resource/gdcwdl.wdl_15665/",
+      "use": "1914 아프리카 식민 지배권의 동시대 지도 확인; 지도 도형 자체는 복제하지 않음"
+    },
+    {
+      "title": "National Army Museum — Moran's War Map, 1914",
+      "url": "https://collection.nam.ac.uk/detail.php?acc=2012-11-17-1",
+      "use": "1914 개전 전후 유럽 국경과 전쟁 발발 연표의 동시대 참고"
+    },
+    {
+      "title": "National Army Museum — East Africa campaign",
+      "url": "https://www.nam.ac.uk/explore/east-africa-campaign",
+      "use": "독일령 동아프리카의 1914 지위"
+    },
+    {
+      "title": "National Army Museum — East Africa / Empire & Commonwealth",
+      "url": "https://ww1.nam.ac.uk/videos/empire-commonwealth-east-africa/",
+      "use": "독일의 4개 아프리카 식민지와 전쟁 중 점령 순서"
+    },
+    {
+      "title": "National Army Museum — 1914 timeline",
+      "url": "https://ww1.nam.ac.uk/theme/year-1914/",
+      "use": "칭다오·독일 식민지 점령 시점을 7월 초와 분리"
+    },
+    {
+      "title": "New Zealand Ministry for Culture and Heritage — British Empire",
+      "url": "https://nzhistory.govt.nz/page/british-empire",
+      "use": "1914 자치령 목록과 제국 전쟁 참여 관계"
+    },
+    {
+      "title": "New Zealand Ministry for Culture and Heritage — Dominion of New Zealand",
+      "url": "https://nzhistory.govt.nz/war/new-zealand-facts",
+      "use": "뉴질랜드 자치령의 1914 헌정 지위"
+    },
+    {
+      "title": "US Department of State — US Relations With the Republic of Korea",
+      "url": "https://2021-2025.state.gov/u-s-relations-with-the-republic-of-korea/",
+      "use": "1910~1945 일본의 한반도 식민지배 시기"
+    },
+    {
+      "title": "USHMM — Czechoslovakia",
+      "url": "https://encyclopedia.ushmm.org/content/en/article/czechoslovakia",
+      "use": "1938~1939 체코슬로바키아 분할, 보호령, 슬로바키아, 헝가리 양도"
+    },
+    {
+      "title": "USHMM — Invasion of Poland, Fall 1939",
+      "url": "https://encyclopedia.ushmm.org/content/en/article/invasion-of-poland-fall-1939",
+      "use": "8월 지도에서 9월 분할을 배제"
+    },
+    {
+      "title": "USHMM — German-Soviet Pact",
+      "url": "https://encyclopedia.ushmm.org/content/en/article/german-soviet-pact",
+      "use": "1940 발트·베사라비아·핀란드 양도를 1939년 8월로 소급하지 않음"
+    },
+    {
+      "title": "USHMM — Vilna",
+      "url": "https://encyclopedia.ushmm.org/content/en/article/vilna",
+      "use": "빌노의 1939년 10월 리투아니아 이양"
+    },
+    {
+      "title": "FRUS1939 VolumeII Document326 — Albanian protest to Italian invasion",
+      "url": "https://history.state.gov/historicaldocuments/frus1939v02/d326",
+      "use": "1939년 4월 이탈리아의 알바니아 침공에 대한 동시대 외교 기록"
+    },
+    {
+      "title": "FRUS1936 VolumeIII — Ethiopian-Italian conflict",
+      "url": "https://history.state.gov/historicaldocuments/frus1936v03/ch6",
+      "use": "1936년 이탈리아의 에티오피아 병합 주장 및 불승인 문제"
+    },
+    {
+      "title": "FRUS1939 VolumeIV — Undeclared War Between Japan and China",
+      "url": "https://history.state.gov/historicaldocuments/frus1939v04",
+      "use": "일본 점령과 중국의 명목 소유, 상하이 국제조계의 구별"
+    },
+    {
+      "title": "FRUS1931-1941 VolumeI index",
+      "url": "https://history.state.gov/historicaldocuments/frus1931-41v01/index",
+      "use": "1931년 만주 점령과 만주국 수립의 외교 기록"
+    },
+    {
+      "title": "US Army Center of Military History — The Eastern Mandates",
+      "url": "https://www.govinfo.gov/content/pkg/GOVPUB-D101-PURL-gpo89049/pdf/GOVPUB-D101-PURL-gpo89049.pdf",
+      "use": "1938 우한/광저우 및 1939 하이난 작전 연표"
+    },
+    {
+      "title": "FRUS1926 VolumeII Document434 — Tangier statute chronology",
+      "url": "https://history.state.gov/historicaldocuments/frus1926v02/d434",
+      "use": "1912 특별구역과1923 국제관리규정 구분"
+    },
+    {
+      "title": "Japan National Archives — First Sino-Japanese War",
+      "url": "https://www.archives.go.jp/learning/archive_collection_9/collection_3/",
+      "use": "1895년 시모노세키 조약과 타이완·펑후 할양 시점 확인"
+    },
+    {
+      "title": "FRUS1914 — Mexico diplomatic correspondence",
+      "url": "https://history.state.gov/historicaldocuments/frus1914/d653",
+      "use": "1914년 멕시코의 자료 공백을 멕시코 국가 소유로 보충하되 내전 통제를 완전히 재현하는 지도는 아님"
+    },
+    {
+      "title": "FRUS1935 VolumeIII Document34 — Soviet special position in Sinkiang",
+      "url": "https://history.state.gov/historicaldocuments/frus1935v03/d34",
+      "use": "신장성 정부 성스차이와 소련 관계, 중국공산당 독립 영토라는 오표기 수정"
+    },
+    {
+      "title": "FRUS1938 VolumeIII Document259 — Carlson report from northwestern China",
+      "url": "https://history.state.gov/historicaldocuments/frus1938v03/d259",
+      "use": "옌안이 중국공산당 활동 중심이며 산시성 북부에 위치함을 확인; 영향권은 고정 구획에 맞춰 근사"
+    }
+  ]
+}

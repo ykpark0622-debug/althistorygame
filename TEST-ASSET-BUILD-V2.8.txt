@@ -1,0 +1,173 @@
+{
+  "registryBytes": 48623,
+  "templates": [
+    {
+      "id": "eastasia1419",
+      "regions": 124,
+      "bytes": 182035,
+      "gzipBytes": 62206
+    },
+    {
+      "id": "world1754",
+      "regions": 167,
+      "bytes": 297815,
+      "gzipBytes": 104818
+    },
+    {
+      "id": "europe-balanced",
+      "regions": 2431,
+      "bytes": 1849164,
+      "gzipBytes": 475298
+    },
+    {
+      "id": "world-balanced",
+      "regions": 5939,
+      "bytes": 6374018,
+      "gzipBytes": 1752813
+    },
+    {
+      "id": "world-detailed",
+      "regions": 61940,
+      "bytes": 24504948,
+      "gzipBytes": 5621732
+    },
+    {
+      "id": "regional_eastasia_1419",
+      "regions": 5591,
+      "bytes": 3215334,
+      "gzipBytes": 773698
+    },
+    {
+      "id": "regional_eastasia_1592",
+      "regions": 5591,
+      "bytes": 3214460,
+      "gzipBytes": 773365
+    },
+    {
+      "id": "regional_eastasia_1754",
+      "regions": 5591,
+      "bytes": 3209118,
+      "gzipBytes": 773206
+    },
+    {
+      "id": "regional_eastasia_modern",
+      "regions": 5591,
+      "bytes": 2948696,
+      "gzipBytes": 739781
+    },
+    {
+      "id": "regional_europe_med_1754",
+      "regions": 26641,
+      "bytes": 14198098,
+      "gzipBytes": 2663133
+    },
+    {
+      "id": "regional_europe_med_modern",
+      "regions": 26641,
+      "bytes": 13300698,
+      "gzipBytes": 2574512
+    },
+    {
+      "id": "regional_asia_1754",
+      "regions": 15841,
+      "bytes": 7673804,
+      "gzipBytes": 1885191
+    },
+    {
+      "id": "regional_asia_modern",
+      "regions": 15841,
+      "bytes": 7088137,
+      "gzipBytes": 1823961
+    },
+    {
+      "id": "regional_north_america_1754",
+      "regions": 8895,
+      "bytes": 3856085,
+      "gzipBytes": 999704
+    },
+    {
+      "id": "regional_north_america_modern",
+      "regions": 8895,
+      "bytes": 3494270,
+      "gzipBytes": 957114
+    },
+    {
+      "id": "regional_south_america_1754",
+      "regions": 8590,
+      "bytes": 4580947,
+      "gzipBytes": 1123733
+    },
+    {
+      "id": "regional_south_america_modern",
+      "regions": 8590,
+      "bytes": 4218082,
+      "gzipBytes": 1082752
+    },
+    {
+      "id": "regional_world_1754",
+      "regions": 61940,
+      "bytes": 26498771,
+      "gzipBytes": 5806333
+    },
+    {
+      "id": "regional_world_modern",
+      "regions": 61940,
+      "bytes": 24620851,
+      "gzipBytes": 5642432
+    },
+    {
+      "id": "balanced_eastasia_modern",
+      "regions": 473,
+      "bytes": 621080,
+      "gzipBytes": 162600
+    },
+    {
+      "id": "balanced_asia_modern",
+      "regions": 1929,
+      "bytes": 2323948,
+      "gzipBytes": 637042
+    },
+    {
+      "id": "balanced_north_america_modern",
+      "regions": 598,
+      "bytes": 1009288,
+      "gzipBytes": 294514
+    },
+    {
+      "id": "balanced_south_america_modern",
+      "regions": 525,
+      "bytes": 841907,
+      "gzipBytes": 231915
+    },
+    {
+      "id": "historical_europe_1444",
+      "regions": 2431,
+      "bytes": 2029663,
+      "gzipBytes": 497723
+    },
+    {
+      "id": "historical_europe_1648",
+      "regions": 2431,
+      "bytes": 2010968,
+      "gzipBytes": 495362
+    },
+    {
+      "id": "historical_world_1550",
+      "regions": 5939,
+      "bytes": 6785358,
+      "gzipBytes": 1798220
+    },
+    {
+      "id": "historical_world_1914",
+      "regions": 5939,
+      "bytes": 6832915,
+      "gzipBytes": 1796580
+    },
+    {
+      "id": "historical_world_1939",
+      "regions": 5939,
+      "bytes": 6830819,
+      "gzipBytes": 1796671
+    }
+  ]
+}

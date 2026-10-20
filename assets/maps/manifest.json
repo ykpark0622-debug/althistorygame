@@ -324,6 +324,71 @@
       "downloadBytes": 841907,
       "recommended": true,
       "balancedRegionId": "south_america"
+    },
+    {
+      "id": "historical_europe_1444",
+      "name": "유럽 · 1444년",
+      "provinceCount": 2431,
+      "asset": "assets/maps/historical_europe_1444.7889dd429209a472.json",
+      "downloadBytes": 2033978,
+      "historicalBaseId": "europe-balanced",
+      "historicalRegionId": "europe_med",
+      "historicalEraId": "historical_1444",
+      "historicalYear": 1444,
+      "historicalNotice": "1444년 무렵를 기준으로 한 역사 지도 초안입니다. 현대 균형 지도의 구획을 유지하고 공개 역사 경계를 표본 대조하여 영토를 근사 배치했습니다. 도시국가·복잡한 월경지·정확한 전선은 일부 생략됩니다. 빗금은 상위 세력의 영향권 또는 점령이며, 식민지·자치령·제후령도 편집 가능한 단위로 구분합니다. 경계 미상으로 표시한 지역은 빈 땅이 아니라 여러 공동체가 살던 곳입니다. 지역명은 위치 검색을 위한 현대 지명이 남아 있습니다.",
+      "baseId": "europe-balanced"
+    },
+    {
+      "id": "historical_europe_1648",
+      "name": "유럽 · 1648년",
+      "provinceCount": 2431,
+      "asset": "assets/maps/historical_europe_1648.352ef8f0c7e0e01a.json",
+      "downloadBytes": 2013530,
+      "historicalBaseId": "europe-balanced",
+      "historicalRegionId": "europe_med",
+      "historicalEraId": "historical_1648",
+      "historicalYear": 1648,
+      "historicalNotice": "1648년 베스트팔렌 조약 이후를 기준으로 한 역사 지도 초안입니다. 현대 균형 지도의 구획을 유지하고 공개 역사 경계를 표본 대조하여 영토를 근사 배치했습니다. 도시국가·복잡한 월경지·정확한 전선은 일부 생략됩니다. 빗금은 상위 세력의 영향권 또는 점령이며, 식민지·자치령·제후령도 편집 가능한 단위로 구분합니다. 경계 미상으로 표시한 지역은 빈 땅이 아니라 여러 공동체가 살던 곳입니다. 지역명은 위치 검색을 위한 현대 지명이 남아 있습니다.",
+      "baseId": "europe-balanced"
+    },
+    {
+      "id": "historical_world_1550",
+      "name": "세계 · 1550년",
+      "provinceCount": 5939,
+      "asset": "assets/maps/historical_world_1550.ef60ec42d0f4069c.json",
+      "downloadBytes": 6803254,
+      "historicalBaseId": "world-balanced",
+      "historicalRegionId": "world",
+      "historicalEraId": "historical_1550",
+      "historicalYear": 1550,
+      "historicalNotice": "1550년 무렵를 기준으로 한 역사 지도 초안입니다. 현대 균형 지도의 구획을 유지하고 공개 역사 경계를 표본 대조하여 영토를 근사 배치했습니다. 도시국가·복잡한 월경지·정확한 전선은 일부 생략됩니다. 빗금은 상위 세력의 영향권 또는 점령이며, 식민지·자치령·제후령도 편집 가능한 단위로 구분합니다. 경계 미상으로 표시한 지역은 빈 땅이 아니라 여러 공동체가 살던 곳입니다. 지역명은 위치 검색을 위한 현대 지명이 남아 있습니다.",
+      "baseId": "world-balanced"
+    },
+    {
+      "id": "historical_world_1914",
+      "name": "세계 · 1914년",
+      "provinceCount": 5939,
+      "asset": "assets/maps/historical_world_1914.56cc02311b6497ab.json",
+      "downloadBytes": 6847058,
+      "historicalBaseId": "world-balanced",
+      "historicalRegionId": "world",
+      "historicalEraId": "historical_1914",
+      "historicalYear": 1914,
+      "historicalNotice": "1914년 7월, 유럽 전쟁 발발 직전를 기준으로 한 역사 지도 초안입니다. 현대 균형 지도의 구획을 유지하고 공개 역사 경계를 표본 대조하여 영토를 근사 배치했습니다. 도시국가·복잡한 월경지·정확한 전선은 일부 생략됩니다. 빗금은 상위 세력의 영향권 또는 점령이며, 식민지·자치령·제후령도 편집 가능한 단위로 구분합니다. 경계 미상으로 표시한 지역은 빈 땅이 아니라 여러 공동체가 살던 곳입니다. 지역명은 위치 검색을 위한 현대 지명이 남아 있습니다.",
+      "baseId": "world-balanced"
+    },
+    {
+      "id": "historical_world_1939",
+      "name": "세계 · 1939년",
+      "provinceCount": 5939,
+      "asset": "assets/maps/historical_world_1939.ac9bd8f60c09177d.json",
+      "downloadBytes": 6856408,
+      "historicalBaseId": "world-balanced",
+      "historicalRegionId": "world",
+      "historicalEraId": "historical_1939",
+      "historicalYear": 1939,
+      "historicalNotice": "1939년 8월, 폴란드 침공 직전·중일전쟁 진행 중를 기준으로 한 역사 지도 초안입니다. 현대 균형 지도의 구획을 유지하고 공개 역사 경계를 표본 대조하여 영토를 근사 배치했습니다. 도시국가·복잡한 월경지·정확한 전선은 일부 생략됩니다. 빗금은 상위 세력의 영향권 또는 점령이며, 식민지·자치령·제후령도 편집 가능한 단위로 구분합니다. 경계 미상으로 표시한 지역은 빈 땅이 아니라 여러 공동체가 살던 곳입니다. 지역명은 위치 검색을 위한 현대 지명이 남아 있습니다.",
+      "baseId": "world-balanced"
     }
   ],
   "assets": [
@@ -966,6 +1031,51 @@
       "gzipBytes": 20700,
       "sha256": "82eb5de61eb980e59668b15d5b9c1e6ced88109367bb5c9e82f013036fae725f",
       "baseId": "world-detailed"
+    },
+    {
+      "id": "historical_europe_1444",
+      "type": "patch",
+      "path": "assets/maps/historical_europe_1444.7889dd429209a472.json",
+      "bytes": 184814,
+      "gzipBytes": 22444,
+      "sha256": "7889dd429209a4724656450c5c03d9862facb2992ab2249ba926cc827008fff9",
+      "baseId": "europe-balanced"
+    },
+    {
+      "id": "historical_europe_1648",
+      "type": "patch",
+      "path": "assets/maps/historical_europe_1648.352ef8f0c7e0e01a.json",
+      "bytes": 164366,
+      "gzipBytes": 20282,
+      "sha256": "352ef8f0c7e0e01ae615189cc709207df7cb073a08b7405c811ca12494a0dd12",
+      "baseId": "europe-balanced"
+    },
+    {
+      "id": "historical_world_1550",
+      "type": "patch",
+      "path": "assets/maps/historical_world_1550.ef60ec42d0f4069c.json",
+      "bytes": 429236,
+      "gzipBytes": 45819,
+      "sha256": "ef60ec42d0f4069c702515efe9792efee6a28d48502daa53f9d14b7310edb143",
+      "baseId": "world-balanced"
+    },
+    {
+      "id": "historical_world_1914",
+      "type": "patch",
+      "path": "assets/maps/historical_world_1914.56cc02311b6497ab.json",
+      "bytes": 473040,
+      "gzipBytes": 42630,
+      "sha256": "56cc02311b6497abf5978194e47b8ce2ebaf8a748617ad924138cf0cd8f89ee7",
+      "baseId": "world-balanced"
+    },
+    {
+      "id": "historical_world_1939",
+      "type": "patch",
+      "path": "assets/maps/historical_world_1939.ac9bd8f60c09177d.json",
+      "bytes": 482390,
+      "gzipBytes": 44213,
+      "sha256": "ac9bd8f60c09177d7965692690e6d80c5f73ca829f30f0f0ee509d94a8e6b633",
+      "baseId": "world-balanced"
     }
   ]
 }

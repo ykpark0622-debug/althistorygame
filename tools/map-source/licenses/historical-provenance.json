@@ -1,0 +1,68 @@
+{
+  "dataset": "Cliopatria",
+  "version": "0.2.1",
+  "commit": "5f433377139a6eeaeacbdc894b70f8805b72c8b5",
+  "sourceUrl": "https://github.com/Seshat-Global-History-Databank/cliopatria/tree/v0.2.1",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "archiveSha256": "e10a4e429fca708788ff9e7572a95fce801fae55852d217cffabc1c59cd4eed4",
+  "method": "FromYear <= year <= ToYear; 7x7 grid samples inside each unchanged balanced province; most area-vote selected from smallest covering polity; documented editorial corrections; unresolved local communities explicitly grouped.",
+  "geometryUnchanged": true,
+  "inputs": [
+    {
+      "path": "tools/map-source/history-input/active-1444.geojson",
+      "bytes": 789131,
+      "sha256": "031dc9cdc4a268bfa01599c07c9ab5859601bb6a4da5cb4db9b6503d512ba7c9"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1550.geojson",
+      "bytes": 838415,
+      "sha256": "64a6d52f9103174887861ad0c39061eadf393ce9d78c1922e577607b7d3c04f6"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1648.geojson",
+      "bytes": 802222,
+      "sha256": "117731d7c21051be619d431a6be516bdb959b2510d74a2bed5a207b5528c0617"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1914.geojson",
+      "bytes": 1334901,
+      "sha256": "25e98f6daf8579dd0872ce7c5e2c8d5f5dade449ab36f5f2b6876cf6d491f8e4"
+    },
+    {
+      "path": "tools/map-source/history-input/active-1939.geojson",
+      "bytes": 1368607,
+      "sha256": "81ffaf775c7fedc1f0c9a7f1324365de97bea6d00f787796aa863159d166c78c"
+    },
+    {
+      "path": "tools/map-source/history-input/early-review.json",
+      "bytes": 33308,
+      "sha256": "bd3d954fb1fc6fdd7c858712e283223e5254f69a21a822cbf646388f876517ba"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-review.json",
+      "bytes": 37283,
+      "sha256": "2a376d5c3cd32bcf5d6e6d4fdcecfd873266eebd51431d349b82cd237f8b7602"
+    },
+    {
+      "path": "tools/map-source/history-input/early-corrections.cjs",
+      "bytes": 14801,
+      "sha256": "075218508a6fd0b48497b2f2e1ec49fb624eb4e7f2dfe14d3a71d615e3b13328"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-corrections.cjs",
+      "bytes": 18021,
+      "sha256": "52385d190c79451bb6c823d5e1a23b21e018b08839002bfb07d8f7eca48dc4e4"
+    },
+    {
+      "path": "tools/map-source/history-input/geographic-gaps.cjs",
+      "bytes": 3297,
+      "sha256": "364a4a22b909d6e1255a0862dd2b51da18164ce51c24a96e17a968f989d837ee"
+    },
+    {
+      "path": "tools/map-source/history-input/wars-boundary-reference.geojson",
+      "bytes": 62318,
+      "sha256": "81aa9fac4230bcb6d3a3fa17c8664d9862895686b2be46cc85731b789057aae3"
+    }
+  ]
+}

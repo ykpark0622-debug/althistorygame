@@ -179,7 +179,7 @@
       const result = {};
       for (const [province, value] of Object.entries(document.map.initial && document.map.initial[layer] || {})) {
         const base = provinceDefaults.get(province);
-        const initialValue = layer === 'owners' ? base.owner : layer === 'influence' && base.influence != null ? base.influence : null;
+        const initialValue = layer === 'owners' ? base.owner : own(template.historicalInitial?.[layer],province) ? template.historicalInitial[layer][province] : layer === 'influence' && base.influence != null ? base.influence : null;
         if (value !== initialValue) result[province] = value;
       }
       map.initial[layer] = result;
@@ -199,7 +199,7 @@
     const template = getTemplate(templateId);
     if (!template) throw new Error('지도 템플릿을 찾을 수 없습니다: ' + templateId);
     const represented = new Set(template.provinces.map(province => province.owner));
-    const preferred = template.countries.find(country => represented.has(country.id) && ['joseon', 'france', 'kor', 'fra'].includes(country.id)) || template.countries.find(country => represented.has(country.id));
+    const preferred = template.countries.find(country => represented.has(country.id) && country.id===template.defaultPlayerCountry) || template.countries.find(country => represented.has(country.id) && ['joseon', 'france', 'kor', 'fra'].includes(country.id)) || template.countries.find(country => represented.has(country.id));
     const map = options.map === undefined ? { templateId, playerCountry: options.playerCountry || preferred && preferred.id, countries: [], initial: {} } : options.map;
     return normalize({ type: 'map', schemaVersion: 1, id: options.id || 'map_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9),
       title: options.title === undefined ? '새 지도' : options.title, description: options.description === undefined ? '' : options.description, map });

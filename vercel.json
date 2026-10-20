@@ -833,6 +833,51 @@
       ]
     },
     {
+      "source": "/assets/maps/historical_europe_1444.7889dd429209a472.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_europe_1648.352ef8f0c7e0e01a.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_world_1550.ef60ec42d0f4069c.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_world_1914.56cc02311b6497ab.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_world_1939.ac9bd8f60c09177d.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/program/standalone.001.fd21ddacba1a8c2b.txt",
       "headers": [
         {
@@ -1121,7 +1166,25 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.033.eb54835fc348a9e3.txt",
+      "source": "/assets/program/standalone.033.854252f2cc7cd794.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.034.4f63bb48565dfe6e.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.035.3d79ba78619203b8.txt",
       "headers": [
         {
           "key": "Cache-Control",

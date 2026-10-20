@@ -1,0 +1,62 @@
+[
+  {
+    "id": "historical_europe_1444",
+    "title": "유럽 15세기 · 1444년",
+    "year": 1444,
+    "date": "1444년 무렵",
+    "baseId": "europe-balanced",
+    "regions": 2431,
+    "countries": 109,
+    "ownedUnits": 106,
+    "bytes": 232324,
+    "filename": "historical_europe_1444.map.json"
+  },
+  {
+    "id": "historical_europe_1648",
+    "title": "유럽 17세기 · 1648년",
+    "year": 1648,
+    "date": "1648년 베스트팔렌 조약 이후",
+    "baseId": "europe-balanced",
+    "regions": 2431,
+    "countries": 75,
+    "ownedUnits": 75,
+    "bytes": 194595,
+    "filename": "historical_europe_1648.map.json"
+  },
+  {
+    "id": "historical_world_1550",
+    "title": "세계 16세기 · 1550년",
+    "year": 1550,
+    "date": "1550년 무렵",
+    "baseId": "world-balanced",
+    "regions": 5939,
+    "countries": 176,
+    "ownedUnits": 174,
+    "bytes": 483561,
+    "filename": "historical_world_1550.map.json"
+  },
+  {
+    "id": "historical_world_1914",
+    "title": "제1차 세계대전 전야 · 1914년",
+    "year": 1914,
+    "date": "1914년 7월, 유럽 전쟁 발발 직전",
+    "baseId": "world-balanced",
+    "regions": 5939,
+    "countries": 139,
+    "ownedUnits": 137,
+    "bytes": 559473,
+    "filename": "historical_world_1914.map.json"
+  },
+  {
+    "id": "historical_world_1939",
+    "title": "제2차 세계대전 전야 · 1939년",
+    "year": 1939,
+    "date": "1939년 8월, 폴란드 침공 직전·중일전쟁 진행 중",
+    "baseId": "world-balanced",
+    "regions": 5939,
+    "countries": 153,
+    "ownedUnits": 149,
+    "bytes": 573881,
+    "filename": "historical_world_1939.map.json"
+  }
+]

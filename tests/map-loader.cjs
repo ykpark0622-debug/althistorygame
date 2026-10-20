@@ -19,7 +19,7 @@ let passed=0;
 async function test(name,fn){await fn();passed++;console.log('PASS '+name);}
 (async()=>{
 await test('metadata and synchronous lookup never request geometry in browser',async()=>{
-  const {maps,requests}=browser();assert.equal(maps.list().length,23);assert.equal(maps.regions().length,6);
+  const {maps,requests}=browser();assert.equal(maps.list().length,28);assert.equal(maps.regions().length,6);
   assert.equal(maps.eras('eastasia').length,4);assert.equal(maps.regionalId('eastasia','1592'),'regional_eastasia_1592');
   assert.equal(maps.get('regional_eastasia_1592'),null);assert.equal(maps.isLoaded('world-detailed'),false);assert.equal(requests.length,0);
   await assert.rejects(maps.ensure('../world.json'));assert.equal(requests.length,0);
@@ -106,14 +106,14 @@ await test('preinstalled offline assets synchronously reconstruct shared era map
   const {maps,requests}=browser(),values={};for(const asset of manifest.assets.filter(asset=>asset.id==='regional_eastasia_modern'||asset.id==='regional_eastasia_1592'))values[asset.path]=logicalAsset(asset);
   maps.installAssets(values);const template=maps.get('regional_eastasia_1592');assert.equal(template.provinces.length,5591);await maps.ensure(template.id);assert.equal(requests.length,0);
 });
-await test('Node lazy lookup and standalone registration preserve all twenty-three template contracts',async()=>{
-  const maps=require('../map-templates.js');assert.equal(maps.get('missing'),null);assert.equal(maps.list().length,23);
+await test('Node lazy lookup and standalone registration preserve all twenty-eight template contracts',async()=>{
+  const maps=require('../map-templates.js');assert.equal(maps.get('missing'),null);assert.equal(maps.list().length,28);
   for(const metadata of maps.list()){const template=maps.get(metadata.id);assert.equal(template.provinces.length,metadata.provinceCount);assert.equal(maps.register(template),template);assert.equal(maps.get(metadata.id),template);}
   const sizes=JSON.parse(fs.readFileSync(path.join(root,'assets/maps/SIZES.json'),'utf8'));const world=sizes.templates.find(t=>t.id==='world-detailed'),east=sizes.templates.find(t=>t.id==='regional_eastasia_1592');
   assert.ok(source.length<60000);assert.ok(east.gzipBytes<world.gzipBytes*0.15);assert.ok(manifest.assets.every(asset=>/\.[a-f0-9]{16}\.json$/.test(asset.path)));
 });
 await test('all physical map files fit their web-upload budget and match byte, SHA-256 and gzip metrics',async()=>{
-  assert.equal(manifest.assets.length,23);
+  assert.equal(manifest.assets.length,28);
   for(const asset of manifest.assets){
     let totalGzip=0,totalBytes=0;
     for(const file of [asset,...(asset.parts||[])]){

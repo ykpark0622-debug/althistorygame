@@ -32,7 +32,7 @@ test('the previous nineteen template files and six region/era definitions remain
  for(const entry of previous.templates)assert.deepEqual(current.templates.find(item=>item.id===entry.id),entry,'Old template: '+entry.id);
  for(const asset of previous.assets)assert.deepEqual(current.assets.find(item=>item.id===asset.id),asset,'Old geometry asset: '+asset.id);
  assert.deepEqual(current.regions,previous.regions);assert.deepEqual(current.eras,previous.eras);
- assert.equal(current.templates.length,previous.templates.length+specs.length);
+ assert.equal(current.templates.length,previous.templates.length+specs.length+5);
 });
 for(const spec of specs)test(spec.region+' is a genuinely clipped crop with reusable world province identities',()=>{
  const t=T.get(spec.id),[west,south,east,north]=spec.bounds;

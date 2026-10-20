@@ -32,6 +32,8 @@ const sourceApi = {get: id => sources.find(template => template.id === id) || nu
 const sandbox = {MapTemplates: sourceApi};
 vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'regional-presets.cjs'), 'utf8'), sandbox, {filename:'regional-presets.cjs'});
 vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'balanced-regions.cjs'), 'utf8'), sandbox, {filename:'balanced-regions.cjs'});
+sandbox.HistoricalMapPresetDefinitions=JSON.parse(fs.readFileSync(path.join(sourceDir,'historical-presets.json'),'utf8'));
+vm.runInNewContext(fs.readFileSync(path.join(sourceDir,'historical-presets.cjs'),'utf8'),sandbox,{filename:'historical-presets.cjs'});
 const original = sandbox.MapTemplates;
 const all = original.list().map(item => original.get(item.id));
 const manifest = {format:'hc-map-manifest-v1', regions:original.regions(), eras:Object.fromEntries(original.regions().map(region => [region.id, original.eras(region.id)])), templates:[], assets:[]};
@@ -69,13 +71,13 @@ function save(id, type, value, baseId) {
 }
 const downloadBytes = descriptor => descriptor.bytes + (descriptor.parts || []).reduce((sum, part) => sum + part.bytes, 0);
 const bases = new Map();
-for(const template of all.filter(template => !template.regionId || (template.eraId === 'modern' && template.regionId !== 'world'))) {
+for(const template of all.filter(template => !template.historicalBaseId && (!template.regionId || (template.eraId === 'modern' && template.regionId !== 'world')))) {
   bases.set(template.id, save(template.id,'base',{format:'hc-map-base-v1',template}));
 }
 for(const template of all) {
   let descriptor = bases.get(template.id), baseId;
   if (!descriptor) {
-    baseId = template.regionId === 'world' ? 'world-detailed' : original.regionalId(template.regionId,'modern');
+    baseId = template.historicalBaseId || (template.regionId === 'world' ? 'world-detailed' : original.regionalId(template.regionId,'modern'));
     const base = original.get(baseId), metadata = Object.assign({},template), changes=[];
     for(const key of ['provinces','landPath','waterPath','riversPath'])delete metadata[key];
     assert.equal(template.provinces.length,base.provinces.length);
@@ -91,6 +93,7 @@ for(const template of all) {
   const entry={id:template.id,name:template.name,provinceCount:template.provinces.length,asset:descriptor.path,downloadBytes:downloadBytes(descriptor)+(baseId?downloadBytes(bases.get(baseId)):0)};
   if(template.recommended)entry.recommended=true;
   if(template.balancedRegionId)entry.balancedRegionId=template.balancedRegionId;
+  for(const key of ['historicalBaseId','historicalRegionId','historicalEraId','historicalYear','historicalNotice'])if(template[key]!==undefined)entry[key]=template[key];
   if(template.regionId){entry.regionId=template.regionId;entry.eraId=template.eraId;}
   if(baseId)entry.baseId=baseId;
   manifest.templates.push(entry);
