@@ -108,10 +108,26 @@
 
     // Imports stay data only. Reject dangerous object keys and non-JSON structures
     // before using any user-provided identifier as an object property.
-    let nodes = 0;
+    // A complete dense atlas can have more than 50,000 valid owner entries.
+    // Keep the ordinary manuscript budget, with a separate bounded allowance
+    // for primitive initial-map entries from a known, loaded template.
+    const dataProperty = (object, key) => { const descriptor = object && typeof object === 'object' && Object.getOwnPropertyDescriptor(object, key); return descriptor && !descriptor.get && !descriptor.set ? descriptor.value : undefined; };
+    const inputMap = dataProperty(scenario, 'map'), initialMap = dataProperty(inputMap, 'initial'), mapLayers = new Set();
+    let initialTemplate;
+    if (dataProperty(scenario, 'schemaVersion') === 2 && plain(inputMap) && plain(initialMap)) {
+      try { initialTemplate = root.MapTemplates?.get(dataProperty(inputMap, 'templateId')); } catch (_) { /* The ordinary map validator reports invalid IDs. */ }
+    }
+    if (Array.isArray(initialTemplate?.provinces)) {
+      const limit = Math.min(65000, initialTemplate.provinces.length);
+      for (const key of ['owners', 'occupation', 'influence', 'markers']) {
+        const layer = dataProperty(initialMap, key);
+        if (plain(layer) && Object.keys(layer).length <= limit) mapLayers.add(layer);
+      }
+    }
+    let nodes = 0, totalNodes = 0;
     const ancestors = new Set();
-    function inspect(value, depth) {
-      if (++nodes > 50000) { error('시나리오 데이터가 너무 큽니다.'); return; }
+    function inspect(value, depth, mapEntry = false) {
+      if (++totalNodes > 400000 || (!mapEntry && ++nodes > 50000)) { error('시나리오 데이터가 너무 큽니다.'); return; }
       if (depth > 25) { error('시나리오의 중첩이 너무 깊습니다.'); return; }
       if (typeof value === 'number' && !Number.isFinite(value)) error('숫자는 유한한 값이어야 합니다.');
       if (value === null || typeof value !== 'object') {
@@ -123,8 +139,9 @@
       ancestors.add(value);
       for (const key of Object.keys(value)) {
         if (reserved.has(key.toLowerCase())) error(`사용할 수 없는 속성 이름입니다: ${key}`);
-        inspect(value[key], depth + 1);
-        if (nodes > 50000) break;
+        const child = value[key];
+        inspect(child, depth + 1, mapLayers.has(value) && (typeof child === 'string' || child === null));
+        if (nodes > 50000 || totalNodes > 400000) break;
       }
       ancestors.delete(value);
     }
@@ -206,6 +223,10 @@
             if (!validId(country.id)) error('지도 국가 ID가 올바르지 않습니다: ' + country.id);
             textField(country.name, '지도 국가 이름', true, 100);
             if (typeof country.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(country.color)) error('지도 국가 색상은 #RRGGBB 형식이어야 합니다.');
+            if (own(country, 'labelPosition') && country.labelPosition !== null) {
+              const point = country.labelPosition;
+              if (!Array.isArray(point) || point.length !== 2 || !point.every(finite) || point[0] < 0 || point[1] < 0 || point[0] > mapConfig.width || point[1] > mapConfig.height) error('국명 위치는 지도 안의 [가로, 세로] 좌표 또는 숨김(null)이어야 합니다.');
+            }
           });
           if (!countryIds.has(scenario.map.playerCountry)) error('지도 플레이 국가를 찾을 수 없습니다.');
           if (scenario.map.initial !== undefined && !plain(scenario.map.initial)) error('지도 초기 상태는 객체여야 합니다.');

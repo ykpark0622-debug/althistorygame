@@ -45,6 +45,9 @@
   const ratio=Math.min(rect.width/view.template.width,rect.height/view.template.height)||1;
   return {x:(event.clientX-rect.left-(rect.width-view.template.width*ratio)/2)/ratio,y:(event.clientY-rect.top-(rect.height-view.template.height*ratio)/2)/ratio};
  }
+ function labelPoint(view,point){return [Math.max(0,Math.min(view.template.width,(point.x-view.x)/view.scale)),Math.max(0,Math.min(view.template.height,(point.y-view.y)/view.scale))];}
+ function manualLabelPosition(value){return Array.isArray(value)&&value.length===2&&value.every(Number.isFinite);}
+ function ownedLabelBounds(view,p){const box=p.bbox||p.bounds;if(Array.isArray(box)&&box.length===4&&box.every(Number.isFinite))return box;try{const measured=view.nodes.get(p.id)?.getBBox?.();if(measured){const dx=Number(view.template.offsetX||0),dy=Number(view.template.offsetY||0);return [measured.x-dx,measured.y-dy,measured.x+measured.width-dx,measured.y+measured.height-dy];}}catch{}return [p.cx,p.cy,p.cx,p.cy];}
  function transform(view){
   const {width,height}=view.template;view.x=Math.max(width*(1-view.scale),Math.min(0,view.x));view.y=Math.max(height*(1-view.scale),Math.min(0,view.y));
   view.world.setAttribute('transform',`translate(${view.x} ${view.y}) scale(${view.scale})`);view.zoomStatus.textContent=Math.round(view.scale*100)+'%';renderLabels(view);
@@ -73,22 +76,23 @@
   view.select.value=view.selected||'';view.searchCount.textContent=dense?(count>SEARCH_LIMIT?`${count.toLocaleString()}개 중 ${SEARCH_LIMIT}개 표시 · 검색어를 좁혀 주세요`:`${count.toLocaleString()}개 지역`):'';
  }
  function renderLabels(view){
-  const selected=view.geometry.byId.get(view.selected),show=view.labels&&(!view.geometry.dense||view.scale>=4),minX=-view.x/view.scale,minY=-view.y/view.scale,maxX=(view.template.width-view.x)/view.scale,maxY=(view.template.height-view.y)/view.scale;
+  const editing=Boolean(view.context.options.labelEditMode),placement=view.context.options.labelPlacementCountry||'',selected=view.geometry.byId.get(view.selected),show=view.labels&&(!view.geometry.dense||view.scale>=4),minX=-view.x/view.scale,minY=-view.y/view.scale,maxX=(view.template.width-view.x)/view.scale,maxY=(view.template.height-view.y)/view.scale;
   let visible=show?view.template.provinces.filter(p=>p.cx>=minX&&p.cx<=maxX&&p.cy>=minY&&p.cy<=maxY).sort((a,b)=>(b.area||0)-(a.area||0)).slice(0,LABEL_LIMIT):[];
   if(selected&&!visible.includes(selected))visible.unshift(selected);
   const matrix=view.svg.getScreenCTM?.(),screenScale=matrix?Math.hypot(matrix.a,matrix.b)||1:1;
   const pixelScale=view.scale*screenScale,labelWidth=text=>[...String(text)].reduce((width,char)=>width+(/[\u1100-\uffff]/.test(char)?11:6.3),0),labelBox=(x,y,text)=>({left:x*pixelScale-labelWidth(text)/2-5,right:x*pixelScale+labelWidth(text)/2+5,top:y*pixelScale-10,bottom:y*pixelScale+7}),overlaps=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
   const occupied=selected?[labelBox(selected.cx,selected.cy,selected.name)]:[],countryLabels=[];
-  for(const candidate of [...(view.countryLabelAnchors?.values()||[])].sort((a,b)=>b.area-a.area)){
+  const candidates=[...(view.countryLabelAnchors?.values()||[])].map(candidate=>view.labelDragPreview?.id===candidate.id?{...candidate,cx:view.labelDragPreview.position[0],cy:view.labelDragPreview.position[1],manual:true}:candidate).sort((a,b)=>Number(Boolean(b.manual))-Number(Boolean(a.manual))||b.area-a.area);
+  for(const candidate of candidates){
    const {id,cx,cy,bounds}=candidate,name=country(view,id);if(cx<minX||cx>maxX||cy<minY||cy>maxY)continue;
-   if((bounds[2]-bounds[0])*pixelScale<labelWidth(name)*.8||(bounds[3]-bounds[1])*pixelScale<18)continue;
-   const box=labelBox(cx,cy,name);if(occupied.some(other=>overlaps(box,other)))continue;
-   occupied.push(box);countryLabels.push({...candidate,name,box});if(countryLabels.length>=90)break;
+   if(!candidate.manual&&((bounds[2]-bounds[0])*pixelScale<labelWidth(name)*.8||(bounds[3]-bounds[1])*pixelScale<18))continue;
+   const box=labelBox(cx,cy,name);if(!candidate.manual&&(countryLabels.length>=90||occupied.some(other=>overlaps(box,other))))continue;
+   occupied.push(box);countryLabels.push({...candidate,name,box});
   }
   visible=visible.filter(p=>p===selected||!countryLabels.some(label=>overlaps(labelBox(p.cx,p.cy,p.name),label.box)));
-  const signature=visible.map(p=>p.id).join('|')+'@'+view.scale.toFixed(3)+'@'+screenScale.toFixed(4)+'@'+countryLabels.map(label=>label.id+':'+label.name+':'+label.cx+','+label.cy).join('|');if(signature===view.labelSignature)return;view.labelSignature=signature;
+  const signature=visible.map(p=>p.id).join('|')+'@'+view.scale.toFixed(3)+'@'+screenScale.toFixed(4)+'@'+editing+'@'+placement+'@'+countryLabels.map(label=>label.id+':'+label.name+':'+label.cx+','+label.cy+':'+Boolean(label.manual)).join('|');if(signature===view.labelSignature)return;view.labelSignature=signature;
   const fontStyle=`font-size:${11/pixelScale}px;stroke-width:${2.4/pixelScale}px`;
-  view.labelLayer.innerHTML=countryLabels.map(label=>`<text x="${label.cx}" y="${label.cy}" class="map-country-label" style="${fontStyle}">${esc(label.name)}</text>`).join('')+visible.map(p=>`<text x="${p.cx}" y="${p.cy}" class="map-label" style="${fontStyle}">${esc(p.name)}</text>`).join('');
+  view.labelLayer.innerHTML=countryLabels.map(label=>`<text x="${label.cx}" y="${label.cy}" data-map-country-label="${esc(label.id)}" class="map-country-label"${editing?` role="button" tabindex="0" aria-label="${esc(label.name)} 국명 위치. 드래그하거나 화살표 키로 이동"`:''} style="${fontStyle}${editing?';pointer-events:all;cursor:grab;touch-action:none;outline:1px dashed #526f61;outline-offset:3px':''}${placement===label.id?';fill:#143f32;text-decoration:underline':''}">${esc(label.name)}</text>`).join('')+visible.map(p=>`<text x="${p.cx}" y="${p.cy}" class="map-label" style="${fontStyle}">${esc(p.name)}</text>`).join('');
  }
  function focusCountry(view,id){
   const provinces=view.template.provinces.filter(p=>ownerOf(view,p)===id);if(!provinces.length)return;
@@ -99,23 +103,27 @@
   const width=Math.max(8,right-left),height=Math.max(8,bottom-top);view.scale=Math.max(1,Math.min(MAX_ZOOM,Math.min(view.template.width/(width*1.3),view.template.height/(height*1.3))));view.x=view.template.width/2-(left+right)/2*view.scale;view.y=view.template.height/2-(top+bottom)/2*view.scale;transform(view);
  }
  function bind(view){
-  const {svg,container}=view;let drag=null,pendingClick=null;
-  const down=event=>{if(event.button!==0)return;const point=screenPoint(view,event);drag={point,x:event.clientX,y:event.clientY,vx:view.x,vy:view.y,province:event.target.closest?.('[data-province]')?.dataset.province,pointer:event.pointerId,moved:false};view.ignoreClick=false;pendingClick=null;svg.setPointerCapture?.(event.pointerId);view.hover.hidden=true;};
+  const {svg,container}=view;let drag=null,pendingClick=null,pendingPoint=null;
+  const down=event=>{if(event.button!==0)return;const point=screenPoint(view,event),label=view.context.options.labelEditMode&&event.target.closest?.('[data-map-country-label]')?.dataset.mapCountryLabel,anchor=label&&view.countryLabelAnchors?.get(label);drag={point,x:event.clientX,y:event.clientY,vx:view.x,vy:view.y,province:event.target.closest?.('[data-province]')?.dataset.province,pointer:event.pointerId,moved:false,label:anchor?label:null,anchor:anchor?[anchor.cx,anchor.cy]:null};view.ignoreClick=false;pendingClick=null;pendingPoint=null;svg.setPointerCapture?.(event.pointerId);view.hover.hidden=true;if(anchor)event.preventDefault();};
+  const previewLabel=point=>{const position=[Math.max(0,Math.min(view.template.width,drag.anchor[0]+(point.x-drag.point.x)/view.scale)),Math.max(0,Math.min(view.template.height,drag.anchor[1]+(point.y-drag.point.y)/view.scale))];view.labelDragPreview={id:drag.label,position};renderLabels(view);return position;};
   const move=event=>{
-   if(drag){const point=screenPoint(view,event);if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>5)drag.moved=true;if(drag.moved){view.x=drag.vx+point.x-drag.point.x;view.y=drag.vy+point.y-drag.point.y;transform(view);}return;}
+   if(drag){if(event.pointerId!==drag.pointer)return;const point=screenPoint(view,event);if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>5)drag.moved=true;if(drag.moved){if(drag.label){if(!view.context.options.labelEditMode)return;previewLabel(point);}else{view.x=drag.vx+point.x-drag.point.x;view.y=drag.vy+point.y-drag.point.y;transform(view);}}return;}
+   if(view.context.options.labelEditMode&&event.target.closest?.('[data-map-country-label]')){view.hover.hidden=true;return;}
    const p=view.geometry.byId.get(event.target.closest?.('[data-province]')?.dataset.province);view.hover.hidden=!p;if(p){const text=regionText(view,p);if(view.hover.textContent!==text)view.hover.textContent=text;}
   };
-  const up=event=>{if(!drag)return;view.ignoreClick=drag.moved;pendingClick=drag.moved?null:drag.province;drag=null;try{svg.releasePointerCapture?.(event.pointerId);}catch{}};
-  const cancel=()=>{drag=null;pendingClick=null;view.ignoreClick=true;view.hover.hidden=true;};
-  const wheel=event=>{event.preventDefault();const pixels=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?view.template.height:1);zoom(view,Math.exp(-Math.max(-400,Math.min(400,pixels))*.002),screenPoint(view,event));view.hover.hidden=true;};
+  const up=event=>{if(!drag||event.pointerId!==drag.pointer)return;const label=drag.label,moved=drag.moved,point=screenPoint(view,event),position=label&&moved&&view.context.options.labelEditMode?previewLabel(point):null;view.ignoreClick=moved;pendingClick=moved?null:drag.province;pendingPoint=moved?null:point;drag=null;delete view.labelDragPreview;try{svg.releasePointerCapture?.(event.pointerId);}catch{}if(position)view.context.options.onLabelMove?.(label,position);renderLabels(view);};
+  const cancel=()=>{drag=null;pendingClick=null;pendingPoint=null;delete view.labelDragPreview;view.ignoreClick=true;view.hover.hidden=true;renderLabels(view);};
+  const wheel=event=>{event.preventDefault();if(drag)return;const pixels=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?view.template.height:1);zoom(view,Math.exp(-Math.max(-400,Math.min(400,pixels))*.002),screenPoint(view,event));view.hover.hidden=true;};
   const leave=()=>{view.hover.hidden=true;};
   const click=event=>{
    const tool=event.target.closest?.('[data-map-tool]')?.dataset.mapTool;
    if(tool){if(tool==='in')zoom(view,1.4);if(tool==='out')zoom(view,1/1.4);if(tool==='reset'){view.scale=1;view.x=0;view.y=0;transform(view);}if(tool==='country')focusCountry(view,view.context.scenario.map?.playerCountry);if(tool==='labels'){view.labels=!view.labels;event.target.closest('[data-map-tool]').setAttribute('aria-pressed',String(view.labels));view.labelSignature='';renderLabels(view);}return;}
    const focus=event.target.closest?.('[data-map-country]')?.dataset.mapCountry;if(focus){focusCountry(view,focus);return;}
-   const id=event.target.closest?.('[data-province]')?.dataset.province||(event.target===svg?pendingClick:null);pendingClick=null;if(id&&!view.ignoreClick)select(view,id);view.ignoreClick=false;
+   if(view.context.options.labelEditMode&&view.context.options.labelPlacementCountry&&svg.contains(event.target)){pendingClick=null;if(!view.ignoreClick){const point=pendingPoint||screenPoint(view,event);if(point.x>=0&&point.x<=view.template.width&&point.y>=0&&point.y<=view.template.height)view.context.options.onLabelMove?.(view.context.options.labelPlacementCountry,labelPoint(view,point));}pendingPoint=null;view.ignoreClick=false;return;}
+   if(view.context.options.labelEditMode&&event.target.closest?.('[data-map-country-label]')){pendingClick=null;pendingPoint=null;view.ignoreClick=false;return;}
+   const id=event.target.closest?.('[data-province]')?.dataset.province||(event.target===svg?pendingClick:null);pendingClick=null;pendingPoint=null;if(id&&!view.ignoreClick)select(view,id);view.ignoreClick=false;
   };
-  const key=event=>{if(event.key==='Enter'||event.key===' '){const id=event.target.closest?.('[data-province]')?.dataset.province;if(id){event.preventDefault();select(view,id);}}else if(event.target===svg&&['+','=','-','0'].includes(event.key)){event.preventDefault();if(event.key==='0'){view.scale=1;view.x=view.y=0;transform(view);}else zoom(view,event.key==='-'?1/1.4:1.4);}};
+  const key=event=>{const label=view.context.options.labelEditMode&&event.target.closest?.('[data-map-country-label]')?.dataset.mapCountryLabel;if(label){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();const anchor=view.countryLabelAnchors?.get(label),matrix=svg.getScreenCTM?.(),screenScale=matrix?Math.hypot(matrix.a,matrix.b)||1:1,step=(event.shiftKey?10:1)/(view.scale*screenScale);if(anchor){const point=[Math.max(0,Math.min(view.template.width,anchor.cx+(event.key==='ArrowRight'?step:event.key==='ArrowLeft'?-step:0))),Math.max(0,Math.min(view.template.height,anchor.cy+(event.key==='ArrowDown'?step:event.key==='ArrowUp'?-step:0)))];view.context.options.onLabelMove?.(label,point);view.labelLayer.querySelector(`[data-map-country-label="${label}"]`)?.focus();}}return;}if(event.key==='Enter'||event.key===' '){const id=event.target.closest?.('[data-province]')?.dataset.province;if(id){event.preventDefault();select(view,id);}}else if(event.target===svg&&['+','=','-','0'].includes(event.key)){event.preventDefault();if(event.key==='0'){view.scale=1;view.x=view.y=0;transform(view);}else zoom(view,event.key==='-'?1/1.4:1.4);}};
   const change=event=>select(view,event.target.value),search=()=>renderSearch(view);
   const layers=event=>{const layer=event.target.dataset?.mapLayer;if(layer==='influence')view.showInfluence=event.target.checked;else if(layer==='occupation')view.showOccupation=event.target.checked;else return;update(view);};
   container.querySelector('[data-map-layer="influence"]').checked=view.showInfluence;
@@ -126,16 +134,25 @@
  }
  function update(view){
   const {map,reference,countries}=view.context;let diff=0;const overlay=[],patterns=new Map(),legend=new Map();
-  const countryBounds=new Map([...countries].filter(([,c])=>Array.isArray(c.focusBounds)&&c.focusBounds.length===4&&c.focusBounds.every(Number.isFinite)).map(([id,c])=>[id,c.focusBounds]));view.countryLabelAnchors=new Map();
+  const editing=Boolean(view.context.options.labelEditMode),customCountries=new Set((view.context.scenario.map.countries||[]).map(c=>c.id)),ownedBounds=new Map(),countryBounds=new Map([...countries].filter(([,c])=>Array.isArray(c.focusBounds)&&c.focusBounds.length===4&&c.focusBounds.every(Number.isFinite)).map(([id,c])=>[id,c.focusBounds]));view.countryLabelAnchors=new Map();
   const patternId=(id,type)=>{const key=type+'|'+id;if(!patterns.has(key))patterns.set(key,{id:view.uid+type+patterns.size,color:color(countries.get(id)?.color),reverse:type==='i'});return patterns.get(key).id;};
   for(const p of view.template.provinces){
    const id=p.id,owner=ownerOf(view,p),occupier=map.occupation?.[id],influence=map.influence?.[id],fill=color(countries.get(owner)?.color),different=Boolean(reference&&['owners','occupation','influence','markers'].some(k=>(map[k]?.[id]??null)!==(reference[k]?.[id]??null)));
    legend.set(owner,fill);if(different)diff++;
    const bounds=countryBounds.get(owner);if(bounds&&p.cx>=bounds[0]&&p.cx<=bounds[2]&&p.cy>=bounds[1]&&p.cy<=bounds[3]){const distance=(p.cx-(bounds[0]+bounds[2])/2)**2+(p.cy-(bounds[1]+bounds[3])/2)**2,previous=view.countryLabelAnchors.get(owner);if(!previous||distance<previous.distance)view.countryLabelAnchors.set(owner,{id:owner,cx:p.cx,cy:p.cy,bounds,distance,area:(bounds[2]-bounds[0])*(bounds[3]-bounds[1])});}
+   if((editing||customCountries.has(owner))&&countries.get(owner)?.labelPosition!==null){const box=ownedLabelBounds(view,p),previous=ownedBounds.get(owner);if(previous){previous.bounds=[Math.min(previous.bounds[0],box[0]),Math.min(previous.bounds[1],box[1]),Math.max(previous.bounds[2],box[2]),Math.max(previous.bounds[3],box[3])];previous.provinces.push(p);}else ownedBounds.set(owner,{bounds:box.slice(),provinces:[p]});}
    const signature=fill+'|'+different;if(view.signatures.get(id)!==signature){const node=view.nodes.get(id);node?.setAttribute('style','--province-color:'+fill);node?.classList.toggle('map-diff',different);view.signatures.set(id,signature);}
    if(occupier&&view.showOccupation)overlay.push(`<path class="map-layer" data-map-overlay="occupation" d="${esc(p.path)}" transform="${geometryOffset(view.template)}" fill="url(#${patternId(occupier,'o')})"/>`);
    if(influence&&view.showInfluence)overlay.push(`<path class="map-layer" data-map-overlay="influence" d="${esc(p.path)}" transform="${geometryOffset(view.template)}" fill="url(#${patternId(influence,'i')})"/>`);
   }
+  // New countries need no separate focus rectangle before their names can be
+  // positioned. Pick an owned province nearest the owned extent's midpoint.
+  for(const [id,{bounds,provinces}]of ownedBounds){if(view.countryLabelAnchors.has(id))continue;let anchor=null,distance=Infinity;for(const p of provinces){const next=(p.cx-(bounds[0]+bounds[2])/2)**2+(p.cy-(bounds[1]+bounds[3])/2)**2;if(next<distance){distance=next;anchor=p;}}if(anchor)view.countryLabelAnchors.set(id,{id,cx:anchor.cx,cy:anchor.cy,bounds,area:(bounds[2]-bounds[0])*(bounds[3]-bounds[1])});}
+  // Saved positions are in the template's local coordinates, matching province
+  // centroids. They do not move as ownership, zoom or automatic labels change.
+  for(const [id,c]of countries){if(c.labelPosition===null){view.countryLabelAnchors.delete(id);continue;}if(manualLabelPosition(c.labelPosition)&&(legend.has(id)||(editing&&view.context.options.labelPlacementCountry===id))){const previous=view.countryLabelAnchors.get(id);view.countryLabelAnchors.set(id,{...previous,id,cx:c.labelPosition[0],cy:c.labelPosition[1],bounds:previous?.bounds||[0,0,view.template.width,view.template.height],area:previous?.area||0,manual:true});}}
+  view.labelLayer.setAttribute('aria-hidden',String(!editing));view.svg.setAttribute('role',editing?'group':'img');if(editing)view.svg.setAttribute('tabindex','0');else view.svg.removeAttribute('tabindex');view.svg.style.cursor=editing&&view.context.options.labelPlacementCountry?'crosshair':'';
+  const hint=view.container.querySelector('.map-gesture-hint');if(hint)hint.textContent=editing?(view.context.options.labelPlacementCountry?`${country(view,view.context.options.labelPlacementCountry)} 국명 위치를 누르세요 · 드래그로 지도 이동`:'국명을 드래그해 이동 · 화살표 키로 미세 조정'):'휠 확대·축소 · 드래그 이동';
   const patternMarkup=[...patterns.values()].map(p=>`<pattern id="${p.id}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(${p.reverse?-35:35})"><line x1="0" y1="0" x2="0" y2="8" stroke="${p.color}" stroke-width="3"/></pattern>`).join('');
   const overlayMarkup=overlay.join(''),overlaySignature=patternMarkup+overlayMarkup;if(view.overlaySignature!==overlaySignature){view.defs.innerHTML=view.clipMarkup+patternMarkup;view.overlays.innerHTML=overlayMarkup;view.overlaySignature=overlaySignature;}
   const legendMarkup=[...legend].map(([id,fill])=>`<button type="button" class="map-country-key" data-map-country="${esc(id)}" title="${esc(country(view,id))}로 이동"><i style="background:${fill}"></i>${esc(country(view,id))}</button>`).join('');

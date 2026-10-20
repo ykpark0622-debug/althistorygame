@@ -113,7 +113,7 @@ test('fromScenario extracts only map content and accepts metadata overrides', ()
   assert.throws(() => M.fromScenario(E.createBlankScenario()));
 });
 
-test('engine editor limits are checked after redundant template defaults are removed', () => {
+test('large known map assignments remain editable while unrelated manuscript metadata stays bounded', () => {
   const originalLength = template.provinces.length;
   try {
     for (let i = 0; i < 51000; i++) template.provinces.push({ id: 'region_' + i, name: '지역 ' + i, owner: 'a' });
@@ -124,9 +124,12 @@ test('engine editor limits are checked after redundant template defaults are rem
     const tooMany = base();
     for (const province of template.provinces) tooMany.map.initial.owners[province.id] = province.owner === 'a' ? 'b' : 'a';
     const before = JSON.stringify(tooMany);
-    assert.ok(M.validate(tooMany).errors.some(message => message.includes('시나리오 편집기')));
-    assert.throws(() => M.normalize(tooMany));
-    assert.equal(JSON.stringify(tooMany), before, 'failed oversized import preserves the supplied document');
+    assert.deepEqual(M.validate(tooMany).errors, [], 'a known dense template may assign every province');
+    assert.equal(Object.keys(M.normalize(tooMany).map.initial.owners).length, template.provinces.length);
+    const oversizedManuscript = M.toScenario(tooMany);
+    oversizedManuscript.unrelatedMetadata = Array.from({ length: 51000 }, () => 0);
+    assert.ok(E.validateScenario(oversizedManuscript, { allowDraft: true }).errors.some(message => message.includes('너무 큽니다')));
+    assert.equal(JSON.stringify(tooMany), before, 'validation never mutates the supplied document');
   } finally { template.provinces.length = originalLength; }
 });
 

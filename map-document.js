@@ -106,13 +106,20 @@
         const ids = new Set();
         map.countries.forEach((country, index) => {
           if (!plain(country)) { error('지도 국가 ' + (index + 1) + ': 객체가 필요합니다.'); return; }
-          keys(country, ['id', 'name', 'color', 'focusBounds', 'available'], '지도 국가');
+          keys(country, ['id', 'name', 'color', 'focusBounds', 'available', 'labelPosition'], '지도 국가');
           if (!validId(country.id)) error('지도 국가 ID가 올바르지 않습니다.');
           else if (ids.has(country.id)) error('지도 국가 ID가 중복되었습니다: ' + country.id);
           else { ids.add(country.id); countries.set(country.id, Object.assign({}, countries.get(country.id), country)); }
           const merged = countries.get(country.id) || country;
           text(merged.name, '지도 국가 이름', 100);
           if (typeof merged.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(merged.color)) error('지도 국가 색상은 #RRGGBB 형식이어야 합니다.');
+          if (own(country, 'labelPosition') && country.labelPosition !== null) {
+            const point = country.labelPosition;
+            if (!Array.isArray(point) || point.length !== 2 || point.some(value => typeof value !== 'number' || !Number.isFinite(value)) ||
+                point[0] < 0 || point[1] < 0 || point[0] > template.width || point[1] > template.height) {
+              error('국명 위치는 지도 안의 [가로, 세로] 좌표 또는 숨김(null)이어야 합니다.');
+            }
+          }
           if (own(country, 'available')) {
             if (typeof country.available !== 'boolean') error('국가 available은 참/거짓 값이어야 합니다.');
             else if (!warnings.includes('국가 목록의 자동 표시 정보는 저장하지 않습니다.')) warnings.push('국가 목록의 자동 표시 정보는 저장하지 않습니다.');
@@ -173,7 +180,9 @@
       const item = { id: country.id, name: merged.name, color: merged.color };
       const customFocus = own(country, 'focusBounds') && JSON.stringify(country.focusBounds) !== JSON.stringify(base && base.focusBounds);
       if (customFocus) item.focusBounds = country.focusBounds.slice();
-      if (!base || item.name !== base.name || item.color !== base.color || customFocus) map.countries.push(item);
+      const customLabel = own(country, 'labelPosition') && JSON.stringify(country.labelPosition) !== JSON.stringify(base && base.labelPosition);
+      if (customLabel) item.labelPosition = country.labelPosition === null ? null : country.labelPosition.slice();
+      if (!base || item.name !== base.name || item.color !== base.color || customFocus || customLabel) map.countries.push(item);
     }
     for (const layer of layers) {
       const result = {};
