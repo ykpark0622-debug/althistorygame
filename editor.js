@@ -763,6 +763,7 @@
     countryQuery.addEventListener('input', () => { current.mapCountryQuery = countryQuery.value; refreshCountryList(); });
     function countryDot(item) { const dot = $('span', 'country-color-dot'); dot.style.backgroundColor = /^#[\da-f]{6}$/i.test(item?.color || '') ? item.color : '#dfe3dd'; dot.setAttribute('aria-hidden', 'true'); return dot; }
     function chooseWorking(id) { current.mapCountry = current.mapPaintCountry = id; current.mapLabelPlacementCountry = null; render(); }
+    function focusWorkingLabel(id) { [...current.dialog.querySelectorAll('[data-map-country-label]')].find(node => node.getAttribute('data-map-country-label') === id)?.focus?.({ preventScroll: true }); }
     function refreshCountryList() {
       const countries = countryList(), filtered = countries.filter(item => countryMatches(item, countryQuery.value)), ownershipCounts = effectiveOwnerCounts(initialMapState(draft).map.owners);
       countryRows.replaceChildren();
@@ -812,12 +813,16 @@
           if (detail.mode === 'paint' && current.mapTool === 'paint') assignProvinces(ids, current.mapCountry);
           else if (detail.mode === 'select' && current.mapTool === 'select') { current.mapSelected = [...new Set([...current.mapSelected, ...ids])]; redraw(); refreshCountryList(); }
         },
-        labelEditMode: current.mapTool === 'label', labelPlacementCountry: current.mapLabelPlacementCountry || null,
+        labelEditMode: current.mapTool === 'label', labelPlacementCountry: current.mapLabelPlacementCountry || null, selectedLabelCountry: current.mapCountry || null,
+        onLabelSelect: id => { if (id !== current.mapCountry && countryList().some(item => item.id === id)) { chooseWorking(id); focusWorkingLabel(id); } },
         onLabelMove: (id, point) => {
           if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite) || point[0] < 0 || point[0] > config.template.width || point[1] < 0 || point[1] > config.template.height) return;
           const override = ensureCountryOverride(id); if (!override) return;
-          override.labelPosition = point.map(value => Math.round(value * 1000) / 1000); current.mapLabelPlacementCountry = null; mark(); redraw();
-          labelPositionStatus.textContent = (countryList().find(item => item.id === id)?.name || id) + ' 국명 위치를 저장했습니다. (' + override.labelPosition.join(', ') + ')';
+          const changedCountry = current.mapCountry !== id; current.mapCountry = current.mapPaintCountry = id;
+          override.labelPosition = point.map(value => Math.round(value * 1000) / 1000); current.mapLabelPlacementCountry = null; mark();
+          const status = (countryList().find(item => item.id === id)?.name || id) + ' 국명 위치를 저장했습니다. (' + override.labelPosition.join(', ') + ')';
+          if (changedCountry) { render(); const positionStatus = current.dialog.querySelector('[data-map-label-position]'); if (positionStatus) positionStatus.textContent = status; focusWorkingLabel(id); }
+          else { redraw(); labelPositionStatus.textContent = status; }
         }
       });
     }

@@ -55,7 +55,7 @@ const webEntry=`<!doctype html>
 </body></html>\n`;
 fs.writeFileSync(path.join(dir,'standalone-web.html'),webEntry);
 fs.writeFileSync(path.join(dir,'vercel.json'),JSON.stringify(vercel,null,2)+'\n');
-fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 역사 지도 10종 · 연구용 지도 구획 · 기록 삭제 · 국가 목록형 작업실\nVersion: 2.12.0-community\nBuild date: 2026-10-23\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
+fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 국명 반투명 배경 · 선택 테두리 · 확대 오류 수정\nVersion: 2.12.1-community\nBuild date: 2026-10-23\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
 const files=[];function visit(folder){for(const ent of fs.readdirSync(path.join(dir,folder),{withFileTypes:true})){const rel=path.posix.join(folder,ent.name);if(ent.isDirectory())visit(rel);else if(!['RELEASE-MANIFEST.json','tools/map-source/world-detailed.json','tools/map-source/world-balanced.json'].includes(rel)){const data=fs.readFileSync(path.join(dir,rel));files.push({path:rel,bytes:data.length,sha256:crypto.createHash('sha256').update(data).digest('hex')});}}}visit('');
-fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.12.0-community',builtAt:'2026-10-23',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
+fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.12.1-community',builtAt:'2026-10-23',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
 console.log(`Built blank standalone HTML, ${programFiles.length} web download parts, and manifest (${files.length} files; examples separate).`);

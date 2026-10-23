@@ -1,5 +1,5 @@
 {
-  "version": "2.12.0-community",
+  "version": "2.12.1-community",
   "builtAt": "2026-10-23",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -57,8 +57,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 9420,
-      "sha256": "c41f0cf09f7b9659789b3ef739f8f52efc30386957f89d502849adbfd66acd74"
+      "bytes": 9700,
+      "sha256": "e12e7b849b1f6a71b02377ce491f4e9822da404f80b6d1e0803e393d6179f57d"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -81,9 +81,9 @@
       "sha256": "0262a2018a71ffd6a229c024c869fc585f0229161126652dd90de844f6bd111c"
     },
     {
-      "path": "TEST-RESULTS-V2.12.txt",
-      "bytes": 30656,
-      "sha256": "4d5e16d29212f07ae23816d3c7acd6dc89bfe72f81fddc08f75ce7e175de4671"
+      "path": "TEST-RESULTS-V2.12.1.txt",
+      "bytes": 27834,
+      "sha256": "744727c561292c386d563759508ae82af4ec05ba7564073b5055b004a1d432dd"
     },
     {
       "path": "UPDATE-GUIDE.txt",
@@ -96,14 +96,14 @@
       "sha256": "c47943263e3728e45e0e89ef398a66c224e65c0560046b22e5a085fba7ff0f32"
     },
     {
-      "path": "UPDATE-V2.12.md",
-      "bytes": 4683,
-      "sha256": "0409eadc62c145284214a736026413b2c76c9762c05b3470bed0f360c7611fc6"
+      "path": "UPDATE-V2.12.1.md",
+      "bytes": 3229,
+      "sha256": "dd24e902c7fcf08afd68c07b796a4c799955b7edeb5e370720e5522c25d74fa6"
     },
     {
       "path": "VERSION.txt",
-      "bytes": 227,
-      "sha256": "1d66fe4185bc290ab69858218402abb7d416c9c2dd39b82c34d029987677c5d8"
+      "bytes": 201,
+      "sha256": "563edb800a44e62096dcfaedd677c2a7c0ac090f2d561c9fcaeaca4616856bf0"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -748,7 +748,7 @@
     {
       "path": "assets/program/manifest.json",
       "bytes": 7111,
-      "sha256": "d2eba51f2672cf8612a641a2db629dc726cd5720f94b2e757c087d40945f7614"
+      "sha256": "a72ace1b1221f83f38f91770898a73bcbc7319971657c5417a7b468f87813506"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -931,9 +931,9 @@
       "sha256": "96f97f412267a4bbd2fa3286bd9e0e7c985e84607a0800e9a44175e68496dc5c"
     },
     {
-      "path": "assets/program/standalone.037.4edc0da4c362f900.txt",
-      "bytes": 455537,
-      "sha256": "4edc0da4c362f900fd79efabc77cf1efca8071313172a71f5f10c66b862f3236"
+      "path": "assets/program/standalone.037.99d47f58706df465.txt",
+      "bytes": 459866,
+      "sha256": "99d47f58706df4650fa42659ef5861a0e3f606dc5e98b866ce3fcfe325c8b7c5"
     },
     {
       "path": "bootstrap.js",
@@ -947,8 +947,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 9271,
-      "sha256": "06831d73c0990775f5b67287a01063dc77b1ef1e5251160e85eb786d7c8588c2"
+      "bytes": 9245,
+      "sha256": "9314926497c9e6fb277366d0cca77dbbe608daaed5b9e6dd6cadc8a183131892"
     },
     {
       "path": "community-bridge.js",
@@ -967,8 +967,8 @@
     },
     {
       "path": "editor.js",
-      "bytes": 136588,
-      "sha256": "f6df4aa4ae2e7c151f04d990909e5e0af04f8e2e696755fc0ef8c11e184ccfc7"
+      "bytes": 137358,
+      "sha256": "6979055b27ae77e71b8e18e5ca5f134f452f7e6df800904cd6ff764b5471b41d"
     },
     {
       "path": "engine.js",
@@ -1207,8 +1207,8 @@
     },
     {
       "path": "map-view.js",
-      "bytes": 38866,
-      "sha256": "cd4fa61d91edf6796693a3a1c82e910c67979f2d213d56ccaf2c26906e003435"
+      "bytes": 42425,
+      "sha256": "ba1cf792e168ceb0b27dec61a9bb33f16f329764f1f1b21dd1dbac473981381f"
     },
     {
       "path": "privacy.html",
@@ -1238,7 +1238,7 @@
     {
       "path": "standalone.html",
       "bytes": 8208,
-      "sha256": "7203f8e04a6a70aed21ae1f77e9469e11ca8e184848b63313d58a2b9a84eba53"
+      "sha256": "f129da500428b2b373d8aac05f324e2dee3014b8134b46a6429fb4db9a9c70aa"
     },
     {
       "path": "styles.css",
@@ -1429,6 +1429,11 @@
       "path": "tests/map-input-browser.cjs",
       "bytes": 9315,
       "sha256": "84b64ecf86ea2e256fded1ac2c04e39794d6222cec49f1931510519123419439"
+    },
+    {
+      "path": "tests/map-label-background-browser.cjs",
+      "bytes": 23475,
+      "sha256": "2350ddf7eaa9da7f60bf31b9a609cc6ada5a7dcddd58fbe3312e4d4513a92bf3"
     },
     {
       "path": "tests/map-label-data.cjs",
@@ -1758,7 +1763,7 @@
     {
       "path": "vercel.json",
       "bytes": 38400,
-      "sha256": "a582fd634ddd1017e68cdd8e67636ffcd619f752d7935393682bd26651df75af"
+      "sha256": "abfa9325dd80553242d23ea641c00f4fe742487166d71f7e4be84f01a6361d5d"
     }
   ]
 }
