@@ -29,7 +29,7 @@
     $('gallery-title').textContent = noun() + ' 갤러리';
     $('gallery-lead').textContent = map ? '지역과 시대, 영토와 국가를 편집한 지도를 나누세요. 마음에 드는 지도는 내 작업 공간에서 편집하고 시나리오의 바탕으로 사용할 수 있습니다.' : '연대기 이야기부터 지도와 연차별 결정을 담은 치세 시나리오까지 골라 플레이하세요. 내 이야기도 직접 올려 나눌 수 있습니다.';
     $('upload-button').textContent = '↑ 내 ' + noun() + ' 올리기';
-    $('maker-link').href = map ? 'index.html?mapMaker=1' : 'index.html';
+    $('maker-link').href = map ? 'index.html?mapMaker=1' : 'index.html?home=1';
     $('maker-link').textContent = map ? '지도 만들기' : '만들기 · 플레이';
     $('sort-select').querySelector('[value="played"]').hidden = map;
     $('detail-dialog').setAttribute('aria-label', noun() + ' 자세히 보기');
@@ -119,7 +119,7 @@
   if (!cfg.supabaseUrl || !cfg.supabaseKey || !window.supabase) {
     const notice = $('setup-notice');
     notice.hidden = false;
-    notice.innerHTML = '<h2>갤러리 설정이 필요합니다</h2><p>사이트 관리자가 <code>config.js</code>에 Supabase 주소와 공개 키를 넣으면 갤러리가 열립니다. 그 전에도 <a href="index.html">만들기 · 플레이</a>는 그대로 쓸 수 있습니다.</p>';
+    notice.innerHTML = '<h2>갤러리 설정이 필요합니다</h2><p>사이트 관리자가 <code>config.js</code>에 Supabase 주소와 공개 키를 넣으면 갤러리가 열립니다. 그 전에도 <a href="index.html?home=1">만들기 · 플레이</a>는 그대로 쓸 수 있습니다.</p>';
     $('upload-button').hidden = true;
     return;
   }
@@ -326,7 +326,7 @@
     const today = new Date().toISOString().slice(0, 10), playedKey = 'hc:played:' + id;
     let counted = null; try { counted = localStorage.getItem(playedKey); } catch {}
     if (counted !== today) { await client.rpc('increment_play', { p_id: id }); try { localStorage.setItem(playedKey, today); } catch {} }
-    location.href = 'index.html';
+    location.href = 'index.html?galleryImport=' + encodeURIComponent(data.id);
   }
   async function downloadJSON(id) {
     const { data, error } = await client.from('scenarios').select('title,data').eq('content_kind', state.kind).eq('id', id).single();

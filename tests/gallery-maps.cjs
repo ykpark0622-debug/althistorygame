@@ -75,4 +75,28 @@ test('additive map migration keeps authentication, grants, moderation and existi
     if(functionName!=='increment_play')assert.equal(body(migration),body(fresh));
   }
 });
-filters().then(()=>console.log('Passed '+passed+' map gallery checks. Database SQL inspected, not executed.')).catch(error=>{console.error(error);process.exitCode=1;});
+async function galleryNavigation() {
+  const playSource=extract('  let playSequence = 0;', '  async function downloadJSON(id)');
+  const id='88888888-8888-4888-8888-888888888888';
+  for(const kind of ['scenario','map']){
+    const data=kind==='map'?sample:scenario,session=new Map(),local=new Map(),calls=[],location={href:'https://example.test/gallery.html'},state={kind};
+    const context={state,location,PENDING_KEY:'hc:pendingImport',noun:()=>kind==='map'?'지도':'시나리오',toast(){},friendlyError:String,ensureContent:async value=>assert.equal(value,data),checkContent:()=>'',M:{normalize:value=>value},E:{validateScenario:()=>({errors:[]})},sessionStorage:{setItem:(key,value)=>session.set(key,String(value))},localStorage:{getItem:key=>local.get(key)||null,setItem:(key,value)=>local.set(key,String(value))},Date,encodeURIComponent,client:{from(table){assert.equal(table,'scenarios');const query={select(){return query;},eq(field,value){calls.push([field,value]);return query;},single:async()=>({data:{id,title:'선택한 작품',data,content_kind:kind},error:null})};return query;},rpc:async(name,args)=>{calls.push([name,args]);return{error:null};}}};
+    vm.runInNewContext(playSource+'\nthis.playAction=play;',context);await context.playAction(id);
+    const target=new URL(location.href,'https://example.test/');assert.equal(target.pathname,'/index.html');
+    assert.ok(calls.some(([field,value])=>field==='content_kind'&&value===kind));
+    if(kind==='scenario'){
+      assert.equal(target.searchParams.get('galleryImport'),id);assert.equal(target.searchParams.has('home'),false);assert.equal(target.searchParams.has('mapMaker'),false);
+      assert.equal(JSON.parse(session.get('hc:pendingImport')).id,id);assert.equal(session.has('hc:pendingMapImport'),false);assert.ok(calls.some(([name])=>name==='increment_play'));
+    }else{
+      assert.equal(target.searchParams.get('mapMaker'),'1');assert.equal(target.searchParams.has('galleryImport'),false);assert.equal(JSON.parse(session.get('hc:pendingMapImport')).id,id);assert.equal(session.has('hc:pendingImport'),false);assert.equal(calls.some(([name])=>name==='increment_play'),false);
+    }
+  }
+  passed++;console.log('ok executed gallery play actions mark explicit scenario handoffs and preserve map navigation');
+  const renderSource=extract('  function renderKind()', '  function toast(message)');
+  const nodes=new Map(),node=id=>{if(!nodes.has(id))nodes.set(id,{querySelector:()=>({hidden:false}),setAttribute(){}});return nodes.get(id);};
+  const context={state:{kind:'scenario'},$:node,noun:()=>context.state.kind==='map'?'지도':'시나리오',document:{title:''}};
+  vm.runInNewContext(renderSource+'\nthis.render=renderKind;',context);context.render();assert.equal(node('maker-link').href,'index.html?home=1');context.state.kind='map';context.render();assert.equal(node('maker-link').href,'index.html?mapMaker=1');
+  const html=fs.readFileSync(path.join(dir,'gallery.html'),'utf8');assert.match(html,/<a\b[^>]*id="maker-link"[^>]*href="index\.html\?home=1"/);assert.match(html,/<a\b[^>]*class="brand"[^>]*href="index\.html\?home=1"/);
+  passed++;console.log('ok executed gallery kind switching sends scenario maker and static home links to the passive landing page');
+}
+filters().then(galleryNavigation).then(()=>console.log('Passed '+passed+' map gallery checks. Database SQL inspected, not executed.')).catch(error=>{console.error(error);process.exitCode=1;});

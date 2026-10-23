@@ -1,4 +1,4 @@
-역사의 갈림길 — 지도 색상·국가 검색·백지도·국명 위치 편집 · 지도 제작·공유
-Version: 2.9.0-community
-Build date: 2026-10-20
+역사의 갈림길 — 첫 화면 선택 · 갤러리에서 돌아올 때 자동 실행 방지 · 지도 제작·공유
+Version: 2.10.1-community
+Build date: 2026-10-23
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)

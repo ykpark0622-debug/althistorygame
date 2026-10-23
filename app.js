@@ -10,9 +10,10 @@
   let launcherMode='file', ai={idea:'',size:'short',endings:'5',mode:'chronicle',mapTemplateId:'',base:false,paste:'',prompt:'',promptNote:'',showPrompt:false,problem:null,repair:'',repairNote:'',showRepair:false};
   let compareMap=false,referenceCache=null;
   let launcherBusy=false, launcherError='', launcherMessage='', failedScenarioUrl=null, loadSequence=0, pendingUrlController=null;
-  let deferredStoredScenario=null, startupRetry=false, aiMapLoading=false, aiMapSequence=0, aiMapError='';
+  let deferredStoredScenario=null, startupRetry=false, startupRestore=true, aiMapLoading=false, aiMapSequence=0, aiMapError='';
   const provinceNameIndexes=new WeakMap();
-  let homeMode=new URL(location.href).searchParams.get('home')==='1';
+  const requestedHome=new URL(location.href).searchParams.get('home')==='1';
+  let homeMode=true;
   const storage = {
     get(key){try{return JSON.parse(localStorage.getItem(baseKey+':'+key));}catch{return null;}},
     set(key,value){try{localStorage.setItem(baseKey+':'+key,JSON.stringify(value));return true;}catch{storageOK=false;return false;}}
@@ -21,7 +22,6 @@
   const custom = storage.get('scenario');
   // A saved map must be loaded before full engine validation. Until then, keep
   // the original manuscript and autosave untouched rather than rejecting it.
-  let hasStoredScenario=false;
   scenario=E.clone(DEFAULT_SCENARIO);state=null;
   const signature = () => hash(scenario);
   function sourceContext(){
@@ -219,14 +219,8 @@
     byId('player-map-panel').hidden=true;byId('map-reference-tools').hidden=true;
     byId('story-panel').classList.remove('game-over');
     const current=Boolean(deferredStoredScenario||scenario.map||!isEmptyScenario());
-    const resumeTitle=deferredStoredScenario?.title||scenario.title;
-    const hasProgress=Boolean(state||deferredStoredScenario&&!deferredStoredScenario.draft);
-    const saved=storage.get('resumeSearch');
-    let resume='?';
-    if(typeof saved==='string'&&saved.startsWith('?')){
-      try{const target=new URL(saved,location.href);target.searchParams.delete('home');resume=target.search||'?';}catch{}
-    }
-    byId('story-panel').innerHTML=(current?`<section class="home-resume"><div><strong>${escape(resumeTitle)}</strong><p>${hasProgress?'플레이하던 진행을 이어갈 수 있습니다.':'작성하던 초안을 다시 열 수 있습니다.'}</p></div><a class="btn primary" id="resume-scenario-link" href="${escape(resume)}">${hasProgress?'이어서 하기':'작성하던 시나리오로 돌아가기'}</a></section>`:'')+launcherMarkup(false);
+    const savedScenario=deferredStoredScenario||scenario,isDraft=savedScenario.draft===true;
+    byId('story-panel').innerHTML=(current?`<section class="home-resume" style="display:block" aria-label="저장된 시나리오 시작 방법"><div style="min-width:0;overflow-wrap:anywhere"><div class="small-label">이 브라우저에 저장된 시나리오</div><h2 style="font-size:22px;margin:10px 0">${escape(savedScenario.title||'저장한 시나리오')}</h2><p>${isDraft?'작성하던 초안을 다시 열 수 있습니다.':'이전 진행을 이어가거나 같은 시나리오를 처음부터 시작하세요.'}</p></div><div class="toolbar" style="display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 10px"><button type="button" class="btn primary" id="resume-scenario-link" data-launch-action="resume-scenario">${isDraft?'작성하던 시나리오로 돌아가기':'이어서 하기'}</button>${isDraft?'':'<button type="button" class="btn secondary" id="restart-scenario-button" data-launch-action="restart-scenario">처음부터 시작하기</button>'}</div><p>선택한 뒤에 필요한 지도를 불러옵니다. 다른 이야기는 아래에서 열 수 있습니다.</p></section>`:'')+launcherMarkup(false);
     updateLauncherFeedback();
   }
   function leaveHome(){
@@ -445,6 +439,7 @@
     document.querySelectorAll('[data-launch-progress]').forEach(node=>{node.textContent=launcherMessage;node.hidden=!launcherMessage;});
     document.querySelectorAll('[data-launch-action="retry-url"]').forEach(node=>{node.hidden=!failedScenarioUrl;node.disabled=launcherBusy;});
     document.querySelectorAll('[data-launch-action="retry-startup"]').forEach(node=>{node.hidden=!startupRetry;node.disabled=launcherBusy;});
+    for(const action of ['resume-scenario','restart-scenario'])document.querySelectorAll(`[data-launch-action="${action}"]`).forEach(node=>{node.disabled=launcherBusy;});
     document.querySelectorAll('[data-scenario-dropzone]').forEach(node=>node.setAttribute('aria-busy',String(launcherBusy)));
   }
   function setLauncherFeedback(message='',error=''){
@@ -627,9 +622,6 @@
     const saved=storage.set('scenario',scenario);saveSourceContext(saved);if(awaitingName)storage.set('autosave',null);else saveAuto();
     render();status(saved?(state?(awaitingName?'시나리오를 적용했습니다. 이름을 입력하고 시작하세요.':'시나리오를 적용했습니다. 새로운 역사를 시작하세요.'):'작성 중인 초안을 저장했습니다. 흐름도에서 이어서 작성하세요.'):'브라우저 저장이 불가능하므로 JSON으로 내보내 보관하세요.');
   }
-  byId('home-link')?.addEventListener('click',()=>{
-    if(!homeMode)storage.set('resumeSearch',new URL(location.href).search||'?');
-  });
   byId('story-panel').addEventListener('submit',event=>{
     if(event.target.id!=='player-name-form')return;
     event.preventDefault();startWithName(byId('player-name-input').value);
@@ -660,6 +652,8 @@
       if(action==='demo-chronicle'||action==='demo-reign')void loadScenarioUrl('examples/'+(action==='demo-chronicle'?'chronicle-sejong.json':'regional-europe-demo.json')); 
       if(action==='demo-world')void loadScenarioUrl('examples/imjin-world.json');
       if(action==='choose-file')chooseScenarioFile();
+      if(action==='resume-scenario'&&!launcherBusy)void runUI(()=>restoreDeferredScenario());
+      if(action==='restart-scenario'&&!launcherBusy)void runUI(()=>startScenarioOver());
       if(action==='new')newScenario();
       if(action==='setup-map')void runUI(()=>openScenarioEditor({page:'map'})).then(result=>{if(result!==null)closeLauncher();});
       if(action==='map-maker')void runUI(()=>MapMaker.open()).then(result=>{if(result!==null)closeLauncher();});
@@ -667,7 +661,7 @@
       if(action==='copy-scenario-map')void runUI(async()=>{if(deferredStoredScenario&&!await restoreDeferredScenario())return null;if(scenario.map)return MapMaker.open(MapDocument.fromScenario(scenario));}).then(result=>{if(result!==null)closeLauncher();});
       if(action==='close')closeLauncher();
       if(action==='retry-url'&&failedScenarioUrl&&!launcherBusy)void loadScenarioUrl(failedScenarioUrl);
-      if(action==='retry-startup'&&!launcherBusy)void restoreDeferredScenario();
+      if(action==='retry-startup'&&!launcherBusy)void restoreDeferredScenario(startupRestore);
       if(action==='mode-file'||action==='mode-ai'){launcherMode=action==='mode-ai'?'ai':'file';refreshLaunchers(`[data-launch-action="${action}"]`);}
       if(action==='ai-copy-prompt')void runUI(copyAIPrompt);
       if(action==='ai-copy-repair')void copyRepair();
@@ -744,26 +738,40 @@
     if(state&&auto&&auto.signature===signature())try{state=restoreSavedState(auto.state);awaitingName=false;}catch{status('이전 자동 저장을 읽지 못해 새 회차를 시작합니다. 저장된 원본은 그대로 남아 있습니다.',true);}
     rememberEnding();render();
   }
-  async function hydrateStored(candidate,sequence=loadSequence){
+  async function hydrateStored(candidate,sequence=loadSequence,restore=true){
     try{
       const id=candidate?.map?.templateId;
       if(id&&!globalThis.MapTemplates?.get(id)){
         launcherBusy=true;setLauncherFeedback('저장한 시나리오에 필요한 지도만 불러오고 있습니다.');status('저장한 시나리오의 지도를 불러오고 있습니다.');
       }
       const prepared=await prepareScenarioWithMap(candidate);if(sequence!==loadSequence)return null;
-      hasStoredScenario=true;deferredStoredScenario=null;startupRetry=false;
-      setLauncherFeedback();initializeRuntime(prepared,true);
+      deferredStoredScenario=null;startupRetry=false;
+      // Continuing an old save after a different link failed must not leave
+      // that failed link in the address or adopt it as the saved story's source.
+      const savedContext=storage.get('sourceContext');
+      if(new URL(location.href).searchParams.has('scenario')&&
+        (savedContext?.context!==sourceContext()||savedContext.signature!==hash(candidate))){
+        try{const url=new URL(location.href);url.searchParams.delete('scenario');globalThis.history?.replaceState(null,'',url.href);}catch{}
+      }
+      failedScenarioUrl=null;
+      setLauncherFeedback();leaveHome();status('');initializeRuntime(prepared,restore);
+      if(!restore&&state&&!awaitingName)saveAuto();
       return E.clone(scenario);
     }catch(error){
       if(sequence!==loadSequence)return null;
-      startupRetry=true;deferredStoredScenario=candidate;
+      startupRetry=true;startupRestore=restore;deferredStoredScenario=candidate;
       setLauncherFeedback('',error.message);render();status('저장한 시나리오를 열지 못했습니다. 원고와 진행은 보존했습니다. ‘저장한 시나리오 다시 열기’로 재시도하세요. '+error.message,true);
       return null;
     }finally{if(sequence===loadSequence){launcherBusy=false;updateLauncherFeedback();}}
   }
-  function restoreDeferredScenario(){
-    if(!deferredStoredScenario)return Promise.resolve(E.clone(scenario));
-    const candidate=deferredStoredScenario;cancelPendingLoad();return hydrateStored(candidate,loadSequence);
+  function restoreDeferredScenario(restore=true){
+    if(!deferredStoredScenario){leaveHome();render();return Promise.resolve(E.clone(scenario));}
+    const candidate=deferredStoredScenario;cancelPendingLoad();startupRestore=restore;
+    return hydrateStored(candidate,loadSequence,restore);
+  }
+  function startScenarioOver(){
+    if(!deferredStoredScenario&&!isEmptyScenario())deferredStoredScenario=E.clone(scenario);
+    return restoreDeferredScenario(false);
   }
   async function openScenarioEditor(settings){
     if(deferredStoredScenario&&!await restoreDeferredScenario())return null;
@@ -775,31 +783,23 @@
     catch(error){setLauncherFeedback('',error.message);status(error.message,true);return Promise.resolve(null);}
   }
   async function initializeApplication(){
-    const sequence=loadSequence,scenarioPath=new URL(location.href).searchParams.get('scenario');
+    const scenarioPath=new URL(location.href).searchParams.get('scenario');
     const savedContext=storage.get('sourceContext');
     const sameSource=Boolean(custom&&savedContext?.context===sourceContext()&&savedContext.signature===hash(custom));
-    const needsStoredMap=Boolean(custom?.map?.templateId&&!globalThis.MapTemplates?.get(custom.map.templateId));
+    // The landing screen needs only the saved manuscript's title. Never load
+    // its map or replay its autosave before an explicit continue/restart action.
+    if(custom)deferredStoredScenario=custom;
     initializeRuntime(prepareScenario(E.clone(DEFAULT_SCENARIO)),false);
-    if(custom){
-      if(needsStoredMap&&(homeMode||scenarioPath&&!sameSource)){
-        // Home needs only manuscript metadata. Resume hydrates the exact save.
-        // Opening another URL downloads its map first, not a previous map.
-        deferredStoredScenario=custom;render();
-      }else{
-        const result=await hydrateStored(custom,sequence);if(sequence!==loadSequence)return E.clone(scenario);
-        if(result&&sameSource&&scenarioPath&&!homeMode)status(state?'이 주소에서 저장한 시나리오와 진행을 이어갑니다.':'이 주소에서 저장한 편집 초안을 이어갑니다.');
-      }
-    }
-    if(scenarioPath&&!homeMode&&(!hasStoredScenario||!sameSource)){
-      const urlSequence=loadSequence+1,result=await loadScenarioUrl(scenarioPath);
-      if(!result&&deferredStoredScenario&&urlSequence===loadSequence)return hydrateStored(deferredStoredScenario,urlSequence);
-      return result;
+    if(scenarioPath&&!requestedHome&&!sameSource){
+      // A new scenario link is an explicit request; unrelated saved maps stay
+      // deferred even when the requested link fails.
+      return loadScenarioUrl(scenarioPath);
     }
     return E.clone(deferredStoredScenario||scenario);
   }
   // A mapless/loaded import is synchronous; an unloaded map import is awaitable.
   // Home exposes the saved manuscript while leaving its heavy map unhydrated.
-  globalThis.HistoryCrossroads={getScenario:()=>E.clone(deferredStoredScenario||scenario),getState:()=>E.clone(state),importScenario,importText,newScenario,resumeScenario:restoreDeferredScenario,ready:Promise.resolve(null)};
+  globalThis.HistoryCrossroads={getScenario:()=>E.clone(deferredStoredScenario||scenario),getState:()=>E.clone(state),importScenario,importText,newScenario,resumeScenario:restoreDeferredScenario,startScenarioOver,ready:Promise.resolve(null)};
   globalThis.HistoryCrossroads.ready=initializeApplication();
   globalThis.MapMaker?.configure({onCreateScenario:next=>{
     cancelPendingLoad();failedScenarioUrl=null;
