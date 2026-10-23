@@ -1,5 +1,5 @@
 {
-  "version": "2.13.1-community",
+  "version": "2.13.2-community",
   "builtAt": "2026-10-23",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -57,8 +57,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 10279,
-      "sha256": "c4256c22634a11b6d7751cf096013756329805788fff2c92a526bbd5ff88b30c"
+      "bytes": 10785,
+      "sha256": "5ff5799c4122d9cad18cb0568cde6b583499cb27ddbd498521f253977344a022"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -81,11 +81,6 @@
       "sha256": "0262a2018a71ffd6a229c024c869fc585f0229161126652dd90de844f6bd111c"
     },
     {
-      "path": "TEST-RESULTS-V2.13.1.txt",
-      "bytes": 27834,
-      "sha256": "e26bdd7d5fb3d205808e134a4e80451f16c906a6729df159ff95b973cfdeac55"
-    },
-    {
       "path": "UPDATE-GUIDE.txt",
       "bytes": 4673,
       "sha256": "0b39196fc2ab47818fd8eeb13bfb6929708f7ab9b5d31f1fc2cef5be136f1c63"
@@ -96,14 +91,14 @@
       "sha256": "c47943263e3728e45e0e89ef398a66c224e65c0560046b22e5a085fba7ff0f32"
     },
     {
-      "path": "UPDATE-V2.13.1.md",
-      "bytes": 2629,
-      "sha256": "adf16e8c8430c5a93bfef5e3bdb086f42ea5a561245afb7754c02ce8cb03ecae"
+      "path": "UPDATE-V2.13.2.md",
+      "bytes": 3043,
+      "sha256": "15cd6949cf6c7447de7024307ecc00ca1607e5a647da50e46caa90ddab3cdc0f"
     },
     {
       "path": "VERSION.txt",
-      "bytes": 194,
-      "sha256": "525fa1c15fb1c84eb48b21215a4cde3ac09ad31c607d2444a3a36178069fda37"
+      "bytes": 200,
+      "sha256": "cb7126856dc84f82812cbacc40a384e278e2259c31dfa9ef78fdac9a125c00d8"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -748,7 +743,7 @@
     {
       "path": "assets/program/manifest.json",
       "bytes": 7111,
-      "sha256": "092baa00522f1fbcf5f780f5006521e2720b0f31d14764db47021c5f77ecc33a"
+      "sha256": "a60a507c26aee4d7157ce32abcd613b52fd6673171f713127830e409b0425f9e"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -931,9 +926,9 @@
       "sha256": "96f97f412267a4bbd2fa3286bd9e0e7c985e84607a0800e9a44175e68496dc5c"
     },
     {
-      "path": "assets/program/standalone.037.439c85ca98776acc.txt",
-      "bytes": 477496,
-      "sha256": "439c85ca98776accbbddee9d5cfea8596c50ea276c817971d0564705816d729f"
+      "path": "assets/program/standalone.037.c4068095ef5c533d.txt",
+      "bytes": 480011,
+      "sha256": "c4068095ef5c533d54de406d2b4a1c25c1158212a6a41e472b0104867c02292e"
     },
     {
       "path": "bootstrap.js",
@@ -947,8 +942,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 9238,
-      "sha256": "9621e91c5193758c959dc2341b023eae21b209c6a398639b6f7f4acdb9557053"
+      "bytes": 9244,
+      "sha256": "7be7537af0524076154a1805001ae6e2444cfc9e0f9492d28c712083915cc1ef"
     },
     {
       "path": "community-bridge.js",
@@ -1207,8 +1202,8 @@
     },
     {
       "path": "map-view.js",
-      "bytes": 44016,
-      "sha256": "ae1c58f90d32e75ec99803a223d01e44405119d2b1a7ebe5c0696bc5a1508072"
+      "bytes": 46531,
+      "sha256": "de37fbd1a205898eab32d83ac1d86c3051d5922d4553a56f873e0299b45e0b3e"
     },
     {
       "path": "privacy.html",
@@ -1238,7 +1233,7 @@
     {
       "path": "standalone.html",
       "bytes": 8208,
-      "sha256": "013f8f0efdd798e9b4a8f0d0c730d8c146033b759bf95b718ac07dad3a8b1103"
+      "sha256": "952f26d6adcb5dd5dbea7469d267dae0177758cc02c29275ff4ee4520fdcf4b2"
     },
     {
       "path": "styles.css",
@@ -1369,6 +1364,11 @@
       "path": "tests/gallery-atlas-browser.cjs",
       "bytes": 10466,
       "sha256": "a2f0dd02007724381ad187ef8b170b1fe4e9cc8d8d91f92d651ea5e506abf2f2"
+    },
+    {
+      "path": "tests/gallery-country-labels-browser.cjs",
+      "bytes": 20019,
+      "sha256": "062034c221f16cbaca6abc62a1a5d0236ffba2df59a0eb646834ca22a13f7703"
     },
     {
       "path": "tests/gallery-maps-browser.cjs",
@@ -1773,7 +1773,7 @@
     {
       "path": "vercel.json",
       "bytes": 38400,
-      "sha256": "144352a824debaf412982e79e065258e9d2b5cf139a712408b3aef3530d75453"
+      "sha256": "50f8b30caba8c6cc3df24aefed4605bee1ed55457a4e2a1891c54578d8558156"
     }
   ]
 }
