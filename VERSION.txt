@@ -1,4 +1,4 @@
-역사의 갈림길 — 전체화면 · 지도 설정 먼저 보기 · 스크롤 유지
-Version: 2.13.0-community
+역사의 갈림길 — 지도 선택 표시 해제 · 전체화면 · 지도 설정
+Version: 2.13.1-community
 Build date: 2026-10-23
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)

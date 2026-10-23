@@ -777,7 +777,7 @@
     const countryQuery = $('input'); countryQuery.type = 'search'; countryQuery.value = current.mapCountryQuery || ''; countryQuery.placeholder = '국가 이름 또는 ID 검색'; countryQuery.setAttribute('aria-label', '국가 목록 검색');
     countryQuery.addEventListener('input', () => { current.mapCountryQuery = countryQuery.value; refreshCountryList(); });
     function countryDot(item) { const dot = $('span', 'country-color-dot'); dot.style.backgroundColor = /^#[\da-f]{6}$/i.test(item?.color || '') ? item.color : '#dfe3dd'; dot.setAttribute('aria-hidden', 'true'); return dot; }
-    function chooseWorking(id) { current.mapCountry = current.mapPaintCountry = id; current.mapLabelPlacementCountry = null; render(); }
+    function chooseWorking(id) { current.mapCountry = current.mapPaintCountry = id; current.mapLabelPlacementCountry = null; current.mapVisualSelectionCleared = false; render(); }
     function focusWorkingLabel(id) { [...current.dialog.querySelectorAll('[data-map-country-label]')].find(node => node.getAttribute('data-map-country-label') === id)?.focus?.({ preventScroll: true }); }
     function refreshCountryList() {
       const countries = countryList(), filtered = countries.filter(item => countryMatches(item, countryQuery.value)), ownershipCounts = effectiveOwnerCounts(initialMapState(draft).map.owners);
@@ -794,7 +794,7 @@
       assign.textContent = '선택한 지역 배정 (' + current.mapSelected.length + ')'; assign.disabled = !current.mapSelected.length;
       selectionText.textContent = current.mapSelected.length ? current.mapSelected.length.toLocaleString('ko-KR') + '개 지역 선택됨 · ' + (selected?.name || '') + '에 배정할 수 있습니다.' : '드래그 칠하기로 영토를 칠하거나, 여러 지역을 선택한 뒤 한 번에 배정하세요.';
     }
-    function setTool(mode) { current.mapTool = mode; current.mapPaintEnabled = mode === 'paint'; current.mapLabelEditMode = mode === 'label'; current.mapLabelPlacementCountry = null; render(); }
+    function setTool(mode) { current.mapTool = mode; current.mapPaintEnabled = mode === 'paint'; current.mapLabelEditMode = mode === 'label'; current.mapLabelPlacementCountry = null; if (mode === 'label') current.mapVisualSelectionCleared = false; render(); }
     for (const [mode, title] of [['inspect', '이동'], ['paint', '드래그 칠하기'], ['select', '여러 지역 선택'], ['label', '국명 위치']]) {
       const tool = button(title, () => setTool(mode)); tool.setAttribute('aria-pressed', String(current.mapTool === mode)); tool.setAttribute('data-map-tool', mode); tools.append(tool);
     }
@@ -828,12 +828,13 @@
           if (detail.mode === 'paint' && current.mapTool === 'paint') assignProvinces(ids, current.mapCountry);
           else if (detail.mode === 'select' && current.mapTool === 'select') { current.mapSelected = [...new Set([...current.mapSelected, ...ids])]; redraw(); refreshCountryList(); }
         },
-        labelEditMode: current.mapTool === 'label', labelPlacementCountry: current.mapLabelPlacementCountry || null, selectedLabelCountry: current.mapCountry || null,
-        onLabelSelect: id => { if (id !== current.mapCountry && countryList().some(item => item.id === id)) { chooseWorking(id); focusWorkingLabel(id); } },
+        labelEditMode: current.mapTool === 'label', labelPlacementCountry: current.mapLabelPlacementCountry || null, selectedLabelCountry: current.mapVisualSelectionCleared ? null : current.mapCountry || null,
+        onSelectionClear: () => { current.mapVisualSelectionCleared = true; current.mapProvince = null; panel.open = current.mapProvinceOpen = false; drawProvince(); },
+        onLabelSelect: id => { current.mapVisualSelectionCleared = false; if (id !== current.mapCountry && countryList().some(item => item.id === id)) { chooseWorking(id); focusWorkingLabel(id); } },
         onLabelMove: (id, point) => {
           if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite) || point[0] < 0 || point[0] > config.template.width || point[1] < 0 || point[1] > config.template.height) return;
           const override = ensureCountryOverride(id); if (!override) return;
-          const changedCountry = current.mapCountry !== id; current.mapCountry = current.mapPaintCountry = id;
+          const changedCountry = current.mapCountry !== id; current.mapCountry = current.mapPaintCountry = id; current.mapVisualSelectionCleared = false;
           override.labelPosition = point.map(value => Math.round(value * 1000) / 1000); current.mapLabelPlacementCountry = null; mark();
           const status = (countryList().find(item => item.id === id)?.name || id) + ' 국명 위치를 저장했습니다. (' + override.labelPosition.join(', ') + ')';
           if (changedCountry) { render(); const positionStatus = current.dialog.querySelector('[data-map-label-position]'); if (positionStatus) positionStatus.textContent = status; focusWorkingLabel(id); }
@@ -877,7 +878,7 @@
     const labelTools = $('details', 'map-ui-label-tools'); labelTools.open = current.mapTool === 'label'; labelTools.append($('summary', '', '국명 위치 편집'));
     labelTools.append(checkbox('국명 위치 편집', current.mapTool === 'label', value => setTool(value ? 'label' : 'inspect')), $('p', 'small muted', '국명 위치 도구에서 지도 위 국명을 드래그하세요. 저장·JSON·갤러리에 위치가 함께 보관됩니다.'));
     const labelActions = $('div', 'toolbar');
-    labelActions.append(button('선택한 국명 위치 지정', () => { current.mapTool = 'label'; current.mapPaintEnabled = false; current.mapLabelEditMode = true; current.mapLabelPlacementCountry = selectedId; render(); }), button('국명 위치 자동 배치', () => { const override = ensureCountryOverride(selectedId); if (!override) return; delete override.labelPosition; current.mapLabelPlacementCountry = null; mark(); redraw(); labelPositionStatus.textContent = '국명을 영토에 맞춰 자동 배치합니다.'; }), button('국명 숨기기', () => { const override = ensureCountryOverride(selectedId); if (!override) return; override.labelPosition = null; current.mapLabelPlacementCountry = null; mark(); redraw(); labelPositionStatus.textContent = '국명을 숨겼습니다. 위치 지정 또는 자동 배치로 다시 표시할 수 있습니다.'; }));
+    labelActions.append(button('선택한 국명 위치 지정', () => { current.mapTool = 'label'; current.mapPaintEnabled = false; current.mapLabelEditMode = true; current.mapLabelPlacementCountry = selectedId; current.mapVisualSelectionCleared = false; render(); }), button('국명 위치 자동 배치', () => { const override = ensureCountryOverride(selectedId); if (!override) return; delete override.labelPosition; current.mapLabelPlacementCountry = null; mark(); redraw(); labelPositionStatus.textContent = '국명을 영토에 맞춰 자동 배치합니다.'; }), button('국명 숨기기', () => { const override = ensureCountryOverride(selectedId); if (!override) return; override.labelPosition = null; current.mapLabelPlacementCountry = null; mark(); redraw(); labelPositionStatus.textContent = '국명을 숨겼습니다. 위치 지정 또는 자동 배치로 다시 표시할 수 있습니다.'; }));
     labelPositionStatus.textContent = current.mapLabelPlacementCountry ? (country?.name || '') + ' 국명을 표시할 위치를 지도에서 누르세요.' : country?.labelPosition === null ? '현재 국명은 숨겨져 있습니다.' : Array.isArray(country?.labelPosition) ? '저장된 국명 위치: ' + country.labelPosition.join(', ') : '현재 국명 위치: 영토에 맞춰 자동 배치';
     labelTools.append(labelActions, labelPositionStatus); edit.append(labelTools); sidebar.append(edit);
     const center = countrySelect(current.mapOnly ? '중심 국가' : '플레이어 국가', draft.map.playerCountry, countryList, value => { draft.map.playerCountry = value; current.mapStatus = ''; mark(); redraw(); }, { help: '지도 이동 버튼의 기준입니다. 작업 국가를 바꿔도 중심 국가는 그대로 유지됩니다.' }); countrySearches.push(center); settingsBody.append(center);

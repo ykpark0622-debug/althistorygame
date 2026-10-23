@@ -96,7 +96,13 @@ async function workshopIntegration(page) {
   const chip = scope.locator('.map-ui-current strong'), save = async () => { await page.getByRole('button', { name: '지도 저장', exact: true }).click(); return page.evaluate(() => MapMaker.getStored()); };
   const cam = () => board().evaluate(node => MapView.getCamera(node));
   const chooseA = async () => { await page.getByLabel('국가 목록 검색', { exact: true }).fill(fixture.a.id); await scope.locator('[data-country-row="' + fixture.a.id + '"]').click(); assert.equal(await chip.textContent(), fixture.a.name); };
-  const bPad = async () => board().locator('[data-map-label-background="' + fixture.b.id + '"]').evaluate(n => { const r = n.getBoundingClientRect(), x = r.right - 2, y = r.y + r.height / 2; return { x, y, hit: document.elementFromPoint(x, y)?.getAttribute('data-map-label-hit') }; });
+  const bPad = async () => {
+    const background = board().locator('[data-map-label-background="' + fixture.b.id + '"]');
+    // Saving uses the footer and can scroll/resize the independently scrolling
+    // board. Raw mouse coordinates require an exposed target just as click().
+    await background.scrollIntoViewIfNeeded();
+    return background.evaluate(n => { const r = n.getBoundingClientRect(), x = r.right - 2, y = r.y + r.height / 2; return { x, y, hit: document.elementFromPoint(x, y)?.getAttribute('data-map-label-hit') }; });
+  };
   const position = doc => doc.map.countries.find(c => c.id === fixture.b.id).labelPosition;
   await page.getByRole('button', { name: '국명 위치', exact: true }).click(); await chooseA();
   for (let i = 0; i < 4; i++) await board().locator('[data-map-tool="in"]').click();

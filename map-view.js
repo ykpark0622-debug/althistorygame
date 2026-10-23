@@ -67,6 +67,15 @@
   if(![...view.select.children].some(node=>node.value===id||node.getAttribute?.('value')===id))renderSearch(view);
   view.select.value=id;renderLabels(view);if(callback)view.context.options.onProvince?.(id,p);
  }
+ function clearSelection(view){
+  const hadSelection=Boolean(view.selected||view.labelSelectedCountry);
+  const old=view.nodes.get(view.selected);old?.classList.remove('selected');if(view.geometry.dense)old?.removeAttribute('tabindex');
+  view.selected=null;view.labelSelectedCountry='';view.select.value='';view.hover.hidden=true;
+  view.selection.textContent='지역을 누르거나 검색하세요. 빗금은 점령·영향권입니다. 표식 내용은 지역을 선택하면 확인할 수 있습니다.';
+  // A focused SVG path has its own outline even after .selected is removed.
+  const active=view.container.ownerDocument?.activeElement;if(active&&active!==view.svg&&view.svg.contains(active))active.blur?.();
+  view.labelSignature='';renderLabels(view);if(hadSelection)view.context.options.onSelectionClear?.();
+ }
  function renderSearch(view){
   const query=searchKey(view.search.value.trim()),dense=view.geometry.dense,countryKeys=new Map([...view.context.countries].map(([id,c])=>[id,searchKey(c.name)]));
   let count=0;const results=[];
@@ -90,7 +99,7 @@
    occupied.push(box);countryLabels.push({...candidate,name,box});
   }
   visible=visible.filter(p=>p===selected||!countryLabels.some(label=>overlaps(labelBox(p.cx,p.cy,p.name),label.box)));
-  const selectedLabel=editing?(view.labelSelectedCountry||view.context.options.selectedLabelCountry||placement):'';
+  const selectedLabel=editing?(view.labelSelectedCountry??view.context.options.selectedLabelCountry??placement):'';
   const signature=visible.map(p=>p.id).join('|')+'@'+view.scale.toFixed(3)+'@'+screenScale.toFixed(4)+'@'+editing+'@'+placement+'@'+selectedLabel+'@'+countryLabels.map(label=>label.id+':'+label.name+':'+label.cx+','+label.cy+':'+Boolean(label.manual)).join('|');if(signature===view.labelSignature)return;view.labelSignature=signature;
   const fontStyle=`font-size:${11/pixelScale}px;stroke-width:${2.4/pixelScale}px`;
   const focusedLabel=view.labelLayer.ownerDocument?.activeElement?.getAttribute?.('data-map-country-label');
@@ -111,7 +120,7 @@
   const width=Math.max(8,right-left),height=Math.max(8,bottom-top);view.scale=Math.max(1,Math.min(MAX_ZOOM,Math.min(view.template.width/(width*1.3),view.template.height/(height*1.3))));view.x=view.template.width/2-(left+right)/2*view.scale;view.y=view.template.height/2-(top+bottom)/2*view.scale;transform(view);
  }
  function bind(view){
-  const {svg,container}=view,doc=container.ownerDocument,win=doc.defaultView||root,listeners=[],keys=new Set();let drag=null,pendingClick=null,pendingPoint=null,frame=0,lastTime=0,shift=false,disposed=false;
+  const {svg,container}=view,doc=container.ownerDocument,win=doc.defaultView||root,listeners=[],keys=new Set();let drag=null,pendingClick=null,pendingPoint=null,pendingLabel=null,frame=0,lastTime=0,shift=false,disposed=false;
   const listen=(target,type,handler,options)=>{target.addEventListener(type,handler,options);listeners.push(()=>target.removeEventListener(type,handler,options));};
   const mode=()=>view.context.options.labelEditMode?'inspect':(['paint','select'].includes(view.context.options.interactionMode)?view.context.options.interactionMode:'inspect');
   const labelId=node=>{const hit=node?.closest?.('[data-map-country-label],[data-map-label-hit]');return hit?.dataset.mapCountryLabel||hit?.dataset.mapLabelHit;};
@@ -129,15 +138,15 @@
   const pointProvince=(event,fallback)=>{const target=doc.elementFromPoint?.(event.clientX,event.clientY);return (target&&svg.contains(target)?target.closest?.('[data-province]')?.dataset.province:null)||fallback;};
   const traceStroke=event=>{if(!drag?.stroke)return;const stroke=drag.stroke,last=stroke.last||event,distance=Math.hypot(event.clientX-last.clientX,event.clientY-last.clientY),steps=Math.min(256,Math.max(1,Math.ceil(distance/5)));for(let i=1;i<=steps;i++){const clientX=last.clientX+(event.clientX-last.clientX)*i/steps,clientY=last.clientY+(event.clientY-last.clientY)*i/steps;touchProvince(stroke,pointProvince({clientX,clientY}));}stroke.last={clientX:event.clientX,clientY:event.clientY};};
   const release=pointer=>{try{if(svg.hasPointerCapture?.(pointer))svg.releasePointerCapture(pointer);}catch{}};
-  const cancel=()=>{const old=drag;drag=null;clearStroke(old?.stroke);if(old){release(old.pointer);view.ignoreClick=true;}pendingClick=null;pendingPoint=null;delete view.labelDragPreview;view.hover.hidden=true;if(view.context&&!disposed)renderLabels(view);};
-  const down=event=>{if(event.button!==0||drag||!visible())return;stopKeys();const point=screenPoint(view,event),label=view.context.options.labelEditMode&&labelId(event.target),anchor=label&&view.countryLabelAnchors?.get(label),currentMode=mode();drag={point,x:event.clientX,y:event.clientY,vx:view.x,vy:view.y,province:event.target.closest?.('[data-province]')?.dataset.province,pointer:event.pointerId,moved:false,label:anchor?label:null,anchor:anchor?[anchor.cx,anchor.cy]:null};view.ignoreClick=false;pendingClick=null;pendingPoint=null;if(!anchor&&currentMode!=='inspect'){drag.stroke={mode:currentMode,ids:new Set(),preview:new Map(),last:{clientX:event.clientX,clientY:event.clientY}};touchProvince(drag.stroke,pointProvince(event,drag.province));}if(anchor){chooseLabel(label);focusLabel(label);}else svg.focus({preventScroll:true});try{svg.setPointerCapture?.(event.pointerId);}catch{}view.hover.hidden=true;if(anchor||drag.stroke)event.preventDefault();};
+  const cancel=()=>{const old=drag;drag=null;clearStroke(old?.stroke);if(old){release(old.pointer);view.ignoreClick=true;}pendingClick=null;pendingPoint=null;pendingLabel=null;delete view.labelDragPreview;view.hover.hidden=true;if(view.context&&!disposed)renderLabels(view);};
+  const down=event=>{if(event.button!==0||drag||!visible())return;stopKeys();const point=screenPoint(view,event),label=view.context.options.labelEditMode&&labelId(event.target),anchor=label&&view.countryLabelAnchors?.get(label),currentMode=mode();drag={point,x:event.clientX,y:event.clientY,vx:view.x,vy:view.y,province:event.target.closest?.('[data-province]')?.dataset.province,pointer:event.pointerId,moved:false,label:anchor?label:null,anchor:anchor?[anchor.cx,anchor.cy]:null};view.ignoreClick=false;pendingClick=null;pendingPoint=null;pendingLabel=null;if(!anchor&&currentMode!=='inspect'){drag.stroke={mode:currentMode,ids:new Set(),preview:new Map(),last:{clientX:event.clientX,clientY:event.clientY}};touchProvince(drag.stroke,pointProvince(event,drag.province));}if(anchor){chooseLabel(label);focusLabel(label);}else svg.focus({preventScroll:true});try{svg.setPointerCapture?.(event.pointerId);}catch{}view.hover.hidden=true;if(anchor||drag.stroke)event.preventDefault();};
   const previewLabel=point=>{const position=[Math.max(0,Math.min(view.template.width,drag.anchor[0]+(point.x-drag.point.x)/view.scale)),Math.max(0,Math.min(view.template.height,drag.anchor[1]+(point.y-drag.point.y)/view.scale))];view.labelDragPreview={id:drag.label,position};renderLabels(view);return position;};
   const move=event=>{
    if(drag){if(event.pointerId!==drag.pointer)return;if(!visible()){cancel();return;}const point=screenPoint(view,event);if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>5)drag.moved=true;if(drag.stroke){if(mode()!==drag.stroke.mode){cancel();return;}traceStroke(event);return;}if(drag.moved){if(drag.label){if(!view.context.options.labelEditMode){cancel();return;}previewLabel(point);}else{view.x=drag.vx+point.x-drag.point.x;view.y=drag.vy+point.y-drag.point.y;transform(view);}}return;}
    if(view.context.options.labelEditMode&&labelId(event.target)){view.hover.hidden=true;return;}
    const p=view.geometry.byId.get(event.target.closest?.('[data-province]')?.dataset.province);view.hover.hidden=!p;if(p){const text=regionText(view,p);if(view.hover.textContent!==text)view.hover.textContent=text;}
   };
-  const up=event=>{if(!drag||event.pointerId!==drag.pointer)return;if(!visible()){cancel();return;}const old=drag;if(old.stroke){if(mode()!==old.stroke.mode){cancel();return;}traceStroke(event);const ids=[...old.stroke.ids],strokeMode=old.stroke.mode;drag=null;clearStroke(old.stroke);release(old.pointer);pendingClick=null;pendingPoint=null;view.ignoreClick=true;if(ids.length)view.context.options.onProvinceStroke?.(ids,{mode:strokeMode});return;}const label=old.label,moved=old.moved,point=screenPoint(view,event),position=label&&moved&&view.context.options.labelEditMode?previewLabel(point):null;view.ignoreClick=moved;pendingClick=moved?null:old.province;pendingPoint=moved?null:point;drag=null;delete view.labelDragPreview;release(old.pointer);if(position)view.context.options.onLabelMove?.(label,position);else if(label&&!view.context.options.labelPlacementCountry)view.context.options.onLabelSelect?.(label);if(!disposed){renderLabels(view);if(label)focusLabel(label);}};
+  const up=event=>{if(!drag||event.pointerId!==drag.pointer)return;if(!visible()){cancel();return;}const old=drag;if(old.stroke){if(mode()!==old.stroke.mode){cancel();return;}traceStroke(event);const ids=[...old.stroke.ids],strokeMode=old.stroke.mode;drag=null;clearStroke(old.stroke);release(old.pointer);pendingClick=null;pendingPoint=null;view.ignoreClick=true;if(ids.length)view.context.options.onProvinceStroke?.(ids,{mode:strokeMode});return;}const label=old.label,moved=old.moved,point=screenPoint(view,event),position=label&&moved&&view.context.options.labelEditMode?previewLabel(point):null;view.ignoreClick=moved;pendingClick=moved?null:old.province;pendingPoint=moved?null:point;pendingLabel=!moved?label:null;drag=null;delete view.labelDragPreview;release(old.pointer);if(position)view.context.options.onLabelMove?.(label,position);else if(label&&!view.context.options.labelPlacementCountry)view.context.options.onLabelSelect?.(label);if(!disposed){pendingLabel=!moved?label:null;renderLabels(view);if(label)focusLabel(label);}};
   const lostCapture=()=>{if(drag)cancel();};
   const wheel=event=>{event.preventDefault();if(drag)return;stopKeys();const pixels=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?view.template.height:1);zoom(view,Math.exp(-Math.max(-400,Math.min(400,pixels))*.002),screenPoint(view,event));view.hover.hidden=true;};
   const leave=()=>{view.hover.hidden=true;};
@@ -145,9 +154,14 @@
    const tool=event.target.closest?.('[data-map-tool]')?.dataset.mapTool;
    if(tool){stopKeys();if(tool==='in')zoom(view,1.4);if(tool==='out')zoom(view,1/1.4);if(tool==='reset'){view.scale=1;view.x=0;view.y=0;transform(view);}if(tool==='country')focusCountry(view,view.context.scenario.map?.playerCountry);if(tool==='labels'){view.labels=!view.labels;event.target.closest('[data-map-tool]').setAttribute('aria-pressed',String(view.labels));view.labelSignature='';renderLabels(view);}return;}
    const focus=event.target.closest?.('[data-map-country]')?.dataset.mapCountry;if(focus){stopKeys();focusCountry(view,focus);return;}
-   if(view.context.options.labelEditMode&&view.context.options.labelPlacementCountry&&svg.contains(event.target)){pendingClick=null;if(!view.ignoreClick){const point=pendingPoint||screenPoint(view,event);if(point.x>=0&&point.x<=view.template.width&&point.y>=0&&point.y<=view.template.height)view.context.options.onLabelMove?.(view.context.options.labelPlacementCountry,labelPoint(view,point));}pendingPoint=null;view.ignoreClick=false;return;}
-   const clickedLabel=view.context.options.labelEditMode&&labelId(event.target);if(clickedLabel){pendingClick=null;pendingPoint=null;view.ignoreClick=false;chooseLabel(clickedLabel);view.context.options.onLabelSelect?.(clickedLabel);return;}
-   const id=event.target.closest?.('[data-province]')?.dataset.province||(event.target===svg?pendingClick:null);pendingClick=null;pendingPoint=null;if(id&&!view.ignoreClick&&mode()==='inspect')select(view,id);view.ignoreClick=false;
+   if(view.context.options.labelEditMode&&view.context.options.labelPlacementCountry&&svg.contains(event.target)){pendingClick=null;pendingLabel=null;if(!view.ignoreClick){const point=pendingPoint||screenPoint(view,event);if(point.x>=0&&point.x<=view.template.width&&point.y>=0&&point.y<=view.template.height)view.context.options.onLabelMove?.(view.context.options.labelPlacementCountry,labelPoint(view,point));}pendingPoint=null;view.ignoreClick=false;return;}
+   const clickedLabel=view.context.options.labelEditMode&&(labelId(event.target)||pendingLabel);if(clickedLabel){const pointerLabel=pendingLabel;pendingLabel=null;pendingClick=null;pendingPoint=null;if(!view.ignoreClick){chooseLabel(clickedLabel);if(!pointerLabel)view.context.options.onLabelSelect?.(clickedLabel);}view.ignoreClick=false;return;}
+   const id=event.target.closest?.('[data-province]')?.dataset.province||(event.target===svg?pendingClick:null);pendingClick=null;pendingPoint=null;
+   if(!view.ignoreClick){if(id&&mode()==='inspect')select(view,id);else if(!id&&svg.contains(event.target))clearSelection(view);}view.ignoreClick=false;
+  };
+  const outside=event=>{
+   if(!visible()||drag||!event.target.isConnected||svg.contains(event.target)||event.target.closest?.('button,a,input,textarea,select,label,summary,[role="button"],[role="combobox"],[contenteditable]:not([contenteditable="false"])'))return;
+   clearSelection(view);
   };
   const key=event=>{
    if(event.isComposing||event.keyCode===229||event.ctrlKey||event.altKey||event.metaKey||blockedInput(event.target)){stopKeys();return;}
@@ -160,12 +174,12 @@
   const focusIn=event=>{if(!keyboardTarget(event.target))stopKeys();else if(view.context.options.labelEditMode)chooseLabel(labelId(event.target));};
   const visibility=()=>{if(doc.hidden){stopKeys();cancel();}};
   const blur=()=>{stopKeys();cancel();};
-  const change=event=>select(view,event.target.value),search=()=>renderSearch(view);
+  const change=event=>event.target.value?select(view,event.target.value):clearSelection(view),search=()=>renderSearch(view);
   const layers=event=>{const layer=event.target.dataset?.mapLayer;if(layer==='influence')view.showInfluence=event.target.checked;else if(layer==='occupation')view.showOccupation=event.target.checked;else return;update(view);};
   container.querySelector('[data-map-layer="influence"]').checked=view.showInfluence;
   container.querySelector('[data-map-layer="occupation"]').checked=view.showOccupation;
   for(const [type,handler]of Object.entries({pointerdown:down,pointermove:move,pointerup:up,pointercancel:cancel,lostpointercapture:lostCapture,pointerleave:leave,wheel}))listen(svg,type,handler,type==='wheel'?{passive:false}:undefined);
-  listen(container,'keydown',key);listen(container,'click',click);listen(container,'change',layers);listen(view.select,'change',change);listen(view.search,'input',search);listen(doc,'keyup',keyup,true);listen(doc,'focusin',focusIn);listen(doc,'visibilitychange',visibility);listen(win,'blur',blur);listen(container,'compositionstart',stopKeys);
+  listen(container,'keydown',key);listen(container,'click',click);listen(container,'change',layers);listen(view.select,'change',change);listen(view.search,'input',search);listen(doc,'click',outside);listen(doc,'keyup',keyup,true);listen(doc,'focusin',focusIn);listen(doc,'visibilitychange',visibility);listen(win,'blur',blur);listen(container,'compositionstart',stopKeys);
   const resize=()=>{if(view.context&&!disposed){view.labelSignature='';renderLabels(view);}};let observer=null;if(typeof win.ResizeObserver==='function'){observer=new win.ResizeObserver(resize);observer.observe(svg);}else listen(win,'resize',resize);if(doc.fonts?.addEventListener)listen(doc.fonts,'loadingdone',resize);
   view.cancelInteraction=()=>{stopKeys();cancel();};
   view.dispose=()=>{if(disposed)return;stopKeys();cancel();disposed=true;observer?.disconnect();for(const remove of listeners)remove();};
@@ -204,7 +218,9 @@
   if(!container)return;const cfg=config(scenario);if(!cfg){views.get(container)?.dispose();views.delete(container);container.replaceChildren();container.hidden=true;return;}container.hidden=false;
   const scenarioKey=scenario.id||'';
   let view=views.get(container);if(!view||view.template!==cfg.template||view.scenarioKey!==scenarioKey||!container.contains(view.svg)){view=createView(container,cfg.template,scenarioKey);const camera=options.initialCamera;if(camera?.templateId===cfg.template.id&&['scale','x','y'].every(key=>Number.isFinite(camera[key]))){view.scale=Math.max(1,Math.min(MAX_ZOOM,camera.scale));view.x=camera.x;view.y=camera.y;}}else view.cancelInteraction?.();
-  view.context={...cfg,scenario,map:state?.map||initialState(scenario).map,reference:options.compareState?.map,options};if(Object.prototype.hasOwnProperty.call(options,'selectedLabelCountry'))view.labelSelectedCountry=options.selectedLabelCountry||'';update(view);
+  view.context={...cfg,scenario,map:state?.map||initialState(scenario).map,reference:options.compareState?.map,options};
+  if(Object.prototype.hasOwnProperty.call(options,'selectedLabelCountry')){const next=options.selectedLabelCountry||'';if(view.externalLabelCountry!==next){view.labelSelectedCountry=next;view.externalLabelCountry=next;}}
+  update(view);
  }
  function dispose(container){views.get(container)?.dispose();views.delete(container);}
  function getCamera(container){const view=views.get(container);return view?{templateId:view.template.id,scale:view.scale,x:view.x,y:view.y}:null;}
