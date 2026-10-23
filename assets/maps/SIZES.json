@@ -1,5 +1,5 @@
 {
-  "registryBytes": 48623,
+  "registryBytes": 62853,
   "priorMonolithBytes": 24500024,
   "templates": [
     {
@@ -31,6 +31,30 @@
       "regions": 61940,
       "bytes": 24504948,
       "gzipBytes": 5621732
+    },
+    {
+      "id": "gallery_china_korea_research",
+      "regions": 2887,
+      "bytes": 1117253,
+      "gzipBytes": 267987
+    },
+    {
+      "id": "gallery_eastasia_research",
+      "regions": 3360,
+      "bytes": 1597460,
+      "gzipBytes": 397249
+    },
+    {
+      "id": "gallery_europe_research",
+      "regions": 2752,
+      "bytes": 1988583,
+      "gzipBytes": 505799
+    },
+    {
+      "id": "gallery_world_research",
+      "regions": 6560,
+      "bytes": 6586902,
+      "gzipBytes": 1801945
     },
     {
       "id": "regional_eastasia_1419",
@@ -169,6 +193,66 @@
       "regions": 5939,
       "bytes": 6856408,
       "gzipBytes": 1797026
+    },
+    {
+      "id": "historical_atlas_qin_246bce",
+      "regions": 2887,
+      "bytes": 1358102,
+      "gzipBytes": 295178
+    },
+    {
+      "id": "historical_atlas_warlords_195",
+      "regions": 2887,
+      "bytes": 1360993,
+      "gzipBytes": 296404
+    },
+    {
+      "id": "historical_atlas_three_powers_214",
+      "regions": 2887,
+      "bytes": 1358651,
+      "gzipBytes": 295482
+    },
+    {
+      "id": "historical_atlas_korea_660",
+      "regions": 3360,
+      "bytes": 1859530,
+      "gzipBytes": 425467
+    },
+    {
+      "id": "historical_atlas_thirty_years_1618",
+      "regions": 2752,
+      "bytes": 2163702,
+      "gzipBytes": 529274
+    },
+    {
+      "id": "historical_atlas_world_1914",
+      "regions": 6560,
+      "bytes": 7001008,
+      "gzipBytes": 1842336
+    },
+    {
+      "id": "historical_atlas_world_1933",
+      "regions": 6560,
+      "bytes": 7002918,
+      "gzipBytes": 1843089
+    },
+    {
+      "id": "historical_atlas_victorian_1880",
+      "regions": 6560,
+      "bytes": 7006252,
+      "gzipBytes": 1845809
+    },
+    {
+      "id": "historical_atlas_italy_1494",
+      "regions": 2752,
+      "bytes": 2165587,
+      "gzipBytes": 529986
+    },
+    {
+      "id": "historical_atlas_napoleon_1803",
+      "regions": 2752,
+      "bytes": 2161397,
+      "gzipBytes": 527625
     }
   ]
 }

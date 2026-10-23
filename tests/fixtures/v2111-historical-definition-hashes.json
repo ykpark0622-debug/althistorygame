@@ -1,0 +1,22 @@
+[
+  {
+    "id": "historical_europe_1444",
+    "sha256": "6731fe58b2cf1450958edfeb9d78cfa7fe5aa620d0f0bfc605f0cb9ded36b028"
+  },
+  {
+    "id": "historical_europe_1648",
+    "sha256": "92d8e1569d1747d6c4ef7fc9822ce062381a07baa03c5198c72ecc3e53690037"
+  },
+  {
+    "id": "historical_world_1550",
+    "sha256": "eabadc6e134ddda2c49469bce3ff642fcf43d77df3ac4f6bc623addd9bf63db4"
+  },
+  {
+    "id": "historical_world_1914",
+    "sha256": "14131ea2401fa42f85eb30468f99167a71679e1e8a2374e9df2b2cf56722577a"
+  },
+  {
+    "id": "historical_world_1939",
+    "sha256": "b997dfa044e61c89dea72aa21a09359acacc698e6a3d704d1a9c83afdb79d851"
+  }
+]

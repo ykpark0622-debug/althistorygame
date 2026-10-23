@@ -1,0 +1,82 @@
+[
+  {
+    "id": "01-qin-246bce",
+    "title": "전국칠웅 · 기원전246년, 진왕 정 원년",
+    "date": "기원전246년 · 진왕 정 원년(왕위 계승247년, 이듬해 개원)",
+    "regions": 2887,
+    "countries": 25,
+    "path": "examples/gallery-atlas/01-qin-246bce.map.json"
+  },
+  {
+    "id": "02-warlords-195",
+    "title": "후한 말 군웅할거 · 195년 겨울",
+    "date": "195년 겨울 · 조조 연주 회복과 손책의 초기 강동 진출 뒤",
+    "regions": 2887,
+    "countries": 46,
+    "path": "examples/gallery-atlas/02-warlords-195.map.json"
+  },
+  {
+    "id": "03-three-powers-214",
+    "title": "삼분의 형성 · 214년 말",
+    "date": "214년 말 · 유비의 성도 입성 뒤,215년 한중·형주 변화 전",
+    "regions": 2887,
+    "countries": 31,
+    "path": "examples/gallery-atlas/03-three-powers-214.map.json"
+  },
+  {
+    "id": "04-three-kingdoms-korea-660",
+    "title": "삼국의 마지막 균형 · 660년 초",
+    "date": "660년 초 · 나당연합군의 백제 침공 이전",
+    "regions": 3360,
+    "countries": 31,
+    "path": "examples/gallery-atlas/04-three-kingdoms-korea-660.map.json"
+  },
+  {
+    "id": "05-thirty-years-war-1618",
+    "title": "1618년 30년 전쟁의 시작",
+    "date": "1618-05-23",
+    "regions": 2752,
+    "countries": 152,
+    "path": "examples/gallery-atlas/05-thirty-years-war-1618.map.json"
+  },
+  {
+    "id": "06-world-1914",
+    "title": "제1차 세계대전 전야 · 1914년 세계",
+    "date": "1914-07-01",
+    "regions": 6560,
+    "countries": 157,
+    "path": "examples/gallery-atlas/06-world-1914.map.json"
+  },
+  {
+    "id": "07-world-weimar-1933",
+    "title": "바이마르 공화국 최후의 전야 · 1933년 세계",
+    "date": "1933-01-29",
+    "regions": 6560,
+    "countries": 176,
+    "path": "examples/gallery-atlas/07-world-weimar-1933.map.json"
+  },
+  {
+    "id": "08-victorian-world-1880",
+    "title": "빅토리아 시대 · 1880년 세계",
+    "date": "1880-01-01",
+    "regions": 6560,
+    "countries": 209,
+    "path": "examples/gallery-atlas/08-victorian-world-1880.map.json"
+  },
+  {
+    "id": "09-renaissance-italy-1494",
+    "title": "1494년 르네상스 이탈리아와 유럽",
+    "date": "1494-01-01",
+    "regions": 2752,
+    "countries": 175,
+    "path": "examples/gallery-atlas/09-renaissance-italy-1494.map.json"
+  },
+  {
+    "id": "10-europe-1803",
+    "title": "1803년 말 나폴레옹의 유럽",
+    "date": "1803-12-31",
+    "regions": 2752,
+    "countries": 100,
+    "path": "examples/gallery-atlas/10-europe-1803.map.json"
+  }
+]

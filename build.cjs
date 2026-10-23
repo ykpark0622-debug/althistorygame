@@ -11,7 +11,7 @@ function offlineMapScripts(){
  if(templates.some(template=>!template))throw Error('Offline map sources are missing.');
  const registry=`(function(root){'use strict';const templates=${JSON.stringify(templates)};const cache=new Map(templates.map(t=>[t.id,t]));root.MapTemplates={get:id=>cache.get(id)||null,list:()=>templates.map(t=>({id:t.id,name:t.name,provinceCount:t.provinces.length,...(t.recommended?{recommended:true}:{})}))};})(globalThis);`;
  const historicalDefinitions=JSON.parse(read('tools/map-source/historical-presets.json'));
- const presets=read('tools/map-source/regional-presets.cjs')+'\n'+read('tools/map-source/balanced-regions.cjs')+'\nglobalThis.HistoricalMapPresetDefinitions='+JSON.stringify(historicalDefinitions)+';\n'+read('tools/map-source/historical-presets.cjs');
+ const presets=read('tools/map-source/regional-presets.cjs')+'\n'+read('tools/map-source/balanced-regions.cjs')+'\n'+read('tools/map-source/research-bases.cjs')+'\nglobalThis.HistoricalMapPresetDefinitions='+JSON.stringify(historicalDefinitions)+';\n'+read('tools/map-source/historical-presets.cjs');
  const adapter=`\n(function(root){const maps=root.MapTemplates,originalGet=maps.get.bind(maps),custom=new Map();maps.get=id=>custom.get(id)||originalGet(id);maps.register=t=>{custom.set(t.id,t);return t;};maps.isLoaded=maps.has=id=>Boolean(maps.get(id));maps.ensure=id=>{const t=maps.get(id);return t?Promise.resolve(t):Promise.reject(new Error('지도 템플릿을 찾을 수 없습니다: '+id));};maps.ensureScenario=value=>value?.map?.templateId?maps.ensure(value.map.templateId):Promise.resolve(null);maps.offline=true;})(globalThis);`;
  return {'map-templates.js':registry,'map-regions.js':presets+adapter};
 }
@@ -55,7 +55,7 @@ const webEntry=`<!doctype html>
 </body></html>\n`;
 fs.writeFileSync(path.join(dir,'standalone-web.html'),webEntry);
 fs.writeFileSync(path.join(dir,'vercel.json'),JSON.stringify(vercel,null,2)+'\n');
-fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 첫 화면에서 시나리오 기록 삭제 · 국가 목록형 지도 작업실\nVersion: 2.11.1-community\nBuild date: 2026-10-23\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
+fs.writeFileSync(path.join(dir,'VERSION.txt'),'역사의 갈림길 — 역사 지도 10종 · 연구용 지도 구획 · 기록 삭제 · 국가 목록형 작업실\nVersion: 2.12.0-community\nBuild date: 2026-10-23\nRuntime: static HTML, CSS, JavaScript + Supabase (optional)\n');
 const files=[];function visit(folder){for(const ent of fs.readdirSync(path.join(dir,folder),{withFileTypes:true})){const rel=path.posix.join(folder,ent.name);if(ent.isDirectory())visit(rel);else if(!['RELEASE-MANIFEST.json','tools/map-source/world-detailed.json','tools/map-source/world-balanced.json'].includes(rel)){const data=fs.readFileSync(path.join(dir,rel));files.push({path:rel,bytes:data.length,sha256:crypto.createHash('sha256').update(data).digest('hex')});}}}visit('');
-fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.11.1-community',builtAt:'2026-10-23',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
+fs.writeFileSync(path.join(dir,'RELEASE-MANIFEST.json'),JSON.stringify({version:'2.12.0-community',builtAt:'2026-10-23',scenarioIncluded:false,examplesSeparate:true,files},null,2)+'\n');
 console.log(`Built blank standalone HTML, ${programFiles.length} web download parts, and manifest (${files.length} files; examples separate).`);

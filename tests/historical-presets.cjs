@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'..'),T=require('../map-templates.js');
 const definitions=JSON.parse(fs.readFileSync(path.join(root,'tools/map-source/historical-presets.json'),'utf8'));
-const prior=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v27-map-manifest.json'),'utf8'));
+const prior=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v2111-map-manifest.json'),'utf8'));
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'assets/maps/manifest.json'),'utf8'));
 const hash=value=>crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const clone=value=>JSON.parse(JSON.stringify(value));
@@ -18,8 +18,10 @@ function browser(){
  return{maps:context.MapTemplates,requests};
 }
 (async()=>{
-await test('the previous twenty-three templates and all original region/era choices are unchanged',()=>{
- assert.equal(definitions.length,5);assert.equal(manifest.templates.length,28);
+await test('all twenty-eight prior templates, the five prior political definitions and original region/era choices are unchanged',()=>{
+ assert.equal(prior.templates.length,28);assert.equal(definitions.length,15);assert.equal(manifest.templates.length,42);
+ const hashes=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v2111-historical-definition-hashes.json'),'utf8'));
+ for(const before of hashes)assert.equal(hash(definitions.find(row=>row.id===before.id)),before.sha256,'Unchanged historical definition '+before.id);
  for(const template of prior.templates)assert.deepEqual(manifest.templates.find(row=>row.id===template.id),template,'Unchanged old template '+template.id);
  for(const asset of prior.assets)assert.deepEqual(manifest.assets.find(row=>row.id===asset.id),asset,'Unchanged old asset '+asset.id);
  assert.deepEqual(manifest.regions,prior.regions);assert.deepEqual(manifest.eras,prior.eras);
@@ -41,12 +43,21 @@ await test('all historical layouts reuse the original province identities, shape
   assert.ok(body.changes.every(change=>Object.keys(change[1]).every(key=>['owner','influence'].includes(key))));
  }
 });
-await test('offline political derivation produces exactly the same five maps without extra geometry copies',()=>{
+await test('offline political derivation produces exactly the same fifteen maps without extra geometry copies',()=>{
  const bases=[...new Set(definitions.map(definition=>definition.baseId))].map(id=>clone(T.get(id)));
  const context={MapTemplates:{get:id=>bases.find(template=>template.id===id)||null,list:()=>bases.map(template=>({id:template.id,name:template.name,provinceCount:template.provinces.length}))},HistoricalMapPresetDefinitions:clone(definitions)};
  vm.runInNewContext(fs.readFileSync(path.join(root,'tools/map-source/historical-presets.cjs'),'utf8'),context);
  assert.equal(context.HistoricalMapPresetDefinitions,undefined);
  for(const definition of definitions)assert.equal(hash(context.MapTemplates.get(definition.id)),hash(T.get(definition.id)),'Exact offline identity '+definition.id);
+});
+await test('offline research recipes reconstruct all four shared bases before the fifteen political wrappers',()=>{
+ const bases=['world-balanced','world-detailed','europe-balanced'].map(id=>clone(T.get(id)));
+ const context={MapTemplates:{get:id=>bases.find(template=>template.id===id)||null,list:()=>bases.map(template=>({id:template.id,name:template.name,provinceCount:template.provinces.length}))}};
+ vm.runInNewContext(fs.readFileSync(path.join(root,'tools/map-source/research-bases.cjs'),'utf8'),context);
+ for(const definition of context.MapTemplates.researchBases())assert.equal(hash(context.MapTemplates.get(definition.id)),hash(T.get(definition.id)),'Exact offline research base '+definition.id);
+ context.HistoricalMapPresetDefinitions=clone(definitions);
+ vm.runInNewContext(fs.readFileSync(path.join(root,'tools/map-source/historical-presets.cjs'),'utf8'),context);
+ for(const definition of definitions)assert.equal(hash(context.MapTemplates.get(definition.id)),hash(T.get(definition.id)),'Research recipe and political patch identity '+definition.id);
 });
 await test('the region and era controls restore all historical choices and preserve existing era defaults',()=>{
  const context=vm.createContext({MapTemplates:T,console});
@@ -66,7 +77,7 @@ await test('the region and era controls restore all historical choices and prese
  }
 });
 await test('a selected historical era loads only its shared balanced base and small patch, then reuses the base for another era',async()=>{
- for(const region of ['europe_med','world']){
+ for(const region of ['eastasia','europe_med','world']){
   const selected=definitions.filter(definition=>definition.regionId===region),{maps,requests}=browser();
   assert.equal(requests.length,0);
   const first=await maps.ensure(selected[0].id),info=maps.assetInfo(first.id);assert.equal(requests.length,info.files.length);
@@ -74,6 +85,17 @@ await test('a selected historical era loads only its shared balanced base and sm
   const before=requests.length,second=await maps.ensure(selected[1].id);
   assert.equal(requests.length,before+1,'Only one additional political patch');assert.equal(hash(second),hash(T.get(second.id)));
   assert.ok(!requests.some(url=>url.includes('world-detailed')));assert.equal(maps.isLoaded(first.id),true);
+ }
+});
+await test('all four research atlas bases are lazy and sibling historical dates reuse their geometry',async()=>{
+ for(const baseId of [...new Set(definitions.filter(row=>row.galleryDocument).map(row=>row.baseId))]){
+  const selected=definitions.filter(row=>row.baseId===baseId),{maps,requests}=browser();
+  assert.equal(requests.length,0);
+  const first=await maps.ensure(selected[0].id),expected=maps.assetInfo(first.id).files;
+  assert.deepEqual(requests.map(url=>new URL(url).pathname.slice(1)).sort(),[...expected].sort());
+  for(const other of definitions.filter(row=>row.baseId!==baseId))assert.equal(maps.isLoaded(other.id),false,'Unselected political era stays unloaded');
+  assert.equal(hash(first),hash(T.get(first.id)));
+  if(selected[1]){const before=requests.length;await maps.ensure(selected[1].id);assert.equal(requests.length,before+1,'Sibling era fetches one political patch');}
  }
 });
 await test('historical occupation and marker defaults agree in the engine, preview and editor and can be cleared or restored',()=>{

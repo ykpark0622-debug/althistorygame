@@ -365,6 +365,159 @@
       ]
     },
     {
+      "source": "/assets/maps/gallery_china_korea_research.8c9d3b9376e315e5.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_china_korea_research.e1450b85e2043f05.part-001.3eff9f73d9691573.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_china_korea_research.e1450b85e2043f05.part-002.0a13d806cd09283c.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_eastasia_research.10507b347fe63ca5.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_eastasia_research.9801ccbd89f850ae.part-001.08af84f15d0fd881.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_eastasia_research.9801ccbd89f850ae.part-002.d12b1333a4bfd05e.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_europe_research.e10140f3bff18239.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_europe_research.9a79358f07f37808.part-001.82410c4248a5f0cd.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_europe_research.9a79358f07f37808.part-002.dda9b72709be1e7d.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.3444bc1dd982d420.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-001.6bd3f752aa3506ab.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-002.a17cc3901df79699.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-003.de4e9f7fa73f2392.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-004.9ca8af7509aeb772.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-005.d51f70c1a100dd61.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-006.0de8da2124890432.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/gallery_world_research.c22337e94ccd9e79.part-007.2217c4192db7c750.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/maps/regional_eastasia_modern.b6cc78c4015a5551.json",
       "headers": [
         {
@@ -878,6 +1031,96 @@
       ]
     },
     {
+      "source": "/assets/maps/historical_atlas_qin_246bce.ece525c4b120fbdd.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_warlords_195.4a76e04ebc54dd94.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_three_powers_214.1197fc2c864478c7.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_korea_660.c9e004d141c07b97.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_thirty_years_1618.3c78e950d9577d0e.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_world_1914.0ec2be2f38c08b48.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_world_1933.60727f7ddfc3b8bd.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_victorian_1880.dee94a10a1813bae.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_italy_1494.dd0f30b7b1e3bba2.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/maps/historical_atlas_napoleon_1803.e08ea00e9c3b28a5.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/program/standalone.001.fd21ddacba1a8c2b.txt",
       "headers": [
         {
@@ -1166,7 +1409,7 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.033.854252f2cc7cd794.txt",
+      "source": "/assets/program/standalone.033.0997ddfb082300a9.txt",
       "headers": [
         {
           "key": "Cache-Control",
@@ -1175,7 +1418,7 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.034.64b38b583a885595.txt",
+      "source": "/assets/program/standalone.034.a275757e591dd280.txt",
       "headers": [
         {
           "key": "Cache-Control",
@@ -1184,7 +1427,25 @@
       ]
     },
     {
-      "source": "/assets/program/standalone.035.a57891dbe6fb49cb.txt",
+      "source": "/assets/program/standalone.035.e38405078747d6f3.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.036.96f97f412267a4bb.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/program/standalone.037.4edc0da4c362f900.txt",
       "headers": [
         {
           "key": "Cache-Control",

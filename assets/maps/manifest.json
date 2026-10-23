@@ -155,6 +155,34 @@
       "downloadBytes": 24504948
     },
     {
+      "id": "gallery_china_korea_research",
+      "name": "중국·한반도 · 역사 연구 지도",
+      "provinceCount": 2887,
+      "asset": "assets/maps/gallery_china_korea_research.8c9d3b9376e315e5.json",
+      "downloadBytes": 1117253
+    },
+    {
+      "id": "gallery_eastasia_research",
+      "name": "동아시아 · 역사 연구 지도",
+      "provinceCount": 3360,
+      "asset": "assets/maps/gallery_eastasia_research.10507b347fe63ca5.json",
+      "downloadBytes": 1597460
+    },
+    {
+      "id": "gallery_europe_research",
+      "name": "유럽과 지중해 · 역사 연구 균형 지도",
+      "provinceCount": 2752,
+      "asset": "assets/maps/gallery_europe_research.e10140f3bff18239.json",
+      "downloadBytes": 1988583
+    },
+    {
+      "id": "gallery_world_research",
+      "name": "세계 · 역사 연구 균형 지도",
+      "provinceCount": 6560,
+      "asset": "assets/maps/gallery_world_research.3444bc1dd982d420.json",
+      "downloadBytes": 6586902
+    },
+    {
       "id": "regional_eastasia_1419",
       "name": "동아시아 · 1419년 무렵 · 조선 전기",
       "provinceCount": 5591,
@@ -389,6 +417,136 @@
       "historicalYear": 1939,
       "historicalNotice": "1939년 8월, 폴란드 침공 직전·중일전쟁 진행 중를 기준으로 한 역사 지도 초안입니다. 현대 균형 지도의 구획을 유지하고 공개 역사 경계를 표본 대조하여 영토를 근사 배치했습니다. 도시국가·복잡한 월경지·정확한 전선은 일부 생략됩니다. 빗금은 상위 세력의 영향권 또는 점령이며, 식민지·자치령·제후령도 편집 가능한 단위로 구분합니다. 경계 미상으로 표시한 지역은 빈 땅이 아니라 여러 공동체가 살던 곳입니다. 지역명은 위치 검색을 위한 현대 지명이 남아 있습니다.",
       "baseId": "world-balanced"
+    },
+    {
+      "id": "historical_atlas_qin_246bce",
+      "name": "전국칠웅 · 기원전246년, 진왕 정 원년",
+      "provinceCount": 2887,
+      "asset": "assets/maps/historical_atlas_qin_246bce.ece525c4b120fbdd.json",
+      "downloadBytes": 1358102,
+      "historicalBaseId": "gallery_china_korea_research",
+      "historicalRegionId": "eastasia",
+      "historicalEraId": "atlas_bce246",
+      "historicalYear": -246,
+      "historicalNotice": "기원전246년 · 진왕 정 원년(왕위 계승247년, 이듬해 개원) 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_china_korea_research"
+    },
+    {
+      "id": "historical_atlas_warlords_195",
+      "name": "후한 말 군웅할거 · 195년 겨울",
+      "provinceCount": 2887,
+      "asset": "assets/maps/historical_atlas_warlords_195.4a76e04ebc54dd94.json",
+      "downloadBytes": 1360993,
+      "historicalBaseId": "gallery_china_korea_research",
+      "historicalRegionId": "eastasia",
+      "historicalEraId": "atlas_195",
+      "historicalYear": 195,
+      "historicalNotice": "195년 겨울 · 조조 연주 회복과 손책의 초기 강동 진출 뒤 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_china_korea_research"
+    },
+    {
+      "id": "historical_atlas_three_powers_214",
+      "name": "삼분의 형성 · 214년 말",
+      "provinceCount": 2887,
+      "asset": "assets/maps/historical_atlas_three_powers_214.1197fc2c864478c7.json",
+      "downloadBytes": 1358651,
+      "historicalBaseId": "gallery_china_korea_research",
+      "historicalRegionId": "eastasia",
+      "historicalEraId": "atlas_214",
+      "historicalYear": 214,
+      "historicalNotice": "214년 말 · 유비의 성도 입성 뒤,215년 한중·형주 변화 전 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_china_korea_research"
+    },
+    {
+      "id": "historical_atlas_korea_660",
+      "name": "삼국의 마지막 균형 · 660년 초",
+      "provinceCount": 3360,
+      "asset": "assets/maps/historical_atlas_korea_660.c9e004d141c07b97.json",
+      "downloadBytes": 1859530,
+      "historicalBaseId": "gallery_eastasia_research",
+      "historicalRegionId": "eastasia",
+      "historicalEraId": "atlas_660",
+      "historicalYear": 660,
+      "historicalNotice": "660년 초 · 나당연합군의 백제 침공 이전 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_eastasia_research"
+    },
+    {
+      "id": "historical_atlas_thirty_years_1618",
+      "name": "1618년 30년 전쟁의 시작",
+      "provinceCount": 2752,
+      "asset": "assets/maps/historical_atlas_thirty_years_1618.3c78e950d9577d0e.json",
+      "downloadBytes": 2163702,
+      "historicalBaseId": "gallery_europe_research",
+      "historicalRegionId": "europe_med",
+      "historicalEraId": "atlas_1618",
+      "historicalYear": 1618,
+      "historicalNotice": "1618-05-23 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_europe_research"
+    },
+    {
+      "id": "historical_atlas_world_1914",
+      "name": "제1차 세계대전 전야 · 1914년 세계",
+      "provinceCount": 6560,
+      "asset": "assets/maps/historical_atlas_world_1914.0ec2be2f38c08b48.json",
+      "downloadBytes": 7001008,
+      "historicalBaseId": "gallery_world_research",
+      "historicalRegionId": "world",
+      "historicalEraId": "atlas_1914",
+      "historicalYear": 1914,
+      "historicalNotice": "1914-07-01 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_world_research"
+    },
+    {
+      "id": "historical_atlas_world_1933",
+      "name": "바이마르 공화국 최후의 전야 · 1933년 세계",
+      "provinceCount": 6560,
+      "asset": "assets/maps/historical_atlas_world_1933.60727f7ddfc3b8bd.json",
+      "downloadBytes": 7002918,
+      "historicalBaseId": "gallery_world_research",
+      "historicalRegionId": "world",
+      "historicalEraId": "atlas_1933",
+      "historicalYear": 1933,
+      "historicalNotice": "1933-01-29 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_world_research"
+    },
+    {
+      "id": "historical_atlas_victorian_1880",
+      "name": "빅토리아 시대 · 1880년 세계",
+      "provinceCount": 6560,
+      "asset": "assets/maps/historical_atlas_victorian_1880.dee94a10a1813bae.json",
+      "downloadBytes": 7006252,
+      "historicalBaseId": "gallery_world_research",
+      "historicalRegionId": "world",
+      "historicalEraId": "atlas_1880",
+      "historicalYear": 1880,
+      "historicalNotice": "1880-01-01 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_world_research"
+    },
+    {
+      "id": "historical_atlas_italy_1494",
+      "name": "1494년 르네상스 이탈리아와 유럽",
+      "provinceCount": 2752,
+      "asset": "assets/maps/historical_atlas_italy_1494.dd0f30b7b1e3bba2.json",
+      "downloadBytes": 2165587,
+      "historicalBaseId": "gallery_europe_research",
+      "historicalRegionId": "europe_med",
+      "historicalEraId": "atlas_1494",
+      "historicalYear": 1494,
+      "historicalNotice": "1494-01-01 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_europe_research"
+    },
+    {
+      "id": "historical_atlas_napoleon_1803",
+      "name": "1803년 말 나폴레옹의 유럽",
+      "provinceCount": 2752,
+      "asset": "assets/maps/historical_atlas_napoleon_1803.e08ea00e9c3b28a5.json",
+      "downloadBytes": 2161397,
+      "historicalBaseId": "gallery_europe_research",
+      "historicalRegionId": "europe_med",
+      "historicalEraId": "atlas_1803",
+      "historicalYear": 1803,
+      "historicalNotice": "1803-12-31 기준의 편집 가능한 역사 복원도입니다. 현대 행정구역을 이용하므로 당시 국경·전선의 정밀 재현과는 차이가 있으며 자료가 부족한 여러 공동체의 경계는 근사입니다.",
+      "baseId": "gallery_europe_research"
     }
   ],
   "assets": [
@@ -642,6 +800,136 @@
           "bytes": 382815,
           "gzipBytes": 114629,
           "sha256": "e3d498df6631c0588ee0b960ca9c49556c17abf252fded4f7e6ef7a13aad738d"
+        }
+      ]
+    },
+    {
+      "id": "gallery_china_korea_research",
+      "type": "base",
+      "path": "assets/maps/gallery_china_korea_research.8c9d3b9376e315e5.json",
+      "bytes": 611,
+      "gzipBytes": 267987,
+      "sha256": "8c9d3b9376e315e548961a8616940f7e5098ae7bb19c247d0f9dc7bf964e09b1",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 1116642,
+      "contentSha256": "e1450b85e2043f055561f46d6eee2739e8d308ff5bd2d1bd9b76d44eb1275cd0",
+      "parts": [
+        {
+          "path": "assets/maps/gallery_china_korea_research.e1450b85e2043f05.part-001.3eff9f73d9691573.txt",
+          "bytes": 1048576,
+          "gzipBytes": 258680,
+          "sha256": "3eff9f73d96915731953d75b3a2f4825e4d7e6f4cc844934e86fc4dd92db1063"
+        },
+        {
+          "path": "assets/maps/gallery_china_korea_research.e1450b85e2043f05.part-002.0a13d806cd09283c.txt",
+          "bytes": 68066,
+          "gzipBytes": 8970,
+          "sha256": "0a13d806cd09283c2b61e86cbf5b27a19fd3e899152f43177ace36c8d4576ce8"
+        }
+      ]
+    },
+    {
+      "id": "gallery_eastasia_research",
+      "type": "base",
+      "path": "assets/maps/gallery_eastasia_research.10507b347fe63ca5.json",
+      "bytes": 605,
+      "gzipBytes": 397249,
+      "sha256": "10507b347fe63ca5939eadd534829775ca17e592abeb7f846089c0e8accef8f3",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 1596855,
+      "contentSha256": "9801ccbd89f850aedabbe1f504b4bd0f82d6576090d7205c67b46bc62be11d31",
+      "parts": [
+        {
+          "path": "assets/maps/gallery_eastasia_research.9801ccbd89f850ae.part-001.08af84f15d0fd881.txt",
+          "bytes": 1048576,
+          "gzipBytes": 266989,
+          "sha256": "08af84f15d0fd8811484924a84176d6dcf2c1145fb4aa57b8290dcf0cf5b9b13"
+        },
+        {
+          "path": "assets/maps/gallery_eastasia_research.9801ccbd89f850ae.part-002.d12b1333a4bfd05e.txt",
+          "bytes": 548279,
+          "gzipBytes": 129923,
+          "sha256": "d12b1333a4bfd05e96e017b32dd521a6883c41844ca3aa5734a3be1b049487b5"
+        }
+      ]
+    },
+    {
+      "id": "gallery_europe_research",
+      "type": "base",
+      "path": "assets/maps/gallery_europe_research.e10140f3bff18239.json",
+      "bytes": 599,
+      "gzipBytes": 505799,
+      "sha256": "e10140f3bff18239e2e5547070cc578b9dff1cc4693f34843133d880ba6b47d4",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 1987984,
+      "contentSha256": "9a79358f07f378087aa3d6a9fe0a4778d27ecc90b240e4ba1be2c39c9d2f9e6c",
+      "parts": [
+        {
+          "path": "assets/maps/gallery_europe_research.9a79358f07f37808.part-001.82410c4248a5f0cd.txt",
+          "bytes": 1048576,
+          "gzipBytes": 266305,
+          "sha256": "82410c4248a5f0cdbf55c705760fb79f5ea3e8677fbedb4c8f33ebcd01f9bbb2"
+        },
+        {
+          "path": "assets/maps/gallery_europe_research.9a79358f07f37808.part-002.dda9b72709be1e7d.txt",
+          "bytes": 939408,
+          "gzipBytes": 239159,
+          "sha256": "dda9b72709be1e7dd4ac22a73ef5790de3fa7532cc0c2bfba90bf8d0059abe78"
+        }
+      ]
+    },
+    {
+      "id": "gallery_world_research",
+      "type": "base",
+      "path": "assets/maps/gallery_world_research.3444bc1dd982d420.json",
+      "bytes": 1615,
+      "gzipBytes": 1801945,
+      "sha256": "3444bc1dd982d4208f0df3ca3dbdc59dc0e5457b762afd0e79c9580ae0cf5b4b",
+      "format": "hc-map-chunks-v1",
+      "contentBytes": 6585287,
+      "contentSha256": "c22337e94ccd9e79fa0884309638c4398487a8a80547e2763c1ee331e86c5cbc",
+      "parts": [
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-001.6bd3f752aa3506ab.txt",
+          "bytes": 1048576,
+          "gzipBytes": 296017,
+          "sha256": "6bd3f752aa3506ab69a7275ac9d65f486eed40cac2b80b04275717d08444f61a"
+        },
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-002.a17cc3901df79699.txt",
+          "bytes": 1048576,
+          "gzipBytes": 280386,
+          "sha256": "a17cc3901df79699d998af57b5359cab84ac23c059f0f5fef192ad10257a2341"
+        },
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-003.de4e9f7fa73f2392.txt",
+          "bytes": 1048576,
+          "gzipBytes": 269250,
+          "sha256": "de4e9f7fa73f239282c2ed94724ccd75e7fa6a78312bd7c5f95d6c7979d31863"
+        },
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-004.9ca8af7509aeb772.txt",
+          "bytes": 1048576,
+          "gzipBytes": 291542,
+          "sha256": "9ca8af7509aeb77262dae3e9b1d59f3785f75226182798d8a6928964f12d21c1"
+        },
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-005.d51f70c1a100dd61.txt",
+          "bytes": 1048576,
+          "gzipBytes": 271816,
+          "sha256": "d51f70c1a100dd614bf0b5550facefc89054dc98d6481513921af8aaccfe80c9"
+        },
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-006.0de8da2124890432.txt",
+          "bytes": 1048576,
+          "gzipBytes": 311794,
+          "sha256": "0de8da212489043231dcae7ed9e79d7f51535303060be57a3bc18cc5644940bc"
+        },
+        {
+          "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-007.2217c4192db7c750.txt",
+          "bytes": 293831,
+          "gzipBytes": 80558,
+          "sha256": "2217c4192db7c75031597af48d785e0fd6c2c75f47fa393ee773533d14dcddcd"
         }
       ]
     },
@@ -1076,6 +1364,96 @@
       "gzipBytes": 44213,
       "sha256": "ac9bd8f60c09177d7965692690e6d80c5f73ca829f30f0f0ee509d94a8e6b633",
       "baseId": "world-balanced"
+    },
+    {
+      "id": "historical_atlas_qin_246bce",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_qin_246bce.ece525c4b120fbdd.json",
+      "bytes": 240849,
+      "gzipBytes": 27191,
+      "sha256": "ece525c4b120fbdd1825f96bf51b4c97b2fc8b663b1c9bb69d78db9258593c3e",
+      "baseId": "gallery_china_korea_research"
+    },
+    {
+      "id": "historical_atlas_warlords_195",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_warlords_195.4a76e04ebc54dd94.json",
+      "bytes": 243740,
+      "gzipBytes": 28417,
+      "sha256": "4a76e04ebc54dd9422a18c3dd345c27136886c1cb2a85c7af4619af07dab4fd2",
+      "baseId": "gallery_china_korea_research"
+    },
+    {
+      "id": "historical_atlas_three_powers_214",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_three_powers_214.1197fc2c864478c7.json",
+      "bytes": 241398,
+      "gzipBytes": 27495,
+      "sha256": "1197fc2c864478c719ddac563119da63e3e5a6523a7425bbb9b0f7fb56e3b706",
+      "baseId": "gallery_china_korea_research"
+    },
+    {
+      "id": "historical_atlas_korea_660",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_korea_660.c9e004d141c07b97.json",
+      "bytes": 262070,
+      "gzipBytes": 28218,
+      "sha256": "c9e004d141c07b979c5298660a354ae71414b50e19d84c19d60fb1dfaf218db7",
+      "baseId": "gallery_eastasia_research"
+    },
+    {
+      "id": "historical_atlas_thirty_years_1618",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_thirty_years_1618.3c78e950d9577d0e.json",
+      "bytes": 175119,
+      "gzipBytes": 23475,
+      "sha256": "3c78e950d9577d0ec2117c61bb810782ad7f312f9a1998b981c93c05dcd1e429",
+      "baseId": "gallery_europe_research"
+    },
+    {
+      "id": "historical_atlas_world_1914",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_world_1914.0ec2be2f38c08b48.json",
+      "bytes": 414106,
+      "gzipBytes": 40391,
+      "sha256": "0ec2be2f38c08b485f49c65b59647b86245cf70a2fc46a9f677590c358d85730",
+      "baseId": "gallery_world_research"
+    },
+    {
+      "id": "historical_atlas_world_1933",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_world_1933.60727f7ddfc3b8bd.json",
+      "bytes": 416016,
+      "gzipBytes": 41144,
+      "sha256": "60727f7ddfc3b8bdf32c0d126a4c0dbb9769efdc60e1952443390963913330f7",
+      "baseId": "gallery_world_research"
+    },
+    {
+      "id": "historical_atlas_victorian_1880",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_victorian_1880.dee94a10a1813bae.json",
+      "bytes": 419350,
+      "gzipBytes": 43864,
+      "sha256": "dee94a10a1813bae8ebbfe8c59f404254686caa42081baefe96d1ba958cd5085",
+      "baseId": "gallery_world_research"
+    },
+    {
+      "id": "historical_atlas_italy_1494",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_italy_1494.dd0f30b7b1e3bba2.json",
+      "bytes": 177004,
+      "gzipBytes": 24187,
+      "sha256": "dd0f30b7b1e3bba21ea8c5e02ce57fdfad5bfddf63c65ccbacad8cfd9351bb7b",
+      "baseId": "gallery_europe_research"
+    },
+    {
+      "id": "historical_atlas_napoleon_1803",
+      "type": "patch",
+      "path": "assets/maps/historical_atlas_napoleon_1803.e08ea00e9c3b28a5.json",
+      "bytes": 172814,
+      "gzipBytes": 21826,
+      "sha256": "e08ea00e9c3b28a5f90268f291a01cdf48e5451cc9ea10bf813d50b58ab0dd00",
+      "baseId": "gallery_europe_research"
     }
   ]
 }

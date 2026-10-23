@@ -1,5 +1,5 @@
 {
-  "version": "2.11.1-community",
+  "version": "2.12.0-community",
   "builtAt": "2026-10-23",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -31,6 +31,11 @@
       "sha256": "57f9d09907cb9414187579cdddb504b74ede8fb56c8d2a044676f15967efa883"
     },
     {
+      "path": "HISTORICAL-ATLAS-10.md",
+      "bytes": 4816,
+      "sha256": "26683590c15457ef53b44b44c4ebbef7bd896a19118f1770763fc12097001c8f"
+    },
+    {
       "path": "HISTORICAL-MAP-SOURCES.md",
       "bytes": 13284,
       "sha256": "8a88a81caca05e5f7631a88eb5e8941a3849b54b2e1b633165a52a3c8b72af2a"
@@ -52,8 +57,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 9138,
-      "sha256": "22ce8a2f54faaba4a3ff6db7cf478adb2df6b53e3c1e8e2da8d831ebdc83e704"
+      "bytes": 9420,
+      "sha256": "c41f0cf09f7b9659789b3ef739f8f52efc30386957f89d502849adbfd66acd74"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -76,129 +81,9 @@
       "sha256": "0262a2018a71ffd6a229c024c869fc585f0229161126652dd90de844f6bd111c"
     },
     {
-      "path": "TEST-ASSET-BUILD-V2.8.txt",
-      "bytes": 3524,
-      "sha256": "3ccac16d6801d611a3dfcc46154738c113d5d7e1869b7fd0b7dfdf76c1f42c54"
-    },
-    {
-      "path": "TEST-MAP-INPUT-V2.11.txt",
-      "bytes": 919,
-      "sha256": "2040b51c8d78df9e9d87334fac96afa76eef0c7ba8f0eba6d603a8236fc173b2"
-    },
-    {
-      "path": "TEST-RECORD-DELETE-V2.11.1.txt",
-      "bytes": 1235,
-      "sha256": "354607b298c16a25325be52ff2d1a877f0edb66dd589b8f6bbbe2f59143a3501"
-    },
-    {
-      "path": "TEST-RESULTS-V2.1.txt",
-      "bytes": 2646,
-      "sha256": "88e3aaddafbd4f91761ac08c4ac9bb1d41857dd4bb30492e3cf9635e13357d15"
-    },
-    {
-      "path": "TEST-RESULTS-V2.10.1.txt",
-      "bytes": 23570,
-      "sha256": "985a8d3cedc616955df670f0f5c8d86266f0412772f00cac04d34daa2ac4b424"
-    },
-    {
-      "path": "TEST-RESULTS-V2.10.txt",
-      "bytes": 23080,
-      "sha256": "a6b5857d16a8e187afd61b44673b71df42d90caba578309e59ffd3470cd036d2"
-    },
-    {
-      "path": "TEST-RESULTS-V2.11.1.txt",
-      "bytes": 23570,
-      "sha256": "003fe748c4fd24beb5be60df98fbc7c223efacbf41209e452cdeed500a438ce7"
-    },
-    {
-      "path": "TEST-RESULTS-V2.11.txt",
-      "bytes": 23570,
-      "sha256": "d366283a80e4d40c5c15ecc1a00039a9eb0e3a947a91fc0c80fef950640cd75c"
-    },
-    {
-      "path": "TEST-RESULTS-V2.2.1.txt",
-      "bytes": 979,
-      "sha256": "0d6b0548f829bf13e4127ab2f0bdd7f18ab73b473cdf400467384df6489d195d"
-    },
-    {
-      "path": "TEST-RESULTS-V2.2.txt",
-      "bytes": 1682,
-      "sha256": "8b03e6fd64201bdc01621bcf072339890c7d848a71e3db044d087963bc1edecb"
-    },
-    {
-      "path": "TEST-RESULTS-V2.3.txt",
-      "bytes": 2032,
-      "sha256": "dd7656d5418e7baddf010d225ecc3e0b5813370441e39311c0577819d3624179"
-    },
-    {
-      "path": "TEST-RESULTS-V2.4.1.txt",
-      "bytes": 2172,
-      "sha256": "e9fd95dac6336a9e3925ba644f6ff969d2ecbf1652e9fe3df6869a79763a72fc"
-    },
-    {
-      "path": "TEST-RESULTS-V2.4.txt",
-      "bytes": 2632,
-      "sha256": "dd9ca2ed78b56422381c92a05333ade32d9234bafa959e43731a68bf4b639b71"
-    },
-    {
-      "path": "TEST-RESULTS-V2.5.txt",
-      "bytes": 15965,
-      "sha256": "48c8d67f11f3b3b3405978d1a62a588b33b77ebb2160afa4055464872295b5f0"
-    },
-    {
-      "path": "TEST-RESULTS-V2.6.1.txt",
-      "bytes": 16679,
-      "sha256": "a4a6d5a9ca63d144c9124c5670576813470fc37ad25be95b5fd7ae429c790eae"
-    },
-    {
-      "path": "TEST-RESULTS-V2.6.txt",
-      "bytes": 16679,
-      "sha256": "5267e3ca0af9d6aed91a92864a9af57a26517b6f54e357a930b7c5f302761faa"
-    },
-    {
-      "path": "TEST-RESULTS-V2.7.txt",
-      "bytes": 18562,
-      "sha256": "a8c2ba3dcdf430f9435174e78e8d62f19bc49b036c1cd913d78cb538638c1067"
-    },
-    {
-      "path": "TEST-RESULTS-V2.8.txt",
-      "bytes": 20187,
-      "sha256": "dc02c671585a12b54bc11b0ad425e0ac77c60b5932bf0eedba8cade229a6aab2"
-    },
-    {
-      "path": "TEST-RESULTS-V2.9.txt",
-      "bytes": 22221,
-      "sha256": "434aa144ec2d503482f78f729560b61221ff9c72e19566fe3617d38eb91dce9a"
-    },
-    {
-      "path": "TEST-RESULTS.txt",
-      "bytes": 2620,
-      "sha256": "f8306bbdc13335dff8ed24c1f4e6c0baa063bb42d0eadfe260854da3e8ab52af"
-    },
-    {
-      "path": "TEST-STARTUP-V2.11.1.txt",
-      "bytes": 2494,
-      "sha256": "d4538a500f5e57293fedf2dc078ebb210fc2bdefb5adbd7e6b5fddaceb39a598"
-    },
-    {
-      "path": "TEST-STARTUP-V2.11.txt",
-      "bytes": 2494,
-      "sha256": "d4538a500f5e57293fedf2dc078ebb210fc2bdefb5adbd7e6b5fddaceb39a598"
-    },
-    {
-      "path": "TEST-UI-V2.11.txt",
-      "bytes": 5280,
-      "sha256": "27e01bf8946d4a76deb943c77cc4cf9b6c6edb57727699c6fff05de71603bbee"
-    },
-    {
-      "path": "TEST-WEB-UPLOAD-V2.11.1.txt",
-      "bytes": 382,
-      "sha256": "5ee1f15a51ce267e680e4ee2e39dfb6357a464d39ec8d77563bcfb151e90a88c"
-    },
-    {
-      "path": "TEST-WEB-UPLOAD-V2.11.txt",
-      "bytes": 382,
-      "sha256": "5ee1f15a51ce267e680e4ee2e39dfb6357a464d39ec8d77563bcfb151e90a88c"
+      "path": "TEST-RESULTS-V2.12.txt",
+      "bytes": 30656,
+      "sha256": "4d5e16d29212f07ae23816d3c7acd6dc89bfe72f81fddc08f75ce7e175de4671"
     },
     {
       "path": "UPDATE-GUIDE.txt",
@@ -211,64 +96,14 @@
       "sha256": "c47943263e3728e45e0e89ef398a66c224e65c0560046b22e5a085fba7ff0f32"
     },
     {
-      "path": "UPDATE-V2.11.1.md",
-      "bytes": 2569,
-      "sha256": "317b21cc3d3cdaded2dd9376e44bad97d1a9c709c56abf0507e14c135af34142"
-    },
-    {
-      "path": "UPDATE-V2.11.md",
-      "bytes": 3863,
-      "sha256": "ab2b10eb6d0657d9a4c5d4f26b57b9c2666ffee14eb70449bccc8ad8953ad9c9"
-    },
-    {
-      "path": "UPDATE-V2.2.1.md",
-      "bytes": 1188,
-      "sha256": "c04df1b8fcb85b32c820fd74b396d7ae371d219d88740ad3bcbb117f768bba5b"
-    },
-    {
-      "path": "UPDATE-V2.2.md",
-      "bytes": 5337,
-      "sha256": "06a7e3ad5fafb7203be6497f6e22e18c20f316fdf982512f8a76fa76db119b9e"
-    },
-    {
-      "path": "UPDATE-V2.3.md",
-      "bytes": 2461,
-      "sha256": "caa8be90c1f79f1f3e3b792c9d9d8a59fa78d6b3729173b1c81e63a42dd8fe12"
-    },
-    {
-      "path": "UPDATE-V2.4.1.md",
-      "bytes": 4884,
-      "sha256": "c82e5fc997286701305ba6ac671593adf67391b3456b226b93ab0d30169b6a65"
-    },
-    {
-      "path": "UPDATE-V2.4.md",
-      "bytes": 3725,
-      "sha256": "80f43854c294efa2fcd08f6d889c0bf382221009635f56ab37bceeab70688539"
-    },
-    {
-      "path": "UPDATE-V2.5.md",
-      "bytes": 1916,
-      "sha256": "031486e848f43cf04be05de2a3ec8e3318b869592c45af3784ccca16075e31fa"
-    },
-    {
-      "path": "UPDATE-V2.6.1.md",
-      "bytes": 1607,
-      "sha256": "543a88dda4987ff600b846be61b1ae8dc9a221ddc30efe7ada32813fb723ed44"
-    },
-    {
-      "path": "UPDATE-V2.6.md",
-      "bytes": 1484,
-      "sha256": "94df1b1949b3d0e8adfa0b2f929947aece87398bd34a9c98a827d6282bf3e1ec"
-    },
-    {
-      "path": "UPDATE-V2.7.md",
-      "bytes": 2304,
-      "sha256": "9748baec3c6b5149966391aad2bff0942d93eabef3b984838156dc73b6869c5e"
+      "path": "UPDATE-V2.12.md",
+      "bytes": 4683,
+      "sha256": "0409eadc62c145284214a736026413b2c76c9762c05b3470bed0f360c7611fc6"
     },
     {
       "path": "VERSION.txt",
-      "bytes": 214,
-      "sha256": "0ac114b577c7a96b6d0111eed4109ef40b7d7dc7491143d729aacff4d6707c51"
+      "bytes": 227,
+      "sha256": "1d66fe4185bc290ab69858218402abb7d416c9c2dd39b82c34d029987677c5d8"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -292,8 +127,8 @@
     },
     {
       "path": "assets/maps/SIZES.json",
-      "bytes": 3558,
-      "sha256": "e9304d00f97d52475e555a88eeb24b6253eca2df3a7bd8d7aea0eb996777da79"
+      "bytes": 5379,
+      "sha256": "2f37b100cb47413e7cfbf052135d45815890752e2e24a4e4d79a3cccca38e787"
     },
     {
       "path": "assets/maps/balanced_asia_modern.14b319f83d6c9c43.json",
@@ -336,6 +171,141 @@
       "sha256": "d59f6cc7714f5ef9c8505053697d06d6c74230a992f9f0f986010ad0dea0961e"
     },
     {
+      "path": "assets/maps/gallery_china_korea_research.8c9d3b9376e315e5.json",
+      "bytes": 611,
+      "sha256": "8c9d3b9376e315e548961a8616940f7e5098ae7bb19c247d0f9dc7bf964e09b1"
+    },
+    {
+      "path": "assets/maps/gallery_china_korea_research.e1450b85e2043f05.part-001.3eff9f73d9691573.txt",
+      "bytes": 1048576,
+      "sha256": "3eff9f73d96915731953d75b3a2f4825e4d7e6f4cc844934e86fc4dd92db1063"
+    },
+    {
+      "path": "assets/maps/gallery_china_korea_research.e1450b85e2043f05.part-002.0a13d806cd09283c.txt",
+      "bytes": 68066,
+      "sha256": "0a13d806cd09283c2b61e86cbf5b27a19fd3e899152f43177ace36c8d4576ce8"
+    },
+    {
+      "path": "assets/maps/gallery_eastasia_research.10507b347fe63ca5.json",
+      "bytes": 605,
+      "sha256": "10507b347fe63ca5939eadd534829775ca17e592abeb7f846089c0e8accef8f3"
+    },
+    {
+      "path": "assets/maps/gallery_eastasia_research.9801ccbd89f850ae.part-001.08af84f15d0fd881.txt",
+      "bytes": 1048576,
+      "sha256": "08af84f15d0fd8811484924a84176d6dcf2c1145fb4aa57b8290dcf0cf5b9b13"
+    },
+    {
+      "path": "assets/maps/gallery_eastasia_research.9801ccbd89f850ae.part-002.d12b1333a4bfd05e.txt",
+      "bytes": 548279,
+      "sha256": "d12b1333a4bfd05e96e017b32dd521a6883c41844ca3aa5734a3be1b049487b5"
+    },
+    {
+      "path": "assets/maps/gallery_europe_research.9a79358f07f37808.part-001.82410c4248a5f0cd.txt",
+      "bytes": 1048576,
+      "sha256": "82410c4248a5f0cdbf55c705760fb79f5ea3e8677fbedb4c8f33ebcd01f9bbb2"
+    },
+    {
+      "path": "assets/maps/gallery_europe_research.9a79358f07f37808.part-002.dda9b72709be1e7d.txt",
+      "bytes": 939408,
+      "sha256": "dda9b72709be1e7dd4ac22a73ef5790de3fa7532cc0c2bfba90bf8d0059abe78"
+    },
+    {
+      "path": "assets/maps/gallery_europe_research.e10140f3bff18239.json",
+      "bytes": 599,
+      "sha256": "e10140f3bff18239e2e5547070cc578b9dff1cc4693f34843133d880ba6b47d4"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.3444bc1dd982d420.json",
+      "bytes": 1615,
+      "sha256": "3444bc1dd982d4208f0df3ca3dbdc59dc0e5457b762afd0e79c9580ae0cf5b4b"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-001.6bd3f752aa3506ab.txt",
+      "bytes": 1048576,
+      "sha256": "6bd3f752aa3506ab69a7275ac9d65f486eed40cac2b80b04275717d08444f61a"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-002.a17cc3901df79699.txt",
+      "bytes": 1048576,
+      "sha256": "a17cc3901df79699d998af57b5359cab84ac23c059f0f5fef192ad10257a2341"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-003.de4e9f7fa73f2392.txt",
+      "bytes": 1048576,
+      "sha256": "de4e9f7fa73f239282c2ed94724ccd75e7fa6a78312bd7c5f95d6c7979d31863"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-004.9ca8af7509aeb772.txt",
+      "bytes": 1048576,
+      "sha256": "9ca8af7509aeb77262dae3e9b1d59f3785f75226182798d8a6928964f12d21c1"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-005.d51f70c1a100dd61.txt",
+      "bytes": 1048576,
+      "sha256": "d51f70c1a100dd614bf0b5550facefc89054dc98d6481513921af8aaccfe80c9"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-006.0de8da2124890432.txt",
+      "bytes": 1048576,
+      "sha256": "0de8da212489043231dcae7ed9e79d7f51535303060be57a3bc18cc5644940bc"
+    },
+    {
+      "path": "assets/maps/gallery_world_research.c22337e94ccd9e79.part-007.2217c4192db7c750.txt",
+      "bytes": 293831,
+      "sha256": "2217c4192db7c75031597af48d785e0fd6c2c75f47fa393ee773533d14dcddcd"
+    },
+    {
+      "path": "assets/maps/historical_atlas_italy_1494.dd0f30b7b1e3bba2.json",
+      "bytes": 177004,
+      "sha256": "dd0f30b7b1e3bba21ea8c5e02ce57fdfad5bfddf63c65ccbacad8cfd9351bb7b"
+    },
+    {
+      "path": "assets/maps/historical_atlas_korea_660.c9e004d141c07b97.json",
+      "bytes": 262070,
+      "sha256": "c9e004d141c07b979c5298660a354ae71414b50e19d84c19d60fb1dfaf218db7"
+    },
+    {
+      "path": "assets/maps/historical_atlas_napoleon_1803.e08ea00e9c3b28a5.json",
+      "bytes": 172814,
+      "sha256": "e08ea00e9c3b28a5f90268f291a01cdf48e5451cc9ea10bf813d50b58ab0dd00"
+    },
+    {
+      "path": "assets/maps/historical_atlas_qin_246bce.ece525c4b120fbdd.json",
+      "bytes": 240849,
+      "sha256": "ece525c4b120fbdd1825f96bf51b4c97b2fc8b663b1c9bb69d78db9258593c3e"
+    },
+    {
+      "path": "assets/maps/historical_atlas_thirty_years_1618.3c78e950d9577d0e.json",
+      "bytes": 175119,
+      "sha256": "3c78e950d9577d0ec2117c61bb810782ad7f312f9a1998b981c93c05dcd1e429"
+    },
+    {
+      "path": "assets/maps/historical_atlas_three_powers_214.1197fc2c864478c7.json",
+      "bytes": 241398,
+      "sha256": "1197fc2c864478c719ddac563119da63e3e5a6523a7425bbb9b0f7fb56e3b706"
+    },
+    {
+      "path": "assets/maps/historical_atlas_victorian_1880.dee94a10a1813bae.json",
+      "bytes": 419350,
+      "sha256": "dee94a10a1813bae8ebbfe8c59f404254686caa42081baefe96d1ba958cd5085"
+    },
+    {
+      "path": "assets/maps/historical_atlas_warlords_195.4a76e04ebc54dd94.json",
+      "bytes": 243740,
+      "sha256": "4a76e04ebc54dd9422a18c3dd345c27136886c1cb2a85c7af4619af07dab4fd2"
+    },
+    {
+      "path": "assets/maps/historical_atlas_world_1914.0ec2be2f38c08b48.json",
+      "bytes": 414106,
+      "sha256": "0ec2be2f38c08b485f49c65b59647b86245cf70a2fc46a9f677590c358d85730"
+    },
+    {
+      "path": "assets/maps/historical_atlas_world_1933.60727f7ddfc3b8bd.json",
+      "bytes": 416016,
+      "sha256": "60727f7ddfc3b8bdf32c0d126a4c0dbb9769efdc60e1952443390963913330f7"
+    },
+    {
       "path": "assets/maps/historical_europe_1444.7889dd429209a472.json",
       "bytes": 184814,
       "sha256": "7889dd429209a4724656450c5c03d9862facb2992ab2249ba926cc827008fff9"
@@ -362,8 +332,8 @@
     },
     {
       "path": "assets/maps/manifest.json",
-      "bytes": 45331,
-      "sha256": "b89fda9415eb1dfbf9cfe0e031b120b853bdb1e9cc7d828670193df9ae5839e7"
+      "bytes": 62647,
+      "sha256": "79601d56220b74e8445a134ab6788bac0ad090e90ed6d0a3b95388b661bca1f2"
     },
     {
       "path": "assets/maps/regional_asia_1754.98b0a77511fa0f6b.json",
@@ -777,8 +747,8 @@
     },
     {
       "path": "assets/program/manifest.json",
-      "bytes": 6735,
-      "sha256": "21023a54365a719f03d1bbd2cca7d6f1d0f04f60e938c693726a17f992af7cfd"
+      "bytes": 7111,
+      "sha256": "d2eba51f2672cf8612a641a2db629dc726cd5720f94b2e757c087d40945f7614"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -941,19 +911,29 @@
       "sha256": "c3942629b4943a3fbb412477890eed5c4d6b60e862e9709b1e2e2123ba53ebc4"
     },
     {
-      "path": "assets/program/standalone.033.854252f2cc7cd794.txt",
+      "path": "assets/program/standalone.033.0997ddfb082300a9.txt",
       "bytes": 1048576,
-      "sha256": "854252f2cc7cd794fec6d0437792d9afc8886ed0dd765e3d1bd3c915262d9afc"
+      "sha256": "0997ddfb082300a9718a566c570e22ed97b6e9aa6ccc84f88919b6677c99d4c9"
     },
     {
-      "path": "assets/program/standalone.034.64b38b583a885595.txt",
+      "path": "assets/program/standalone.034.a275757e591dd280.txt",
       "bytes": 1048576,
-      "sha256": "64b38b583a88559518de9a6a47d3b2c27cd616177ade001f82f229d874c77ef3"
+      "sha256": "a275757e591dd2809d065881dad7b6bb75bdd287d97aa9061b0183f56a362259"
     },
     {
-      "path": "assets/program/standalone.035.a57891dbe6fb49cb.txt",
-      "bytes": 177664,
-      "sha256": "a57891dbe6fb49cbe3ed643df1af1cb98c020f1b206370190e7d6e337e2d2101"
+      "path": "assets/program/standalone.035.e38405078747d6f3.txt",
+      "bytes": 1048576,
+      "sha256": "e38405078747d6f33454f2c7d6b87fc03b53b8e0bf4882b67149058ddf77d612"
+    },
+    {
+      "path": "assets/program/standalone.036.96f97f412267a4bb.txt",
+      "bytes": 1048576,
+      "sha256": "96f97f412267a4bbd2fa3286bd9e0e7c985e84607a0800e9a44175e68496dc5c"
+    },
+    {
+      "path": "assets/program/standalone.037.4edc0da4c362f900.txt",
+      "bytes": 455537,
+      "sha256": "4edc0da4c362f900fd79efabc77cf1efca8071313172a71f5f10c66b862f3236"
     },
     {
       "path": "bootstrap.js",
@@ -967,8 +947,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 9209,
-      "sha256": "c9627c0670227d1d7975cd5a0bb80ef9138b2e29b9eb01ef6d9a2860a42a8819"
+      "bytes": 9271,
+      "sha256": "06831d73c0990775f5b67287a01063dc77b1ef1e5251160e85eb786d7c8588c2"
     },
     {
       "path": "community-bridge.js",
@@ -1024,6 +1004,61 @@
       "path": "examples/europe-balanced.map.json",
       "bytes": 519,
       "sha256": "9057f9749df9e848578018f5b56b0ed2f92c70608f19a84a9b9aac7fbca73bfb"
+    },
+    {
+      "path": "examples/gallery-atlas/01-qin-246bce.map.json",
+      "bytes": 168401,
+      "sha256": "be61a0312d369ee5b2c3c568442fa073c061d077d7f0c5f11f9da1f8d3b96d6a"
+    },
+    {
+      "path": "examples/gallery-atlas/02-warlords-195.map.json",
+      "bytes": 171273,
+      "sha256": "a2d9f8e9e254ad3edb12c025cd39903bc324404e74d23fc60ccd84330e2de4b6"
+    },
+    {
+      "path": "examples/gallery-atlas/03-three-powers-214.map.json",
+      "bytes": 168886,
+      "sha256": "3404940b61efd2594dbfe032103df0715481839402a7a5b828c5bf365a5bcb06"
+    },
+    {
+      "path": "examples/gallery-atlas/04-three-kingdoms-korea-660.map.json",
+      "bytes": 194779,
+      "sha256": "c375e7b6fc0b4400df78bfcb2a7b0de33b93118a6c528d95a2f2d368aceceeea"
+    },
+    {
+      "path": "examples/gallery-atlas/05-thirty-years-war-1618.map.json",
+      "bytes": 171334,
+      "sha256": "17001ec56acfd7c7050a1832f7171f0c7509622d6295b2db9e2e88cfd178d25f"
+    },
+    {
+      "path": "examples/gallery-atlas/06-world-1914.map.json",
+      "bytes": 372329,
+      "sha256": "0d0d90565bdc1237298292142daa93a67fa1ba184f5e000d36a34089623195de"
+    },
+    {
+      "path": "examples/gallery-atlas/07-world-weimar-1933.map.json",
+      "bytes": 375072,
+      "sha256": "7f40f2f273e9231e0304cd0aaf65a88cc05c82320fc84269f969f251e9ea19ce"
+    },
+    {
+      "path": "examples/gallery-atlas/08-victorian-world-1880.map.json",
+      "bytes": 378015,
+      "sha256": "0aa166d7cb3aa2df927c6f3a65e0ea9989d8d8ae3ac1c419595c834e07a6aa79"
+    },
+    {
+      "path": "examples/gallery-atlas/09-renaissance-italy-1494.map.json",
+      "bytes": 172829,
+      "sha256": "259eb6d688c8e28b9b648b37c7d39375e1445ce5a7cd57f712800a7628507ea8"
+    },
+    {
+      "path": "examples/gallery-atlas/10-europe-1803.map.json",
+      "bytes": 168675,
+      "sha256": "7fea54b36484d57dc09bbcc760eaf31def79045221da26034a9918af07626499"
+    },
+    {
+      "path": "examples/gallery-atlas/index.json",
+      "bytes": 2587,
+      "sha256": "8f24e4bc2125d06975076404f978006911ec83f7d21272dbd831ac79eca59eba"
     },
     {
       "path": "examples/imjin-world-notes.md",
@@ -1121,6 +1156,11 @@
       "sha256": "d03659a56a45ef314f8f1b8bb6db5f57e8efde5f356782f43b05035f6fc7d9f8"
     },
     {
+      "path": "historical-atlas.html",
+      "bytes": 5293,
+      "sha256": "d67d4e55adf369bb5168c5656b898245a3fb8e5f8b57b642832cfa90ef350086"
+    },
+    {
       "path": "historical-maps.html",
       "bytes": 5612,
       "sha256": "e92a7f942fed8108452688ae79556ab36be841cc5f8821426dc00eca8a2349be"
@@ -1157,8 +1197,8 @@
     },
     {
       "path": "map-templates.js",
-      "bytes": 48623,
-      "sha256": "edbd7efc6750d681df5a4ee2215a3d6de9fdd9b867d6a9ae132c676785b6c840"
+      "bytes": 62853,
+      "sha256": "64ee51eab21cc0770bab363dfdd3c4110c17170d11316ea228e208a275937a93"
     },
     {
       "path": "map-view.css",
@@ -1197,8 +1237,8 @@
     },
     {
       "path": "standalone.html",
-      "bytes": 7900,
-      "sha256": "547d0007277eccd2c4a5aed324966dfe2a9c2a2b7e6ab57b075ae89e5b6b52de"
+      "bytes": 8208,
+      "sha256": "7203f8e04a6a70aed21ae1f77e9469e11ca8e184848b63313d58a2b9a84eba53"
     },
     {
       "path": "styles.css",
@@ -1252,8 +1292,8 @@
     },
     {
       "path": "tests/balanced-regions.cjs",
-      "bytes": 11164,
-      "sha256": "8c7c425324e6b7181d98eac64021aa93a095952c1b2cb052f54c441a1678ffa6"
+      "bytes": 11220,
+      "sha256": "42def48d8bda7a33a2eff3f03762af3b4cb94e7d034b1be66e10a3a574678c59"
     },
     {
       "path": "tests/detailed-map.cjs",
@@ -1286,6 +1326,16 @@
       "sha256": "98d0dafd89e1c29e9ac8b1a802242c273dbbc964ae531411d8540a512d2b8b0c"
     },
     {
+      "path": "tests/fixtures/v2111-historical-definition-hashes.json",
+      "bytes": 630,
+      "sha256": "0f3caea45be56c2c9e32f868c009b40c46ab2d764008872d82ab3bdc7694baa4"
+    },
+    {
+      "path": "tests/fixtures/v2111-map-manifest.json",
+      "bytes": 45331,
+      "sha256": "b89fda9415eb1dfbf9cfe0e031b120b853bdb1e9cc7d828670193df9ae5839e7"
+    },
+    {
       "path": "tests/fixtures/v241-map-manifest.json",
       "bytes": 32409,
       "sha256": "2db94de611bdb20db498fd8080021a4df94e2b430eb461454a3946440411085f"
@@ -1311,6 +1361,11 @@
       "sha256": "56992b3545e3213411be58e3c3fc74398d11b28cd01c4a1c3ff69d80e1e2850e"
     },
     {
+      "path": "tests/gallery-atlas-browser.cjs",
+      "bytes": 10466,
+      "sha256": "a2f0dd02007724381ad187ef8b170b1fe4e9cc8d8d91f92d651ea5e506abf2f2"
+    },
+    {
       "path": "tests/gallery-maps-browser.cjs",
       "bytes": 10584,
       "sha256": "36413c55f22d33b672e6834f76eabfb7200272a0b802e84124ed2b284616881b"
@@ -1322,8 +1377,8 @@
     },
     {
       "path": "tests/historical-map-data.cjs",
-      "bytes": 2271,
-      "sha256": "be50922ba85a6fc49e0dd17164bc2c9f494f0a6bb4f177bc171eb84b37ef1e9b"
+      "bytes": 2415,
+      "sha256": "c1fd67a81bb94fc8ec1c79abe04e56db1f32c52adced83c4ecff3063af84ddc3"
     },
     {
       "path": "tests/historical-presets-browser.cjs",
@@ -1332,8 +1387,8 @@
     },
     {
       "path": "tests/historical-presets.cjs",
-      "bytes": 9492,
-      "sha256": "5eab2ae76e60e7021a23f9d7dc1ccb54464c08cbb557d5cf9bfb1f6bdd75da1d"
+      "bytes": 11826,
+      "sha256": "ff4bbc03387c4d60b3a1fd7e4d50d4eb7fc52eb77a3f626576aacfc07b68ab0a"
     },
     {
       "path": "tests/home-navigation-browser.cjs",
@@ -1362,8 +1417,8 @@
     },
     {
       "path": "tests/map-build-fallback.cjs",
-      "bytes": 2654,
-      "sha256": "7a23d53811a0e7011b7eed56f62d8badbbb2947258ea1ee5f8dbfb190adf8030"
+      "bytes": 2834,
+      "sha256": "6801788134865a02319a5f6907ff72d74e7426c3bb6a6492a7cd81a72635228e"
     },
     {
       "path": "tests/map-document.cjs",
@@ -1387,8 +1442,8 @@
     },
     {
       "path": "tests/map-loader.cjs",
-      "bytes": 14057,
-      "sha256": "5b4f68b2bd8a59d4611cf44174fecda49f8016e6956f486086b3e52f954de9ba"
+      "bytes": 14099,
+      "sha256": "49ff8407c2223bdad39dc841b256022c214486ce5549bfbfbd121cd2f0637276"
     },
     {
       "path": "tests/map-maker-browser.cjs",
@@ -1418,7 +1473,7 @@
     {
       "path": "tests/map-workshop-ui-browser.cjs",
       "bytes": 27776,
-      "sha256": "fca53b24cd8efdd24a2b4e1d7ce392c9d7d23ae6d5bff79b163b1211a389bae6"
+      "sha256": "b117c639e3e9e30b050a48c7dca4bf8fd25bf44dec2f162d8fb242ccc51bbccc"
     },
     {
       "path": "tests/preloaded-map-fixture.cjs",
@@ -1438,7 +1493,7 @@
     {
       "path": "tests/regional-maps.cjs",
       "bytes": 5617,
-      "sha256": "5d677f2c8cca0fab6b79b612e7589ad67556c65604ef14f3cc7113dc989782fc"
+      "sha256": "fdbbe193791f896d46af75ff0823b0edc672cabdcb88f0a47b2eea9e3f5fa92b"
     },
     {
       "path": "tests/regional-renderer-browser.cjs",
@@ -1472,8 +1527,8 @@
     },
     {
       "path": "tests/world-balanced.cjs",
-      "bytes": 9793,
-      "sha256": "b1f4499f1bf3cc7cbe196f550358e4fcce8460a96bf7ac95241a7f50627c3e62"
+      "bytes": 9770,
+      "sha256": "fbc633845a52d8608b15394416fc230dcbd1e153fbb76249fb4b2d97712ba657"
     },
     {
       "path": "tests/world-ui-browser.cjs",
@@ -1507,8 +1562,8 @@
     },
     {
       "path": "tools/build-map-assets.cjs",
-      "bytes": 9722,
-      "sha256": "6db935c55762fa1f4f59bf2f7e7a6a7f7392b394a1cc443fb472c17d51a34d4f"
+      "bytes": 10453,
+      "sha256": "c031aa414d20bb7b490e77d0c5e5cd43ab73e4396d92cdd58c276c2198f3a42b"
     },
     {
       "path": "tools/build-map-regions.cjs",
@@ -1557,8 +1612,8 @@
     },
     {
       "path": "tools/map-source/historical-presets.json",
-      "bytes": 1685445,
-      "sha256": "7447ba9dc08ded77ebccc41e0ea35fe3aa5f0d774aa0ec8bb1703f5c574465ee"
+      "bytes": 4726442,
+      "sha256": "0933e7ed6a9ee7b2da1b7fa61299dc3130ca217371e2d9cbf175b7b1deb24128"
     },
     {
       "path": "tools/map-source/history-input/active-1444.geojson",
@@ -1686,6 +1741,11 @@
       "sha256": "d98698cc2b2886ed7afe065e91f7efbf419c18d0e52d6c2e9225e4c304ca5519"
     },
     {
+      "path": "tools/map-source/research-bases.cjs",
+      "bytes": 12118,
+      "sha256": "bbbdba34cdf89c3519c7b1cd6e82c09126eff9eff729401a55cb686949cc7f80"
+    },
+    {
       "path": "tools/map-source/world1754.json",
       "bytes": 195780,
       "sha256": "facad4967abdd8f72df8cd1a65bab3066a56752a44aa8e839563e15a7cd1c5fd"
@@ -1697,8 +1757,8 @@
     },
     {
       "path": "vercel.json",
-      "bytes": 31374,
-      "sha256": "229d3785fd5442e994b75cf2a8cd4351caf8d2e2cf94bd606836fe4443bcd693"
+      "bytes": 38400,
+      "sha256": "a582fd634ddd1017e68cdd8e67636ffcd619f752d7935393682bd26651df75af"
     }
   ]
 }

@@ -28,6 +28,17 @@ addDistributedSource('world-balanced');
 // Development may keep the processed world source separately. Distribution ZIPs
 // use its identical hashed base asset, avoiding an extra 24.5 MB copy.
 addDistributedSource('world-detailed');
+// Research map geometry is optional in old distributions. New distributions
+// can rebuild it from its existing hashed assets when development JSON is absent.
+const researchIds=['gallery_china_korea_research','gallery_eastasia_research','gallery_europe_research','gallery_world_research'];
+for(const id of researchIds){
+  const source=path.join(sourceDir,'research-bases',id+'.json');
+  if(fs.existsSync(source))sources.push(JSON.parse(fs.readFileSync(source,'utf8')));
+  else {
+    const previous=JSON.parse(fs.readFileSync(path.join(output,'manifest.json'),'utf8'));
+    if(previous.templates.some(template=>template.id===id))sources.push(createRegistry({},previous,name=>name==='node:fs'?fs:require(name),root).get(id));
+  }
+}
 const sourceApi = {get: id => sources.find(template => template.id === id) || null, list: () => sources.map(template => ({id:template.id,name:template.name,provinceCount:template.provinces.length,...(template.recommended ? {recommended:true} : {})}))};
 const sandbox = {MapTemplates: sourceApi};
 vm.runInNewContext(fs.readFileSync(path.join(sourceDir, 'regional-presets.cjs'), 'utf8'), sandbox, {filename:'regional-presets.cjs'});

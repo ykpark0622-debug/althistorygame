@@ -131,10 +131,10 @@ async function workflow(page, initialGame) {
   passed('Country-list editing and recoloring are independent of center selection; searchable center choices preserve all data when no country matches');
   // Keep metadata and the saved map title editable in the same settings panel.
   await page.getByLabel('지도 제목', { exact: true }).fill('국가 목록형 UI 검증 지도');
-  const setup = await page.evaluate(() => ({ count: MapTemplates.list().length, regions: MapTemplates.regions().map(r => r.id) })); assert.equal(setup.count, 28); assert.equal(setup.regions.length, 6);
+  const setup = await page.evaluate(() => ({ count: MapTemplates.list().length, regions: MapTemplates.regions().map(r => r.id) })); assert.equal(setup.count, 42); assert.equal(setup.regions.length, 6);
   assert.equal(await page.getByLabel('① 사용할 지역 지도', { exact: true }).inputValue(), 'europe_med');
   assert.equal(await page.getByLabel('② 시대 기본안', { exact: true }).inputValue(), 'balanced_modern');
-  passed('The redesigned settings retain map title, the six regional selectors, existing era presets and all 28 template registrations');
+  passed('The redesigned settings retain map title, the six regional selectors, existing era presets and all 32 template registrations');
   // Real label drag after previous painting; ownership must remain identical.
   await countryList(page, custom.id); await page.getByRole('button', { name: '국명 위치', exact: true }).click();
   await page.getByRole('button', { name: '선택한 국명 위치 지정', exact: true }).click();
