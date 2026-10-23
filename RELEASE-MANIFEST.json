@@ -1,5 +1,5 @@
 {
-  "version": "2.13.2-community",
+  "version": "2.13.3-community",
   "builtAt": "2026-10-23",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -57,8 +57,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 10785,
-      "sha256": "5ff5799c4122d9cad18cb0568cde6b583499cb27ddbd498521f253977344a022"
+      "bytes": 11265,
+      "sha256": "afce72916629c18c23e4b5fb94ca48cbfac88da6b24fbf2613a2a8c8dec59e57"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -91,14 +91,14 @@
       "sha256": "c47943263e3728e45e0e89ef398a66c224e65c0560046b22e5a085fba7ff0f32"
     },
     {
-      "path": "UPDATE-V2.13.2.md",
-      "bytes": 3043,
-      "sha256": "15cd6949cf6c7447de7024307ecc00ca1607e5a647da50e46caa90ddab3cdc0f"
+      "path": "UPDATE-V2.13.3.md",
+      "bytes": 3498,
+      "sha256": "384016f07e8b1ec0691216d54a8713d290033b25715c1324f2fbbaf64901b3c3"
     },
     {
       "path": "VERSION.txt",
-      "bytes": 200,
-      "sha256": "cb7126856dc84f82812cbacc40a384e278e2259c31dfa9ef78fdac9a125c00d8"
+      "bytes": 197,
+      "sha256": "2a5f83085df9e6733e0b11f180b89f4103c3fcaad97610faad4a53a2fcd92ace"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -112,13 +112,13 @@
     },
     {
       "path": "ai-helper.js",
-      "bytes": 33618,
-      "sha256": "89c981b137c699b50d1282b67af9c6675812a91cbecb3a4484be762e7804a9f8"
+      "bytes": 36014,
+      "sha256": "9837058cc2e0335e0a051526dbe4172f3326b45648de64b43e7a74238bf0c46a"
     },
     {
       "path": "app.js",
-      "bytes": 105377,
-      "sha256": "32306f119764009cf5b835016ff8ee08a0e33662e23bd53b4435f2555f48a58e"
+      "bytes": 105856,
+      "sha256": "a560b7791ceb20fb58cb08a67988378844231148a344fb28351d4cc5a8d6cd82"
     },
     {
       "path": "assets/maps/SIZES.json",
@@ -743,7 +743,7 @@
     {
       "path": "assets/program/manifest.json",
       "bytes": 7111,
-      "sha256": "a60a507c26aee4d7157ce32abcd613b52fd6673171f713127830e409b0425f9e"
+      "sha256": "43db85030d135f000b33ed4041d5e96f1618d3ee950fb0a233a2b743fd019fa1"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -926,9 +926,9 @@
       "sha256": "96f97f412267a4bbd2fa3286bd9e0e7c985e84607a0800e9a44175e68496dc5c"
     },
     {
-      "path": "assets/program/standalone.037.c4068095ef5c533d.txt",
-      "bytes": 480011,
-      "sha256": "c4068095ef5c533d54de406d2b4a1c25c1158212a6a41e472b0104867c02292e"
+      "path": "assets/program/standalone.037.4623d893509c81a9.txt",
+      "bytes": 482886,
+      "sha256": "4623d893509c81a921f98c74efcf6449c89ca64ecef6f514be48c02d9ac0351e"
     },
     {
       "path": "bootstrap.js",
@@ -942,8 +942,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 9244,
-      "sha256": "7be7537af0524076154a1805001ae6e2444cfc9e0f9492d28c712083915cc1ef"
+      "bytes": 9241,
+      "sha256": "30c4baa6c6cab804ba283d457113508b9eaa487f73bc51967896866209f63756"
     },
     {
       "path": "community-bridge.js",
@@ -1233,7 +1233,7 @@
     {
       "path": "standalone.html",
       "bytes": 8208,
-      "sha256": "952f26d6adcb5dd5dbea7469d267dae0177758cc02c29275ff4ee4520fdcf4b2"
+      "sha256": "da6400627dec48ffa57f69a5d4e10912b072028917e35888278c0d5b3b8a6728"
     },
     {
       "path": "styles.css",
@@ -1264,6 +1264,11 @@
       "path": "tests/ai-gallery-v2.cjs",
       "bytes": 9909,
       "sha256": "4e880adacd9d7325476e5bc3c1e33bdf41923eb71e81e6b15d306276be565af4"
+    },
+    {
+      "path": "tests/ai-map-scope-browser.cjs",
+      "bytes": 12467,
+      "sha256": "9c883621095afb7dca2f4c719542446c47e8e85cbae62702fff2241bb021bca4"
     },
     {
       "path": "tests/app-lazy-loading.cjs",
@@ -1359,11 +1364,6 @@
       "path": "tests/fullscreen-workshop-browser.cjs",
       "bytes": 17107,
       "sha256": "84b035a5cb82a3df2fd2bd584106b9458a0000775051b770c24bec3eeddb55c7"
-    },
-    {
-      "path": "tests/gallery-atlas-browser.cjs",
-      "bytes": 10466,
-      "sha256": "a2f0dd02007724381ad187ef8b170b1fe4e9cc8d8d91f92d651ea5e506abf2f2"
     },
     {
       "path": "tests/gallery-country-labels-browser.cjs",
@@ -1773,7 +1773,7 @@
     {
       "path": "vercel.json",
       "bytes": 38400,
-      "sha256": "50f8b30caba8c6cc3df24aefed4605bee1ed55457a4e2a1891c54578d8558156"
+      "sha256": "132000c2226eca674897be163a644324b5c45df37fa6bd47a1c985ad97cc9ae3"
     }
   ]
 }

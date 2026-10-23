@@ -141,17 +141,28 @@
   }
 
   function mapInstructions(template, countryId, base) {
-    if (!template) return '[지도 선택]\n- 지도를 사용하지 않는다. map과 territory 및 kind:"territory" 조건을 새로 만들지 마라.';
+    if (!template) return '[지도 선택]\n- 지도를 사용하지 않는다. 출력 JSON에는 map과 territory 및 kind:"territory" 조건을 넣지 마라. [현재 시나리오]에 있더라도 출력에서 제거하고 지도 없이 진행하도록 고쳐라.';
     const provinces = promptProvinces(template, countryId, base), limited = provinces.length < template.provinces.length;
+    const registry=root.MapTemplates,editor=root.ScenarioEditorV2;
+    const balancedRegion=template.balancedRegionId||({'world-balanced':'world','europe-balanced':'europe_med'})[template.id];
+    const selection=editor?.mapSetupSelection?.(template.id)||(template.historicalRegionId?{regionId:template.historicalRegionId,eraId:template.historicalEraId}:balancedRegion?{regionId:balancedRegion,eraId:'balanced_modern'}:registry?.selection?.(template.id))||(template.regionId?{regionId:template.regionId,eraId:template.eraId}:null);
+    const region=registry?.regions?.().find(item=>item.id===selection?.regionId),era=selection?(editor?.mapSetupEras?.(selection.regionId)||registry?.eras?.(selection.regionId)||[]).find(item=>item.id===selection.eraId):null;
+    const scope=selection?`${region?.name||selection.regionId} (${selection.regionId}) / 시대 기본안: ${era?.name||(selection.eraId==='balanced_modern'?'현대 · 균형 지도':template.name)} (${selection.eraId})`:template.name+' (기존 지도 고유 범위·기본안)';
+    const sameMap=base?.map?.templateId===template.id,countries=new Map(template.countries.map(country=>[country.id,country]));
+    if(sameMap)for(const country of base.map.countries||[])countries.set(country.id,{...countries.get(country.id),...country});
     return [
       '[선택한 기본 지도]',
       '- templateId: ' + template.id + ' / 이름: ' + template.name,
       '- 아래의 지역·국가 id를 그대로 사용해라. 지도 그림이나 SVG path를 생성하지 마라.',
       template.notice ? '- 지도 안내: ' + template.notice : '',
-      template.regionId ? '- 지도 범위: '+template.regionId+' / 시대 기본안: '+template.eraId+'. 이 지도 밖의 지역 ID를 쓰지 마라. 기본 소유국은 이미 시대 기본안을 반영하므로 바꿀 지역만 initial에 넣어라.' : '',
-      '국가 목록: ' + JSON.stringify(template.countries.filter(c=>c.available!==false||c.id===countryId).map(({ id, name, color }) => ({ id, name, color }))),
+      '- 지도 범위: '+scope+'. 이 지도 밖의 지역 ID를 쓰지 마라. 기본 소유국은 이미 선택한 기본안을 반영하므로 바꿀 지역만 initial에 넣어라.',
+      Array.isArray(template.geographicBounds)?'- 실제 지도 경위도 범위 [서쪽 경도,남쪽 위도,동쪽 경도,북쪽 위도]: '+JSON.stringify(template.geographicBounds)+'. 위 지역 분류보다 좁게 자른 지도라면 이 실제 범위를 따른다.':'',
+      '- 전체 지도는 '+template.provinces.length.toLocaleString()+'개 지역이다. 아래 지역 ID 참고 목록의 개수에 맞춰 지도를 자르거나 templateId를 바꾸지 마라.',
+      base?.map&&!sameMap?'- [현재 시나리오]의 기존 지도는 참고 자료다. 출력 map.templateId는 반드시 '+template.id+'로 바꾸고, 이전 지도 밖의 지역 참조와 국명 좌표는 새 범위에 맞게 제거하거나 변환해라. 유효한 새 지역 ID만 사용해라.':'',
+      sameMap?'- [현재 시나리오]에 편집된 국가·소유권·점령·영향권·국명 위치가 있으면 해당 값을 유지하고 요청받은 변경만 적용해라. 기본 지도로 덮어쓰지 마라.':'',
+      '국가 목록: ' + JSON.stringify([...countries.values()].filter(c=>c.available!==false||c.id===countryId).map(({ id, name, color }) => ({ id, name, color }))),
       limited ? '- 촘촘한 지도: 전체 ' + template.provinces.length.toLocaleString() + '개 중 실제 ID ' + provinces.length + '개만 아래에 싣는다.' + (countryId ? ' 현재 플레이 국가 ' + countryId + '와 기존 시나리오에서 참조한 지역을 우선한다.' : ' 국가별 대표 지역을 우선한다.') : '',
-      '지역 목록: ' + JSON.stringify(provinces.map(({ id, name, owner }) => ({ id, name, owner }))),
+      '지역 목록: ' + JSON.stringify(provinces.map(({ id, name, owner }) => ({ id, name, owner:sameMap?(base.map.initial?.owners?.[id]||owner):owner }))),
       limited ? '- 아래 목록과 [현재 시나리오]에 없는 지역 ID를 추측하거나 새로 만들지 마라. 더 필요한 지역은 편집기의 지역 검색 또는 지도·초기 영토 탭의 "지역 ID 목록 내려받기"에서 확인한 ID 목록을 사용자에게 받아 사용해라. 지도 전체를 initial.owners에 복사하지 말고 변경할 지역만 지정해라.' : '',
       '- map 형식: {"templateId":"' + template.id + '","playerCountry":"위 국가 id","countries":[],"initial":{"owners":{},"occupation":{},"influence":{},"markers":{}}}. countries는 기본 국가를 덮어쓰거나 추가할 때 id/name/color를 넣는다.',
       '- country.labelPosition은 선택사항이다. 기존 값은 유지하고, 새 좌표는 요청받았을 때만 지도 안의 [가로,세로]로 쓴다. 범위는 [0,0]부터 [' + template.width + ',' + template.height + ']까지이며 null은 국명 숨김, 생략은 자동 배치다. focusBounds(국가로 이동할 때의 확대 범위)와 혼동하지 마라.',

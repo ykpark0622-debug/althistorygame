@@ -497,6 +497,16 @@
     const base=ai.base&&canUseBase()?scenario:null;
     return {idea:ai.idea,size:ai.size,endings:ai.endings,mode:ai.mode,mapTemplateId:ai.mapTemplateId,baseScenario:base?E.clone(base):null};
   }
+  function aiMapControls(){
+    const registry=globalThis.MapTemplates,editor=globalThis.ScenarioEditorV2;
+    return {
+      registry,regions:registry?.regions?.()||[],
+      selection:id=>editor?.mapSetupSelection?.(id)||registry?.selection?.(id)||null,
+      eras:id=>editor?.mapSetupEras?.(id)||registry?.eras?.(id)||[],
+      templateId:(region,era)=>editor?.mapSetupTemplateId?.(region,era)||registry?.regionalId?.(region,era)||null,
+      defaults:region=>editor?.mapSetupDefault?.(region)||{regionId:region.id,eraId:region.defaultEra||registry?.eras?.(region.id)?.[0]?.id}
+    };
+  }
   function aiPromptPreview(){
     if(aiMapLoading)return '선택한 지도만 불러오고 있습니다. 잠시 뒤 요청문을 확인할 수 있습니다.';
     if(aiMapError)return aiMapError;
@@ -530,11 +540,11 @@
     const sizes=Object.entries(ScenarioAI.SIZES).map(([key,item])=>`<option value="${key}" ${ai.size===key?'selected':''}>${escape(item.label)} · 사건 ${escape(item.events)}개${item.note?' ('+escape(item.note)+')':''}</option>`).join('');
     const endings=['3','4','5','6','8'].map(n=>`<option value="${n}" ${ai.endings===n?'selected':''}>${n}개</option>`).join('');
     const base=canUseBase()?`<label class="ai-check"><input type="checkbox" data-ai-field="base" ${ai.base?'checked':''}> 지금 열린 「${escape(scenario.title)}」을 바탕으로 고치거나 늘리기</label>`:'';
-    const registry=globalThis.MapTemplates,regions=registry?.regions?.()||[],selected=registry?.selection?.(ai.mapTemplateId);
+    const maps=aiMapControls(),{registry,regions}=maps,selected=maps.selection(ai.mapTemplateId);
     const legacy=Boolean(ai.mapTemplateId&&!selected),regionId=selected?.regionId||(legacy?'legacy':'');
-    const mapOptions=(registry?.list()||[]).filter(m=>!registry?.selection?.(m.id)).map(m=>`<option value="${escape(m.id)}" ${ai.mapTemplateId===m.id?'selected':''}>${escape(m.name)}</option>`).join('');
+    const mapOptions=(registry?.list()||[]).filter(m=>!maps.selection(m.id)).map(m=>`<option value="${escape(m.id)}" ${ai.mapTemplateId===m.id?'selected':''}>${escape(m.name)}</option>`).join('');
     const regionOptions=regions.map(r=>`<option value="${escape(r.id)}" ${regionId===r.id?'selected':''}>${escape(r.name)}</option>`).join('');
-    const eraOptions=(selected?registry?.eras?.(selected.regionId):[]).map(era=>`<option value="${escape(era.id)}" ${selected?.eraId===era.id?'selected':''}>${escape(era.name)}</option>`).join('');
+    const eraOptions=(selected?maps.eras(selected.regionId):[]).map(era=>`<option value="${escape(era.id)}" ${selected?.eraId===era.id?'selected':''}>${escape(era.name)}</option>`).join('');
     const mapFields=regions.length?`<label class="field"><span>지도 범위</span><select data-ai-field="mapRegion"><option value="" ${!regionId?'selected':''}>지도 없이</option>${regionOptions}<option value="legacy" ${legacy?'selected':''}>기존 지도 호환</option></select></label>${legacy?`<label class="field"><span>기존 지도</span><select data-ai-field="mapTemplateId">${mapOptions}</select></label>`:`<label class="field"><span>시대 기본안</span><select data-ai-field="mapEra" ${!selected?'disabled':''}>${eraOptions||'<option>지역을 먼저 선택하세요</option>'}</select></label>`}`:`<label class="field"><span>지도</span><select data-ai-field="mapTemplateId"><option value="">지도 없이</option>${mapOptions}</select></label>`;
     const v2Options=`<div class="ai-v2-settings"><label class="field"><span>게임 방식</span><select data-ai-field="mode"><option value="chronicle" ${ai.mode==='chronicle'?'selected':''}>연대기 · 장면마다 선택</option><option value="reign" ${ai.mode==='reign'?'selected':''}>치세 · 분야별 선택 후 정산</option></select></label>${mapFields}</div>`;
     const problem=ai.problem;
@@ -914,12 +924,12 @@
     const field=event.target.closest?.('[data-ai-field]');if(!field)return;
     const key=field.dataset.aiField;ai[key]=field.type==='checkbox'?field.checked:field.value;
     if(key==='mapRegion'){
-      const registry=globalThis.MapTemplates,region=registry?.regions?.().find(r=>r.id===field.value);
-      ai.mapTemplateId=region?registry.regionalId(region.id,region.defaultEra||registry.eras(region.id)[0].id):field.value==='legacy'?(registry.list().find(m=>!registry.selection?.(m.id))?.id||''):'';
+      const maps=aiMapControls(),region=maps.regions.find(r=>r.id===field.value);
+      ai.mapTemplateId=region?maps.templateId(region.id,maps.defaults(region).eraId):field.value==='legacy'?(maps.registry?.list().find(m=>!maps.selection(m.id))?.id||''):'';
     }
     if(key==='mapEra'){
-      const registry=globalThis.MapTemplates,selected=registry?.selection?.(ai.mapTemplateId);
-      if(selected)ai.mapTemplateId=registry.regionalId(selected.regionId,field.value);
+      const maps=aiMapControls(),selected=maps.selection(ai.mapTemplateId);
+      if(selected)ai.mapTemplateId=maps.templateId(selected.regionId,field.value);
     }
     if(key==='base'&&ai.base&&canUseBase()){
       ai.mode=scenario.mode||'chronicle';ai.mapTemplateId=scenario.map?.templateId||'';

@@ -1,4 +1,4 @@
-역사의 갈림길 — 갤러리 국명 표시 · 국명 켜기와 끄기 · 전체화면
-Version: 2.13.2-community
+역사의 갈림길 — AI 요청문 지도 범위 · 균형 지도 · 역사 기본안
+Version: 2.13.3-community
 Build date: 2026-10-23
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)
