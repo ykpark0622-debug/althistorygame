@@ -1,0 +1,10 @@
+PASS A fresh browser has no delete action and performs no map request
+PASS The delete action fits a 390px mobile viewport; Cancel leaves all storage, session and URL bytes unchanged without downloading geometry
+PASS Confirmed deletion removes only the displayed manuscript and matching auto/manual/endings/source/gallery remnants; refresh cannot reopen it and makes zero geometry requests
+PASS An unrelated manual save, ending collection, source/gallery metadata, map workshop draft, player name and unrelated handoff survive exact-byte checks
+PASS Returning home after a real Continue offers deletion and does not resurrect the resumed game on reload
+PASS An unplayed scenario draft can be deleted while unrelated existing game progress and map work are kept
+PASS Deleting during an in-flight Continue cancels its eventual commit; a late geometry response cannot restore state or saves
+PASS A storage removal failure rolls back partial deletion, retains the working chooser and reports the failure
+PASS The public deletion API refuses an open editor before prompting, preserving the open draft and active game
+PASS The built standalone program deletes matching local records and stays empty on reload with no asset requests

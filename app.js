@@ -221,7 +221,7 @@
     byId('story-panel').classList.remove('game-over');
     const current=Boolean(deferredStoredScenario||scenario.map||!isEmptyScenario());
     const savedScenario=deferredStoredScenario||scenario,isDraft=savedScenario.draft===true;
-    byId('story-panel').innerHTML=(current?`<section class="home-resume" style="display:block" aria-label="저장된 시나리오 시작 방법"><div style="min-width:0;overflow-wrap:anywhere"><div class="small-label">이 브라우저에 저장된 시나리오</div><h2 style="font-size:22px;margin:10px 0">${escape(savedScenario.title||'저장한 시나리오')}</h2><p>${isDraft?'작성하던 초안을 다시 열 수 있습니다.':'이전 진행을 이어가거나 같은 시나리오를 처음부터 시작하세요.'}</p></div><div class="toolbar" style="display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 10px"><button type="button" class="btn primary" id="resume-scenario-link" data-launch-action="resume-scenario">${isDraft?'작성하던 시나리오로 돌아가기':'이어서 하기'}</button>${isDraft?'':'<button type="button" class="btn secondary" id="restart-scenario-button" data-launch-action="restart-scenario">처음부터 시작하기</button>'}</div><p>선택한 뒤에 필요한 지도를 불러옵니다. 다른 이야기는 아래에서 열 수 있습니다.</p></section>`:'')+launcherMarkup(false);
+    byId('story-panel').innerHTML=(current?`<section class="home-resume" style="display:block" aria-label="저장된 시나리오 시작 방법"><div style="min-width:0;overflow-wrap:anywhere"><div class="small-label">이 브라우저에 저장된 시나리오</div><h2 style="font-size:22px;margin:10px 0">${escape(savedScenario.title||'저장한 시나리오')}</h2><p>${isDraft?'작성하던 초안을 다시 열 수 있습니다.':'이전 진행을 이어가거나 같은 시나리오를 처음부터 시작하세요.'}</p></div><div class="toolbar" style="display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 10px"><button type="button" class="btn primary" id="resume-scenario-link" data-launch-action="resume-scenario">${isDraft?'작성하던 시나리오로 돌아가기':'이어서 하기'}</button>${isDraft?'':'<button type="button" class="btn secondary" id="restart-scenario-button" data-launch-action="restart-scenario">처음부터 시작하기</button>'}<button type="button" class="btn secondary" id="delete-scenario-record-button" data-launch-action="delete-scenario-record" style="color:#a5463a;border-color:#d8b4aa">기록 삭제하기</button></div><p>선택한 뒤에 필요한 지도를 불러옵니다. 다른 이야기는 아래에서 열 수 있습니다.</p></section>`:'')+launcherMarkup(false);
     updateLauncherFeedback();
   }
   function leaveHome(){
@@ -455,6 +455,69 @@
   function cancelPendingLoad(){
     loadSequence+=1;pendingUrlController?.abort();pendingUrlController=null;launcherBusy=false;
   }
+  function deleteScenarioRecord(){
+    const candidate=deferredStoredScenario||scenario;
+    if(!deferredStoredScenario&&!scenario.map&&isEmptyScenario())return false;
+    // A modal editor may own an unsaved draft or an independent map. Leave it
+    // intact instead of letting a programmatic deletion bypass its close flow.
+    if(byId('editor-dialog')?.open){notify('편집 중인 작업을 저장하고 편집기를 닫은 뒤 기록을 삭제하세요.');return false;}
+    const title=String(candidate.title||'저장한 시나리오'),targetSignature=hash(candidate);
+    if(!confirm(`「${title}」의 이 브라우저 기록을 삭제할까요?\n\n삭제: 이 시나리오의 원고 사본, 자동·직접 저장한 진행, 발견한 결말과 시작 화면 항목.\n유지: 다른 시나리오의 기록, 따로 저장한 지도, 내려받은 JSON 파일, 갤러리에 올린 원본과 이름 설정.\n\n다시 플레이하려면 JSON 파일이나 갤러리에서 시나리오를 불러와야 합니다. 삭제한 기록은 되돌릴 수 없습니다.`))return false;
+    // Read only the keys owned by this exact manuscript. In particular, a
+    // newer save from another story or another tab must never be swept away.
+    const names=['scenario','autosave','save','collection:'+targetSignature,'sourceContext'];
+    const snapshot=new Map(),attempted=[];
+    const originalUrl=location.href,originalHistoryState=globalThis.history?.state;
+    let cleanUrl,urlChanged=false;
+    const parse=raw=>{try{return JSON.parse(raw);}catch{return null;}};
+    const blank=E.createBlankScenario();
+    try{
+      for(const name of names){
+        const key=baseKey+':'+name,raw=localStorage.getItem(key);
+        if(raw===null)continue;
+        const value=parse(raw);
+        const matches=name==='scenario'?Boolean(value&&hash(value)===targetSignature&&JSON.stringify(value)===JSON.stringify(candidate)):
+          name==='collection:'+targetSignature||value?.signature===targetSignature;
+        if(matches)snapshot.set(key,raw);
+      }
+      const origin=localStorage.getItem('hc:galleryOrigin');
+      if(origin!==null&&parse(origin)?.sig===targetSignature)snapshot.set('hc:galleryOrigin',origin);
+      cleanUrl=new URL(originalUrl);
+      for(const name of ['scenario','mapMaker','galleryImport'])cleanUrl.searchParams.delete(name);
+      if(cleanUrl.href!==originalUrl){
+        if(typeof globalThis.history?.replaceState!=='function')throw Error('시작 주소를 정리할 수 없습니다.');
+        globalThis.history.replaceState(originalHistoryState,'',cleanUrl.href);urlChanged=true;
+      }
+      for(const [key,raw] of snapshot){
+        if(localStorage.getItem(key)!==raw)throw Error('다른 탭에서 저장 내용이 바뀌었습니다.');
+        attempted.push(key);localStorage.removeItem(key);
+        if(localStorage.getItem(key)!==null)throw Error('브라우저가 기록 삭제를 허용하지 않았습니다.');
+      }
+    }catch(error){
+      let rolledBack=true;
+      for(const key of attempted.reverse())try{
+        const currentRaw=localStorage.getItem(key);
+        if(currentRaw===snapshot.get(key))continue;
+        if(currentRaw!==null){rolledBack=false;continue;}
+        localStorage.setItem(key,snapshot.get(key));
+        if(localStorage.getItem(key)!==snapshot.get(key))rolledBack=false;
+      }catch{rolledBack=false;}
+      if(urlChanged)try{globalThis.history.replaceState(originalHistoryState,'',originalUrl);}catch{rolledBack=false;}
+      storageOK=false;
+      const message=rolledBack?'기록을 삭제하지 못했습니다. 원고와 진행은 그대로 유지했습니다. 브라우저 저장 설정을 확인해 주세요.':
+        '기록 삭제 중 저장 공간에 접근하지 못해 일부 기록을 복구하지 못했을 수 있습니다. 현재 열린 원고는 유지했습니다. JSON으로 먼저 보관한 뒤 브라우저 저장 설정을 확인해 주세요.';
+      setLauncherFeedback('',message);status(message,true);return false;
+    }
+    // Do this only after the storage transaction succeeds: canceling the
+    // confirmation or a failed removal must leave an in-flight restore alone.
+    cancelPendingLoad();globalThis.ScenarioEditor?.cancelPending?.();globalThis.MapMaker?.cancelPending?.();
+    ++aiMapSequence;aiMapLoading=false;aiMapError='';ai.base=false;ai.prompt='';ai.showPrompt=false;
+    failedScenarioUrl=null;deferredStoredScenario=null;startupRetry=false;startupRestore=true;
+    scenario=blank;state=null;awaitingName=false;nameReturnState=null;compareMap=false;referenceCache=null;
+    homeMode=true;launcherError='';launcherMessage='';closeLauncher();render();
+    status(`「${title}」의 이 브라우저 기록을 삭제했습니다.`);notify('시나리오 기록을 삭제했습니다.');
+    return true;
+  }
   function checkedText(text){
     if(typeof text!=='string')throw Error('시나리오 파일의 내용을 텍스트로 읽을 수 없습니다.');
     if(text.length>MAX_SCENARIO_BYTES||new TextEncoder().encode(text).byteLength>MAX_SCENARIO_BYTES)throw Error('시나리오 파일은 최대 5 MB까지 불러올 수 있습니다.');
@@ -655,6 +718,7 @@
       if(action==='choose-file')chooseScenarioFile();
       if(action==='resume-scenario'&&!launcherBusy)void runUI(()=>restoreDeferredScenario());
       if(action==='restart-scenario'&&!launcherBusy)void runUI(()=>startScenarioOver());
+      if(action==='delete-scenario-record')deleteScenarioRecord();
       if(action==='new')newScenario();
       if(action==='setup-map')void runUI(()=>openScenarioEditor({page:'map'})).then(result=>{if(result!==null)closeLauncher();});
       if(action==='map-maker')void runUI(()=>MapMaker.open()).then(result=>{if(result!==null)closeLauncher();});
@@ -800,7 +864,7 @@
   }
   // A mapless/loaded import is synchronous; an unloaded map import is awaitable.
   // Home exposes the saved manuscript while leaving its heavy map unhydrated.
-  globalThis.HistoryCrossroads={getScenario:()=>E.clone(deferredStoredScenario||scenario),getState:()=>E.clone(state),importScenario,importText,newScenario,resumeScenario:restoreDeferredScenario,startScenarioOver,ready:Promise.resolve(null)};
+  globalThis.HistoryCrossroads={getScenario:()=>E.clone(deferredStoredScenario||scenario),getState:()=>E.clone(state),importScenario,importText,newScenario,resumeScenario:restoreDeferredScenario,startScenarioOver,deleteScenarioRecord,ready:Promise.resolve(null)};
   globalThis.HistoryCrossroads.ready=initializeApplication();
   globalThis.MapMaker?.configure({onCreateScenario:next=>{
     cancelPendingLoad();failedScenarioUrl=null;
@@ -816,12 +880,14 @@
   globalThis.HistoryCrossroads.ready.then(async()=>{
     if(!globalThis.MapMaker)return;
     const url=new URL(location.href);if(url.searchParams.get('mapMaker')!=='1')return;
+    const sequence=loadSequence;
     let pending;
     try{pending=JSON.parse(sessionStorage.getItem('hc:pendingMapImport')||'null');}catch{}
     try{
-      if(pending?.data)await MapMaker.importDocument(pending.data);else await MapMaker.open();
+      const result=pending?.data?await MapMaker.importDocument(pending.data):await MapMaker.open();
+      if(sequence!==loadSequence||result===false)return;
       try{sessionStorage.removeItem('hc:pendingMapImport');}catch{}
       url.searchParams.delete('mapMaker');globalThis.history?.replaceState(null,'',url.href);
-    }catch(error){status('지도를 열지 못했습니다. 현재 시나리오는 유지됩니다: '+error.message,true);}
+    }catch(error){if(sequence===loadSequence)status('지도를 열지 못했습니다. 현재 시나리오는 유지됩니다: '+error.message,true);}
   }).catch(error=>status('초기 화면을 준비하지 못했습니다. 저장된 원고와 진행은 그대로 남아 있습니다: '+error.message,true));
 })();

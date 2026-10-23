@@ -1,4 +1,4 @@
-역사의 갈림길 — 국가 목록형 지도 작업실 · WASD 이동 · 국가 선택 검색
-Version: 2.11.0-community
+역사의 갈림길 — 첫 화면에서 시나리오 기록 삭제 · 국가 목록형 지도 작업실
+Version: 2.11.1-community
 Build date: 2026-10-23
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)

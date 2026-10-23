@@ -1,5 +1,5 @@
 {
-  "version": "2.11.0-community",
+  "version": "2.11.1-community",
   "builtAt": "2026-10-23",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -52,8 +52,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 8743,
-      "sha256": "b9fe6ddb78d45494e44f1bcfdf7e30847181bafda54ec7c3f17456bb3baa8ff2"
+      "bytes": 9138,
+      "sha256": "22ce8a2f54faaba4a3ff6db7cf478adb2df6b53e3c1e8e2da8d831ebdc83e704"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -72,8 +72,8 @@
     },
     {
       "path": "STARTUP.md",
-      "bytes": 4009,
-      "sha256": "77d91d14df3093548711cfcf3b0daea42d3b1bc46573c50ad6cead44edc28bd6"
+      "bytes": 4867,
+      "sha256": "0262a2018a71ffd6a229c024c869fc585f0229161126652dd90de844f6bd111c"
     },
     {
       "path": "TEST-ASSET-BUILD-V2.8.txt",
@@ -84,6 +84,11 @@
       "path": "TEST-MAP-INPUT-V2.11.txt",
       "bytes": 919,
       "sha256": "2040b51c8d78df9e9d87334fac96afa76eef0c7ba8f0eba6d603a8236fc173b2"
+    },
+    {
+      "path": "TEST-RECORD-DELETE-V2.11.1.txt",
+      "bytes": 1235,
+      "sha256": "354607b298c16a25325be52ff2d1a877f0edb66dd589b8f6bbbe2f59143a3501"
     },
     {
       "path": "TEST-RESULTS-V2.1.txt",
@@ -99,6 +104,11 @@
       "path": "TEST-RESULTS-V2.10.txt",
       "bytes": 23080,
       "sha256": "a6b5857d16a8e187afd61b44673b71df42d90caba578309e59ffd3470cd036d2"
+    },
+    {
+      "path": "TEST-RESULTS-V2.11.1.txt",
+      "bytes": 23570,
+      "sha256": "003fe748c4fd24beb5be60df98fbc7c223efacbf41209e452cdeed500a438ce7"
     },
     {
       "path": "TEST-RESULTS-V2.11.txt",
@@ -166,6 +176,11 @@
       "sha256": "f8306bbdc13335dff8ed24c1f4e6c0baa063bb42d0eadfe260854da3e8ab52af"
     },
     {
+      "path": "TEST-STARTUP-V2.11.1.txt",
+      "bytes": 2494,
+      "sha256": "d4538a500f5e57293fedf2dc078ebb210fc2bdefb5adbd7e6b5fddaceb39a598"
+    },
+    {
       "path": "TEST-STARTUP-V2.11.txt",
       "bytes": 2494,
       "sha256": "d4538a500f5e57293fedf2dc078ebb210fc2bdefb5adbd7e6b5fddaceb39a598"
@@ -174,6 +189,11 @@
       "path": "TEST-UI-V2.11.txt",
       "bytes": 5280,
       "sha256": "27e01bf8946d4a76deb943c77cc4cf9b6c6edb57727699c6fff05de71603bbee"
+    },
+    {
+      "path": "TEST-WEB-UPLOAD-V2.11.1.txt",
+      "bytes": 382,
+      "sha256": "5ee1f15a51ce267e680e4ee2e39dfb6357a464d39ec8d77563bcfb151e90a88c"
     },
     {
       "path": "TEST-WEB-UPLOAD-V2.11.txt",
@@ -189,6 +209,11 @@
       "path": "UPDATE-V2.1.txt",
       "bytes": 2935,
       "sha256": "c47943263e3728e45e0e89ef398a66c224e65c0560046b22e5a085fba7ff0f32"
+    },
+    {
+      "path": "UPDATE-V2.11.1.md",
+      "bytes": 2569,
+      "sha256": "317b21cc3d3cdaded2dd9376e44bad97d1a9c709c56abf0507e14c135af34142"
     },
     {
       "path": "UPDATE-V2.11.md",
@@ -242,8 +267,8 @@
     },
     {
       "path": "VERSION.txt",
-      "bytes": 206,
-      "sha256": "2f282cb4bf12975c0204f640055648bc9f9a16c583ebb5504b8b2a47419dc4b6"
+      "bytes": 214,
+      "sha256": "0ac114b577c7a96b6d0111eed4109ef40b7d7dc7491143d729aacff4d6707c51"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -262,8 +287,8 @@
     },
     {
       "path": "app.js",
-      "bytes": 87696,
-      "sha256": "651633231e4b994fa8eaadfadf21a5f1411dc9c8dd3a9f8010cd9ac75f9f5184"
+      "bytes": 92916,
+      "sha256": "3e933970eb78d58c657ea0a791069189e520dedcd809840e57c2f3608ba94829"
     },
     {
       "path": "assets/maps/SIZES.json",
@@ -753,7 +778,7 @@
     {
       "path": "assets/program/manifest.json",
       "bytes": 6735,
-      "sha256": "0aa69875b83608961308e53e6d9346d8cd53fbe77a6a71e91a9050d7a5125ed9"
+      "sha256": "21023a54365a719f03d1bbd2cca7d6f1d0f04f60e938c693726a17f992af7cfd"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -926,9 +951,9 @@
       "sha256": "64b38b583a88559518de9a6a47d3b2c27cd616177ade001f82f229d874c77ef3"
     },
     {
-      "path": "assets/program/standalone.035.d35419c3823c7243.txt",
-      "bytes": 172444,
-      "sha256": "d35419c3823c7243bba561e1a0c2831adf84a7fded9513b49191748aef3a73dc"
+      "path": "assets/program/standalone.035.a57891dbe6fb49cb.txt",
+      "bytes": 177664,
+      "sha256": "a57891dbe6fb49cbe3ed643df1af1cb98c020f1b206370190e7d6e337e2d2101"
     },
     {
       "path": "bootstrap.js",
@@ -942,8 +967,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 9201,
-      "sha256": "a8058445f951c37aced6b9ed5017e04daea7085b295c9189f9d0de72afe4865b"
+      "bytes": 9209,
+      "sha256": "c9627c0670227d1d7975cd5a0bb80ef9138b2e29b9eb01ef6d9a2860a42a8819"
     },
     {
       "path": "community-bridge.js",
@@ -1173,7 +1198,7 @@
     {
       "path": "standalone.html",
       "bytes": 7900,
-      "sha256": "9b8c99539324b2c490c2d9836780867b1e312ff35eba49eeb258464026ea531c"
+      "sha256": "547d0007277eccd2c4a5aed324966dfe2a9c2a2b7e6ab57b075ae89e5b6b52de"
     },
     {
       "path": "styles.css",
@@ -1406,6 +1431,11 @@
       "sha256": "afe2673c9897d97adbd950aab6680e8a68be8ae960951530fd6cea3d9b35d472"
     },
     {
+      "path": "tests/record-delete-browser.cjs",
+      "bytes": 18168,
+      "sha256": "73c398210a494f1eb465e335d52458a92911cc682afefec13ba414afccf0507f"
+    },
+    {
       "path": "tests/regional-maps.cjs",
       "bytes": 5617,
       "sha256": "5d677f2c8cca0fab6b79b612e7589ad67556c65604ef14f3cc7113dc989782fc"
@@ -1427,8 +1457,8 @@
     },
     {
       "path": "tests/startup-choice-browser.cjs",
-      "bytes": 21498,
-      "sha256": "292cdd81ab53cb0b9c03b70cafd86cc691e7d0618a34d976bc46eb82f8699422"
+      "bytes": 21510,
+      "sha256": "49a29ea0cb423a7cf9d6ab2a7cb2f6dd63ed3531ab33744ab01cc7dfcd0dbe9a"
     },
     {
       "path": "tests/web-upload-browser.cjs",
@@ -1668,7 +1698,7 @@
     {
       "path": "vercel.json",
       "bytes": 31374,
-      "sha256": "c6e2ded6628078c24e47ff9d8728af56994d22b564ec30906aad451af4b33d37"
+      "sha256": "229d3785fd5442e994b75cf2a8cd4351caf8d2e2cf94bd606836fe4443bcd693"
     }
   ]
 }

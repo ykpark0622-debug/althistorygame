@@ -1,0 +1,21 @@
+PASS A fresh browser opens the lightweight launcher without save actions or map requests
+PASS Root reload shows both choices and the saved title, preserves exact manuscript/autosave/manual/collection bytes, and makes zero map requests
+PASS Continue fetches only the saved regional map and restores the exact name, history, flags, statistics and territory
+PASS The logo returns to the startup chooser without requesting or resuming the old map
+PASS Reloading the exact saved scenario URL also waits for a choice and does not refetch its manuscript or map
+PASS Start over asks for a name, begins at turn zero, and preserves both manual progress and discovered endings; the manual save still restores
+PASS A failed map download preserves every save byte and offers a working retry through Continue
+PASS After a missing different scenario URL, Continue restores the saved game, clears the stale URL and retry action, and the next reload remains lightweight
+PASS An explicit different scenario URL loads only its selected Europe map instead of first hydrating the old East Asia map
+PASS An explicit gallery handoff of the saved manuscript resumes through the public API and consumes the handoff only after restoration
+PASS The generated standalone program also gates saved play behind the chooser; Continue and Start over work with no network assets
+PASS Actual gallery .brand navigation ignores same stale handoff, keeps saves and pending JSON intact, and downloads no map
+PASS Actual gallery #maker-link navigation ignores same stale handoff, keeps saves and pending JSON intact, and downloads no map
+PASS Actual gallery .brand navigation ignores different stale handoff, keeps saves and pending JSON intact, and downloads no map
+PASS Actual gallery #maker-link navigation ignores different stale handoff, keeps saves and pending JSON intact, and downloads no map
+PASS root with stale pending: chooser stays idle and all saved data is preserved
+PASS mismatched explicit marker: chooser stays idle and all saved data is preserved
+PASS explicit marker without pending: chooser stays idle and all saved data is preserved
+PASS home overrides a matching marker: chooser stays idle and all saved data is preserved
+PASS The real gallery Play button imports the chosen different story and clears its explicit handoff marker after success
+PASS A failed marked gallery play keeps the handoff, marker and existing saves; refreshing retries and consumes them only after successful import
