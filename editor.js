@@ -142,11 +142,19 @@
     let selected = value, active = -1, visible = [];
     const entries = () => [...(options.extra || []).map(item => ({ id: item[0], name: item[1], special: true })), ...getCountries()];
     function dot(country) { const swatch = $('span', 'country-color-dot'); swatch.style.backgroundColor = /^#[\da-f]{6}$/i.test(country?.color || '') ? country.color : '#dfe3dd'; swatch.setAttribute('aria-hidden', 'true'); return swatch; }
-    function choose(country) { selected = country.id; close(); fill(); trigger.focus(); action(selected); if (options.mark !== false) mark(); }
+    function choose(country) { selected = country.id; close(); fill(); trigger.focus({ preventScroll: true }); action(selected); if (options.mark !== false) mark(); }
     function activate(index) {
       active = index; const rows = [...list.children];
       rows.forEach((row, i) => row.classList.toggle('is-active', i === active));
-      if (rows[active]) { search.setAttribute('aria-activedescendant', rows[active].id); rows[active].scrollIntoView?.({ block: 'nearest' }); }
+      if (rows[active]) {
+        search.setAttribute('aria-activedescendant', rows[active].id);
+        // Only scroll the popup's results. scrollIntoView would also move the
+        // workshop board and can pull a map setting away from the pointer.
+        const scroller = list.scrollHeight > list.clientHeight ? list : popup;
+        const rowRect = rows[active].getBoundingClientRect(), bounds = scroller.getBoundingClientRect();
+        if (rowRect.top < bounds.top) scroller.scrollTop += rowRect.top - bounds.top;
+        else if (rowRect.bottom > bounds.bottom) scroller.scrollTop += rowRect.bottom - bounds.bottom;
+      }
       else search.removeAttribute('aria-activedescendant');
     }
     function fill() {
@@ -159,7 +167,7 @@
         row.id = popupId + '-option-' + index; row.setAttribute('role', 'option'); row.setAttribute('aria-selected', String(country.id === selected)); row.setAttribute('data-country-id', country.id);
         row.append(dot(country), $('span', 'country-picker-value', country.name));
         if (!country.special) row.append($('small', 'muted', country.id));
-        row.addEventListener('keydown', event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); activate((index + (event.key === 'ArrowDown' ? 1 : -1) + visible.length) % visible.length); list.children[active]?.focus(); } else if (event.key === 'Escape') { event.preventDefault(); close(); trigger.focus(); } });
+        row.addEventListener('keydown', event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); activate((index + (event.key === 'ArrowDown' ? 1 : -1) + visible.length) % visible.length); list.children[active]?.focus({ preventScroll: true }); } else if (event.key === 'Escape') { event.preventDefault(); close(); trigger.focus({ preventScroll: true }); } });
         list.append(row);
       });
       help.textContent = matches.length ? matches.length.toLocaleString('ko-KR') + '개 검색됨' + (matches.length > 12 ? ' · 12개 표시, 검색어로 좁히세요.' : '') : '검색 결과가 없습니다. 현재 선택은 유지됩니다.';
@@ -176,14 +184,14 @@
       else { popup.style.top = Math.max(12, rect.bottom + 5) + 'px'; popup.style.bottom = 'auto'; }
     }
     function outside(event) { if (!wrap.contains(event.target)) close(); }
-    function open() { closeCountryPickers(); popup.hidden = false; search.value = ''; fill(); position(); trigger.setAttribute('aria-expanded', 'true'); openCountryPickers.add(controller); document.addEventListener('pointerdown', outside, true); window.addEventListener('resize', position); window.addEventListener('scroll', position, true); search.focus(); }
+    function open() { closeCountryPickers(); popup.hidden = false; search.value = ''; fill(); position(); trigger.setAttribute('aria-expanded', 'true'); openCountryPickers.add(controller); document.addEventListener('pointerdown', outside, true); window.addEventListener('resize', position); window.addEventListener('scroll', position, true); search.focus({ preventScroll: true }); }
     function close() { popup.hidden = true; trigger.setAttribute('aria-expanded', 'false'); openCountryPickers.delete(controller); document.removeEventListener('pointerdown', outside, true); window.removeEventListener('resize', position); window.removeEventListener('scroll', position, true); }
     search.addEventListener('input', fill);
     search.addEventListener('keydown', event => {
       if (event.isComposing) return;
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); if (visible.length) activate((active + (event.key === 'ArrowDown' ? 1 : -1) + visible.length) % visible.length); }
       else if (event.key === 'Enter') { event.preventDefault(); if (visible[active < 0 ? 0 : active]) choose(visible[active < 0 ? 0 : active]); }
-      else if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); trigger.focus(); }
+      else if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); trigger.focus({ preventScroll: true }); }
       else if (event.key === 'Tab' && event.shiftKey) { close(); }
     });
     wrap.addEventListener('focusout', () => setTimeout(() => { if (!wrap.contains(document.activeElement)) close(); }, 0));
@@ -651,6 +659,7 @@
 .editor-dialog .map-ui-workspace{display:grid;grid-template-columns:275px minmax(0,1fr);gap:16px;min-height:0;height:100%;align-items:stretch}.editor-dialog .map-ui-sidebar{min-width:0;min-height:0;padding:15px;background:#fffdf7;border:1px solid #d8dfcf;border-radius:9px;overflow-y:auto;scrollbar-width:thin}.map-ui-sidebar>h3{font-size:15px;margin-bottom:11px}.map-ui-sidebar>input{width:100%;margin-top:13px}.map-ui-sidebar>.btn{width:100%}.map-ui-sidebar>.small{font-size:11px;margin:7px 0}.map-ui-country-list{display:flex;flex-direction:column;gap:3px;max-height:270px;overflow-y:auto}.editor-dialog .map-ui-country-row{display:flex;gap:9px;align-items:center;text-align:left;min-height:35px;padding:7px 8px;border-color:transparent;background:transparent;transform:none}.map-ui-country-name{flex:1;min-width:0;overflow-wrap:anywhere}.map-ui-country-row small{font-size:10px;white-space:nowrap}.editor-dialog .map-ui-country-row[aria-pressed=true]{background:#edf1e5;border-color:#c5d4b9}.map-ui-sidebar .editor-section{margin:15px 0 0;padding-top:14px;border-top:1px solid #d8dfcf}.map-ui-sidebar .editor-section>h3{font-size:13px}.map-ui-sidebar .form-grid{grid-template-columns:minmax(0,1fr);gap:6px}.map-ui-sidebar .field{margin-bottom:11px}.map-ui-sidebar .v2-color-picker .form-grid{grid-template-columns:60px minmax(0,1fr);gap:7px}.map-ui-sidebar .v2-color-presets{gap:5px;margin-top:0;flex-wrap:wrap}.map-ui-sidebar .v2-color-presets .btn{width:25px!important;height:25px!important;min-width:25px!important}.map-ui-sidebar .v2-color-picker input[type=color]{min-height:38px!important;padding:3px}.map-ui-sidebar .v2-color-picker .field>span{font-size:10px}.map-ui-create-form{background:#edf1e5;border:1px solid #cbd7bf;border-radius:8px;padding:11px;margin-top:10px}.map-ui-create-form>.btn{margin:5px 5px 0 0}.map-ui-error{color:#a34235;margin:5px 0}.map-ui-label-tools{font-size:12px;margin-top:13px}.map-ui-label-tools summary{cursor:pointer;margin-bottom:10px}.map-ui-label-tools .toolbar{flex-wrap:wrap;gap:5px}.map-ui-label-tools .btn{font-size:11px;padding:7px 8px}
 .editor-dialog .map-ui-board{min-width:0;min-height:0;overflow-y:auto;padding-right:3px;scrollbar-width:thin}.map-ui-tools{gap:5px;flex-wrap:wrap;margin-bottom:8px}.editor-dialog .map-ui-tools>.btn{font-size:12px;padding:8px 10px;min-height:36px}.editor-dialog .map-ui-tools>.btn[aria-pressed=true]{background:#234c3f;color:#fff;border-color:#234c3f}.map-ui-tools>.btn:last-child{margin-left:auto}.map-ui-current{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:9px 0 12px;font-size:13px}.map-ui-current>.small{margin-left:auto;font-size:11px}.map-ui-board .history-map{margin:0}.editor-dialog .map-ui-board .map-viewport{height:auto}.editor-dialog .map-ui-board .province-map{width:100%;height:clamp(320px,53vh,600px);max-height:none;aspect-ratio:auto}.map-ui-board .map-heading{padding:10px 14px}.map-ui-board .map-heading h2{font-size:15px}.map-ui-key-help{margin:7px 0;font-size:10px}.map-ui-selection-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:10px 0}.map-ui-selection-bar>span{flex:1;min-width:180px;font-size:11px}.map-ui-selection-bar>.btn{font-size:11px;padding:8px}.map-ui-province,.map-ui-settings{border:1px solid #d8dfcf;background:#fffdf7;border-radius:8px;padding:11px 13px;margin:10px 0}.map-ui-province>summary,.map-ui-settings>summary{font-size:13px;cursor:pointer;font-weight:600}.map-ui-province>div,.map-ui-settings-body{margin-top:14px}.map-ui-settings-body>h2{font-size:16px}.map-ui-settings-body .editor-section{margin:12px 0}.map-ui-settings-body .notice{font-size:11px}.map-ui-province>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.map-ui-province h3{grid-column:1/-1;font-size:13px}.map-ui-settings-body .regional-legacy-maps{margin:12px 0}.map-ui-settings-body .regional-legacy-maps>summary{cursor:pointer;font-size:12px}
 .editor-dialog.map-maker-mode{width:min(1540px,98vw);max-width:98vw}.map-maker-mode .editor-content.map-maker-content{padding:14px;overflow:hidden}.map-maker-mode .editor-top{padding:12px 18px 9px}.map-maker-mode .editor-top h2{font-size:20px}.map-maker-mode .editor-top p{font-size:11px}.map-maker-mode .editor-footer{padding:11px 16px}.map-maker-mode .editor-footer .btn{font-size:12px}.editor-dialog:not(.map-maker-mode) .map-ui-workspace{height:min(740px,70vh);min-height:420px}
+.editor-dialog .map-ui-workspace,.editor-dialog .map-ui-board,.editor-dialog .map-ui-sidebar,.editor-dialog .map-ui-country-list,.editor-dialog .map-maker-content{overflow-anchor:none}.map-maker-mode .map-ui-board>.map-ui-settings:first-child{margin-top:0}
 @media(max-width:1020px){.editor-dialog .map-ui-workspace{grid-template-columns:245px minmax(0,1fr);gap:10px}.editor-dialog .map-ui-sidebar{padding:11px}.map-ui-tools>.btn:last-child{margin-left:0}.map-ui-current>.small{margin-left:0}.map-maker-mode .editor-top>div:first-child{max-width:440px}}
 @media(max-width:760px){.editor-dialog .map-ui-workspace{display:flex;flex-direction:column;height:auto;align-items:stretch}.editor-dialog .map-ui-sidebar{order:2;overflow:visible}.editor-dialog .map-ui-board{order:1;overflow:visible}.map-maker-mode .editor-content.map-maker-content{overflow:auto;padding:10px}.editor-dialog:not(.map-maker-mode) .map-ui-workspace{height:auto;min-height:0}.editor-dialog .map-ui-board .province-map{height:clamp(290px,46vh,460px)}.map-ui-country-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:230px}.map-ui-province>div{grid-template-columns:1fr}.map-ui-province h3{grid-column:auto}.map-ui-tools>.btn{flex:1 1 auto}.map-ui-sidebar .editor-section .form-grid{grid-template-columns:60px minmax(0,1fr)}.map-ui-sidebar input[type=search],.country-picker-popup input{font-size:16px}}
 @media(pointer:coarse){.editor-dialog .map-ui-tools>.btn,.editor-dialog .country-picker-trigger,.editor-dialog .country-picker-option,.editor-dialog .map-ui-country-row{min-height:44px}}
@@ -728,9 +737,15 @@
     const setupNodes = [...content.children]; content.replaceChildren();
     const workspace = $('div', 'map-ui-workspace'), sidebar = $('aside', 'map-ui-sidebar'), board = $('section', 'map-ui-board');
     sidebar.setAttribute('aria-label', '국가 목록과 편집'); sidebar.setAttribute('data-country-editor', ''); board.setAttribute('aria-label', '편집 중인 지도');
-    const settings = $('details', 'map-ui-settings'); settings.open = Boolean(current.mapSettingsOpen);
+    const settingsOwner = current, settings = $('details', 'map-ui-settings'); settings.open = Boolean(settingsOwner.mapSettingsOpen);
     const settingsSummary = $('summary', '', '지도 설정'); settingsSummary.setAttribute('role', 'button'); settings.append(settingsSummary);
-    settings.addEventListener('toggle', () => { current.mapSettingsOpen = settings.open; });
+    settingsSummary.addEventListener('click', event => {
+      event.preventDefault();
+      const scroll = captureMapEditorScroll(settingsOwner.dialog);
+      settings.open = settingsOwner.mapSettingsOpen = !settings.open;
+      restoreMapEditorScroll(settingsOwner.dialog, scroll);
+    });
+    settings.addEventListener('toggle', () => { if (current === settingsOwner && settings.isConnected) settingsOwner.mapSettingsOpen = settings.open; });
     const settingsBody = $('div', 'map-ui-settings-body'); settings.append(settingsBody);
     if (current.mapOnly) settingsBody.append(input('지도 제목', draft.title, value => { draft.title = value; }, { maxLength: 120 }), input('지도 설명', draft.description, value => { draft.description = value; }, { multiline: true, rows: 2, maxLength: 1000, help: '시대와 가정, 수정한 국경 등을 적어 두세요.' }));
     setupNodes.forEach(node => settingsBody.append(node));
@@ -883,7 +898,9 @@
       const blob = new Blob([text + '\n'], { type: 'application/json;charset=utf-8' }), url = URL.createObjectURL(blob), link = $('a'); link.href = url; link.download = config.template.id + '-region-ids.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     }));
     if (config.template.notice) settingsBody.append(notice(config.template.notice));
-    board.append(tools, currentChip, preview, $('p', 'small muted map-ui-key-help', '지도를 클릭한 뒤 WASD 이동 · Shift로 빠르게 · 휠 확대·축소 · 입력 중에는 지도 이동이 멈춥니다.'), selectionBar, panel, settings);
+    if (current.mapOnly) board.append(settings);
+    board.append(tools, currentChip, preview, $('p', 'small muted map-ui-key-help', '지도를 클릭한 뒤 WASD 이동 · Shift로 빠르게 · 휠 확대·축소 · 입력 중에는 지도 이동이 멈춥니다.'), selectionBar, panel);
+    if (!current.mapOnly) board.append(settings);
     workspace.append(sidebar, board); content.append(workspace); redraw(); drawProvince(); refreshCountryList();
   }
 
@@ -1546,6 +1563,26 @@
     renderMap(content);
   }
 
+  const mapEditorScrollSelectors = ['#editor-root', '.editor-content', '.map-ui-board', '.map-ui-sidebar', '.map-ui-country-list'];
+  function captureMapEditorScroll(dialog) {
+    const entries = mapEditorScrollSelectors.map(selector => {
+      const element = dialog.querySelector(selector);
+      return element ? { selector, top: element.scrollTop, left: element.scrollLeft } : null;
+    }).filter(Boolean);
+    return { entries, top: dialog.scrollTop, left: dialog.scrollLeft, x: window.scrollX, y: window.scrollY };
+  }
+  function restoreMapEditorScroll(dialog, position) {
+    if (!position) return;
+    // Restore the newly created scroll containers after their layout exists.
+    // Map camera restoration is handled separately by disposeEditorMapViews.
+    for (const entry of position.entries) {
+      const element = dialog.querySelector(entry.selector);
+      if (element) { element.scrollTop = entry.top; element.scrollLeft = entry.left; }
+    }
+    dialog.scrollTop = position.top; dialog.scrollLeft = position.left;
+    if (window.scrollX !== position.x || window.scrollY !== position.y) window.scrollTo({ left: position.x, top: position.y, behavior: 'instant' });
+  }
+
   function disposeEditorMapViews(rememberCamera) {
     if (!current) return;
     closeCountryPickers();
@@ -1559,6 +1596,8 @@
   function render() {
     if (!current) return;
     ensureMapEditorStyles();
+    const owner = current, mapPage = current.mapOnly || current.page === 'map';
+    const scroll = mapPage && current.renderedPage === current.page ? captureMapEditorScroll(current.dialog) : null;
     disposeEditorMapViews(true);
     if (current.flowchartCleanup) { current.flowchartCleanup(); current.flowchartCleanup = null; }
     current.dialog.classList.toggle('flowchart-mode', current.page === 'flowchart' && !current.mapOnly);
@@ -1573,7 +1612,11 @@
     const fileInput = $('input');
     fileInput.type = 'file'; fileInput.accept = '.json,application/json'; fileInput.hidden = true;
     fileInput.addEventListener('change', () => { if (current.mapOnly) importMapJSON(fileInput.files[0]); else importJSON(fileInput.files[0]); fileInput.value = ''; });
-    if (current.mapOnly) tools.append(button('지도 JSON 가져오기', () => fileInput.click()), button('지도 JSON 내보내기', () => runMapAction('export')), fileInput, button('새 지도', () => runMapAction('new')));
+    if (current.mapOnly) {
+      tools.append(button('지도 JSON 가져오기', () => fileInput.click()), button('지도 JSON 내보내기', () => runMapAction('export')), fileInput, button('새 지도', () => runMapAction('new')));
+      const fullscreenButton = globalThis.HistoryCrossroadsFullscreen?.createWorkshopButton?.(current.dialog);
+      if (fullscreenButton) tools.append(fullscreenButton);
+    }
     else {
       tools.append(button('JSON 가져오기', () => fileInput.click()), button('JSON 내보내기', exportJSON), fileInput, button('전체 삭제', clearAll, 'danger'));
       if (resetUndo) tools.append(button('전체 삭제 되돌리기', undoClear));
@@ -1604,6 +1647,8 @@
     if (!current.mapOnly) shell.append(nav);
     shell.append(content, report, footer);
     root.append(shell);
+    current.renderedPage = current.page;
+    if (current === owner) restoreMapEditorScroll(current.dialog, scroll);
     if (current.page === 'flowchart' && !current.mapOnly) {
       current.flowchartCleanup = ScenarioFlowchart.mount(content, {
         scenario: current.draft,
@@ -1624,6 +1669,7 @@
     if (!force && current.dirty && !confirm(current.mapOnly ? '아직 저장하지 않은 지도 수정을 닫을까요? 보관하려면 취소하고 “지도 저장” 또는 “지도 JSON 내보내기”를 누르세요.' : '아직 게임에 적용하지 않은 편집 초안을 닫을까요? 보관하려면 취소하고 JSON으로 내보내세요.')) return false;
     globalThis.MapMaker?.cancelPending?.();
     const dialog = current.dialog;
+    globalThis.HistoryCrossroadsFullscreen?.closeWorkshop?.(dialog);
     disposeEditorMapViews(false);
     if (current.flowchartCleanup) current.flowchartCleanup();
     dialog.classList.remove('flowchart-mode', 'map-maker-mode');
@@ -1648,7 +1694,7 @@
     if (current && !close(false)) return;
     const dialog = document.getElementById('editor-dialog');
     if (!dialog || !document.getElementById('editor-root')) throw new Error('편집기 dialog 요소가 없습니다.');
-    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: options.mapOnly ? 'map' : tabs.some(([id]) => id === options.page) ? options.page : 'overview', mapOnly: Boolean(options.mapOnly), mapActions: options.mapActions || {}, eventIndex: 0, endingIndex: 0, randomIndex: 0, reignIndex: 0, mapProvince: null, mapCountry: null, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
+    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: options.mapOnly ? 'map' : tabs.some(([id]) => id === options.page) ? options.page : 'overview', mapOnly: Boolean(options.mapOnly), mapSettingsOpen: Boolean(options.mapOnly), mapActions: options.mapActions || {}, eventIndex: 0, endingIndex: 0, randomIndex: 0, reignIndex: 0, mapProvince: null, mapCountry: null, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
     dialog.setAttribute('aria-label', current.mapOnly ? '지도 편집' : '시나리오 편집');
     if (!dialog.dataset.editorBound) {
       dialog.dataset.editorBound = 'true';

@@ -1,5 +1,5 @@
 {
-  "version": "2.12.1-community",
+  "version": "2.13.0-community",
   "builtAt": "2026-10-23",
   "variant": "web-upload",
   "scenarioIncluded": false,
@@ -57,8 +57,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 9700,
-      "sha256": "e12e7b849b1f6a71b02377ce491f4e9822da404f80b6d1e0803e393d6179f57d"
+      "bytes": 9972,
+      "sha256": "ef763e282d7a22455260f7095178533a827d27b209c2fd451bef6981a01c4dc4"
     },
     {
       "path": "REGIONAL-MAPS.md",
@@ -81,9 +81,9 @@
       "sha256": "0262a2018a71ffd6a229c024c869fc585f0229161126652dd90de844f6bd111c"
     },
     {
-      "path": "TEST-RESULTS-V2.12.1.txt",
+      "path": "TEST-RESULTS-V2.13.txt",
       "bytes": 27834,
-      "sha256": "744727c561292c386d563759508ae82af4ec05ba7564073b5055b004a1d432dd"
+      "sha256": "813bee0c0d58f15b2816c42b1b287ecff5df3ba3a68fbd05cc7dc59c5b0b72f2"
     },
     {
       "path": "UPDATE-GUIDE.txt",
@@ -96,14 +96,14 @@
       "sha256": "c47943263e3728e45e0e89ef398a66c224e65c0560046b22e5a085fba7ff0f32"
     },
     {
-      "path": "UPDATE-V2.12.1.md",
-      "bytes": 3229,
-      "sha256": "dd24e902c7fcf08afd68c07b796a4c799955b7edeb5e370720e5522c25d74fa6"
+      "path": "UPDATE-V2.13.md",
+      "bytes": 3191,
+      "sha256": "98946e651a4876ed78dbe67f3d492a0b68b6ef939369d56f6a91d19d9d5841c6"
     },
     {
       "path": "VERSION.txt",
-      "bytes": 201,
-      "sha256": "563edb800a44e62096dcfaedd677c2a7c0ac090f2d561c9fcaeaca4616856bf0"
+      "bytes": 197,
+      "sha256": "be65f6bf30ecf1a8853cbdf60d48241f6445df477ca5de39aad1b6f1a1812997"
     },
     {
       "path": "WORLD-BALANCED-MAP-SOURCES.md",
@@ -122,8 +122,8 @@
     },
     {
       "path": "app.js",
-      "bytes": 92916,
-      "sha256": "3e933970eb78d58c657ea0a791069189e520dedcd809840e57c2f3608ba94829"
+      "bytes": 105377,
+      "sha256": "32306f119764009cf5b835016ff8ee08a0e33662e23bd53b4435f2555f48a58e"
     },
     {
       "path": "assets/maps/SIZES.json",
@@ -748,7 +748,7 @@
     {
       "path": "assets/program/manifest.json",
       "bytes": 7111,
-      "sha256": "a72ace1b1221f83f38f91770898a73bcbc7319971657c5417a7b468f87813506"
+      "sha256": "223838f08465b0875526c2a49b827a665e696aa0220ad42979150730c46f2b1c"
     },
     {
       "path": "assets/program/standalone.001.fd21ddacba1a8c2b.txt",
@@ -931,9 +931,9 @@
       "sha256": "96f97f412267a4bbd2fa3286bd9e0e7c985e84607a0800e9a44175e68496dc5c"
     },
     {
-      "path": "assets/program/standalone.037.99d47f58706df465.txt",
-      "bytes": 459866,
-      "sha256": "99d47f58706df4650fa42659ef5861a0e3f606dc5e98b866ce3fcfe325c8b7c5"
+      "path": "assets/program/standalone.037.840e7a7ec0926a8f.txt",
+      "bytes": 475456,
+      "sha256": "840e7a7ec0926a8fc9236f666ece5288fc423a575cbcd382b43356a5fba96f40"
     },
     {
       "path": "bootstrap.js",
@@ -947,8 +947,8 @@
     },
     {
       "path": "build.cjs",
-      "bytes": 9245,
-      "sha256": "9314926497c9e6fb277366d0cca77dbbe608daaed5b9e6dd6cadc8a183131892"
+      "bytes": 9241,
+      "sha256": "12a4e936de76a2f2cdbe54d40fd8de29df5051adcfd0fef991033f1f26e9cf56"
     },
     {
       "path": "community-bridge.js",
@@ -967,8 +967,8 @@
     },
     {
       "path": "editor.js",
-      "bytes": 137358,
-      "sha256": "6979055b27ae77e71b8e18e5ca5f134f452f7e6df800904cd6ff764b5471b41d"
+      "bytes": 140487,
+      "sha256": "1c897251d9c02846b28648255e9d91c1ff6260c2d958885a24d549a29b3c13bd"
     },
     {
       "path": "engine.js",
@@ -1238,7 +1238,7 @@
     {
       "path": "standalone.html",
       "bytes": 8208,
-      "sha256": "f129da500428b2b373d8aac05f324e2dee3014b8134b46a6429fb4db9a9c70aa"
+      "sha256": "bae7c053df93e588b37dce97384c30a35de96717f48688897146f8466801b697"
     },
     {
       "path": "styles.css",
@@ -1359,6 +1359,11 @@
       "path": "tests/flow-reign-smoke.cjs",
       "bytes": 3717,
       "sha256": "56992b3545e3213411be58e3c3fc74398d11b28cd01c4a1c3ff69d80e1e2850e"
+    },
+    {
+      "path": "tests/fullscreen-workshop-browser.cjs",
+      "bytes": 17107,
+      "sha256": "84b035a5cb82a3df2fd2bd584106b9458a0000775051b770c24bec3eeddb55c7"
     },
     {
       "path": "tests/gallery-atlas-browser.cjs",
@@ -1522,8 +1527,8 @@
     },
     {
       "path": "tests/web-upload-browser.cjs",
-      "bytes": 9072,
-      "sha256": "685f878959c4b6a20ed46316b98ea9cd5c85957711d8e5a926207155e534ef64"
+      "bytes": 9137,
+      "sha256": "13b9dda89ff1014c1139cb7eb0fdacfcead68d16eeddb5f9358a3d3d4e620472"
     },
     {
       "path": "tests/world-balanced-browser.cjs",
@@ -1763,7 +1768,7 @@
     {
       "path": "vercel.json",
       "bytes": 38400,
-      "sha256": "abfa9325dd80553242d23ea641c00f4fe742487166d71f7e4be84f01a6361d5d"
+      "sha256": "1d5c2e10dd18ff0899de7b7b2fbc586c3137210e872870fcee9bbac563352df2"
     }
   ]
 }

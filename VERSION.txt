@@ -1,4 +1,4 @@
-역사의 갈림길 — 국명 반투명 배경 · 선택 테두리 · 확대 오류 수정
-Version: 2.12.1-community
+역사의 갈림길 — 전체화면 · 지도 설정 먼저 보기 · 스크롤 유지
+Version: 2.13.0-community
 Build date: 2026-10-23
 Runtime: static HTML, CSS, JavaScript + Supabase (optional)

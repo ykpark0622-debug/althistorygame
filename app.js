@@ -1,3 +1,177 @@
+/* Presentation-only fullscreen state: never enters a scenario or browser save. */
+(function () {
+  'use strict';
+  if (typeof document === 'undefined' || !document.documentElement || !document.createElement) return;
+  let pageExpanded = false, workshop = null, busy = false, suppressCancelUntil = 0, noticeTimer;
+  const nativeElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+  const fullscreenRequest = () => document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+  const fullscreenExit = () => document.exitFullscreen || document.webkitExitFullscreen;
+  const eachButton = callback => document.querySelectorAll?.('#app-fullscreen-button, .hc-workshop-fullscreen-button').forEach(callback);
+  function resizeViews() {
+    if (typeof globalThis.dispatchEvent === 'function' && typeof Event === 'function') globalThis.dispatchEvent(new Event('resize'));
+  }
+  function ensureStyles() {
+    if (!document.head || document.getElementById('hc-fullscreen-styles')) return;
+    const style = document.createElement('style'); style.id = 'hc-fullscreen-styles';
+    style.textContent = `
+.header-actions #app-fullscreen-button{white-space:nowrap;flex-shrink:0}
+.hc-page-expanded .layout{max-width:min(1800px,calc(100vw - 48px));width:calc(100% - 48px)}
+.hc-page-expanded .masthead{padding-left:24px;padding-right:24px}
+#editor-dialog.hc-workshop-fullscreen{position:fixed;inset:0!important;margin:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;border:0!important;border-radius:0!important;padding:0;overflow:hidden}
+#editor-dialog.hc-workshop-fullscreen>#editor-root{height:100%;min-height:0}
+#editor-dialog.hc-workshop-fullscreen .editor-shell{height:100%;min-height:0}
+#editor-dialog.hc-workshop-fullscreen .editor-top,#editor-dialog.hc-workshop-fullscreen .editor-footer{flex-shrink:0}
+#editor-dialog.hc-workshop-fullscreen .editor-content.map-maker-content{flex:1;min-height:0}
+#editor-dialog.hc-workshop-fullscreen .map-ui-workspace{min-height:0}
+#editor-dialog.hc-workshop-fullscreen .map-ui-board .province-map{height:clamp(320px,calc(100vh - 270px),1100px);height:clamp(320px,calc(100dvh - 270px),1100px)}
+.hc-workshop-fullscreen-button{white-space:nowrap}
+#hc-fullscreen-status{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:100001;max-width:min(620px,90vw);padding:10px 16px;border:1px solid #a8bcaa;border-radius:8px;background:#edf3e9f5;color:#284c3b;box-shadow:0 4px 20px #173b3620;font-size:12px;line-height:1.6;pointer-events:none}
+@media(max-width:1100px){.masthead{height:auto;min-height:92px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}.header-actions{flex-wrap:wrap;justify-content:flex-end;gap:7px}.header-actions #app-fullscreen-button{font-size:11px;padding:9px 10px}}
+@media(max-width:760px){.hc-page-expanded .layout{width:auto;max-width:none}#editor-dialog.hc-workshop-fullscreen .editor-top{padding:10px 12px;gap:8px}#editor-dialog.hc-workshop-fullscreen .editor-top .toolbar{gap:5px}#editor-dialog.hc-workshop-fullscreen .editor-footer{padding:8px 10px;gap:5px}#editor-dialog.hc-workshop-fullscreen .editor-footer .btn{font-size:11px;padding:8px 10px}#editor-dialog.hc-workshop-fullscreen .map-ui-board .province-map{height:clamp(280px,54vh,620px)}#hc-fullscreen-status{bottom:8px;font-size:11px}}
+`;
+    document.head.append(style);
+  }
+  function updateButtons() {
+    eachButton(button => {
+      const isWorkshop = button.classList.contains('hc-workshop-fullscreen-button');
+      const active = isWorkshop ? Boolean(workshop?.active) : Boolean(nativeElement() || pageExpanded);
+      button.textContent = active ? '전체화면 종료' : isWorkshop ? '작업실 전체화면' : '전체화면';
+      button.setAttribute('aria-pressed', String(active));
+      button.setAttribute('aria-label', active ? (isWorkshop ? '지도 작업실 전체화면 종료' : '전체화면 종료') : (isWorkshop ? '지도 작업실 전체화면으로 열기' : '전체화면으로 열기'));
+      button.title = active ? 'Esc 키 또는 이 버튼으로 종료' : '화면을 크게 사용합니다';
+      button.disabled = busy;
+    });
+  }
+  function announce(message) {
+    let node = document.getElementById('hc-fullscreen-status');
+    if (!node) { node = document.createElement('div'); node.id = 'hc-fullscreen-status'; node.setAttribute('role', 'status'); node.setAttribute('aria-live', 'polite'); }
+    (workshop?.dialog?.open ? workshop.dialog : document.body)?.append(node);
+    node.textContent = message; node.hidden = false;
+    clearTimeout(noticeTimer); noticeTimer = setTimeout(() => { node.hidden = true; }, 5200);
+  }
+  function applyWorkshop(active) {
+    workshop?.dialog?.classList.toggle('hc-workshop-fullscreen', Boolean(active));
+    updateButtons(); resizeViews();
+  }
+  async function exitNative() {
+    const exit = fullscreenExit();
+    if (nativeElement() && typeof exit === 'function') { try { await exit.call(document); } catch { announce('브라우저 전체화면은 Esc 키로 종료할 수 있습니다.'); } }
+  }
+  async function togglePage() {
+    if (busy) return false;
+    busy = true; updateButtons();
+    try {
+      if (nativeElement()) { await exitNative(); return true; }
+      if (pageExpanded) { pageExpanded = false; document.documentElement.classList.remove('hc-page-expanded'); return true; }
+      const request = fullscreenRequest();
+      if (typeof request === 'function') {
+        try { await request.call(document.documentElement); if (nativeElement()) return true; } catch { /* Browser policy can deny a request despite support. */ }
+      }
+      pageExpanded = true; document.documentElement.classList.add('hc-page-expanded');
+      announce('브라우저 전체화면을 사용할 수 없어 창 안에서 화면을 넓혔습니다. Esc 키 또는 “전체화면 종료”로 돌아갑니다.');
+      return true;
+    } finally { busy = false; updateButtons(); resizeViews(); }
+  }
+  async function closeWorkshop(dialog) {
+    const owner = workshop;
+    if (!owner || (dialog && owner.dialog !== dialog)) return false;
+    workshop = null; owner.active = false;
+    owner.dialog.classList.remove('hc-workshop-fullscreen');
+    const notice = document.getElementById('hc-fullscreen-status');
+    if (notice && notice.parentNode === owner.dialog) { notice.hidden = true; document.body?.append(notice); }
+    updateButtons(); resizeViews();
+    // A workshop opened inside an existing game fullscreen must leave it intact.
+    if (owner.ownsNative && nativeElement()) {
+      const alreadyBusy = busy; busy = true; updateButtons();
+      try { await exitNative(); } finally { busy = alreadyBusy; updateButtons(); }
+    }
+    return true;
+  }
+  async function toggleWorkshop(dialog) {
+    if (!dialog?.open || busy) return false;
+    if (workshop?.active && workshop.dialog === dialog) { suppressCancelUntil = Date.now() + 450; return closeWorkshop(dialog); }
+    if (workshop) await closeWorkshop(workshop.dialog);
+    const owner = { dialog, active: true, ownsNative: false, mode: nativeElement() ? 'native' : 'expanded' };
+    workshop = owner; applyWorkshop(true);
+    if (nativeElement()) return true;
+    busy = true; updateButtons();
+    try {
+      const request = fullscreenRequest();
+      if (typeof request === 'function') {
+        try {
+          await request.call(document.documentElement);
+          if (nativeElement()) {
+            owner.ownsNative = true; owner.mode = 'native';
+            // A close or map replacement may complete while the browser enters fullscreen.
+            if (workshop !== owner || !dialog.open) await exitNative();
+            return true;
+          }
+        } catch { /* Keep the usable viewport-size editor when fullscreen is denied. */ }
+      }
+      if (workshop === owner && dialog.open) announce('브라우저 전체화면을 사용할 수 없어 창 안에 작업실을 가득 표시했습니다. Esc 키 또는 “전체화면 종료”로 돌아갑니다.');
+      return true;
+    } finally { busy = false; updateButtons(); resizeViews(); }
+  }
+  function createWorkshopButton(dialog) {
+    ensureStyles();
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'btn secondary hc-workshop-fullscreen-button';
+    button.textContent = workshop?.active && workshop.dialog === dialog ? '전체화면 종료' : '작업실 전체화면';
+    button.setAttribute('aria-pressed', String(Boolean(workshop?.active && workshop.dialog === dialog)));
+    button.setAttribute('aria-label', workshop?.active && workshop.dialog === dialog ? '지도 작업실 전체화면 종료' : '지도 작업실 전체화면으로 열기');
+    button.title = 'Esc 키 또는 이 버튼으로 전체화면 종료'; button.disabled = busy;
+    button.onclick = () => { void toggleWorkshop(dialog); };
+    return button;
+  }
+  function onFullscreenChange() {
+    const dialog = document.getElementById('editor-dialog');
+    if (!nativeElement() && dialog?.open) suppressCancelUntil = Date.now() + 450;
+    if (!nativeElement() && workshop?.mode === 'native') {
+      const owner = workshop; workshop = null; owner.active = false; owner.dialog.classList.remove('hc-workshop-fullscreen');
+    }
+    updateButtons(); resizeViews();
+  }
+  function cleanupClone(doc) {
+    doc.documentElement?.classList?.remove('hc-page-expanded');
+    doc.querySelectorAll?.('.hc-workshop-fullscreen').forEach(node => node.classList.remove('hc-workshop-fullscreen'));
+    for (const id of ['app-fullscreen-button', 'hc-fullscreen-status', 'hc-fullscreen-styles']) doc.getElementById(id)?.remove();
+  }
+  function install() {
+    ensureStyles();
+    const nav = document.querySelector?.('.masthead .header-actions');
+    if (!nav) return;
+    let button = document.getElementById('app-fullscreen-button');
+    if (!button) { button = document.createElement('button'); button.id = 'app-fullscreen-button'; button.className = 'btn secondary'; button.type = 'button'; nav.append(button); }
+    button.onclick = () => { void togglePage(); }; updateButtons();
+  }
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+    // A searchable country picker owns its first Escape; the next Escape can
+    // leave fullscreen after the popup has closed without changing selection.
+    const picker = event.target?.closest?.('[data-country-picker]');
+    if (picker?.querySelector('.country-picker-popup')?.hidden === false) return;
+    if (workshop?.active) { event.preventDefault(); event.stopImmediatePropagation(); suppressCancelUntil = Date.now() + 450; void closeWorkshop(workshop.dialog); }
+    else if (nativeElement() || pageExpanded) { event.preventDefault(); event.stopImmediatePropagation(); suppressCancelUntil = Date.now() + 450; void togglePage(); }
+  }, true);
+  // Browsers can dispatch a dialog cancel together with their native fullscreen Esc.
+  // Consume that one gesture instead of closing (and potentially discarding) the map.
+  document.addEventListener('cancel', event => {
+    if (event.target?.id !== 'editor-dialog') return;
+    if (workshop?.active || Date.now() < suppressCancelUntil) {
+      event.preventDefault(); event.stopImmediatePropagation();
+      if (workshop?.active) { suppressCancelUntil = Date.now() + 450; void closeWorkshop(workshop.dialog); }
+    }
+  }, true);
+  document.addEventListener('close', event => { if (event.target === workshop?.dialog) void closeWorkshop(workshop.dialog); }, true);
+  globalThis.HistoryCrossroadsFullscreen = {
+    togglePage, toggleWorkshop, createWorkshopButton, closeWorkshop, cleanupClone,
+    getState: () => ({ pageFullscreen: Boolean(nativeElement() || pageExpanded), pageMode: nativeElement() ? 'native' : pageExpanded ? 'expanded' : 'none', workshopFullscreen: Boolean(workshop?.active), workshopMode: workshop?.active ? workshop.mode : 'none', busy })
+  };
+  if (document.readyState === 'loading' && !document.querySelector?.('.masthead .header-actions')) document.addEventListener('DOMContentLoaded', install, { once: true });
+  else install();
+})();
+
 (function () {
   'use strict';
   const E = GameEngine;
@@ -653,6 +827,7 @@
       doc.querySelectorAll('link[rel="stylesheet"]').forEach(link=>link.remove());
       doc.querySelectorAll('style').forEach(style=>{if(!['game-styles','flowchart-styles','launcher-styles','map-view-styles','map-maker-styles','editor-v2-styles','standalone-styles'].includes(style.id))style.remove();});
       doc.querySelectorAll('dialog[open]').forEach(d=>d.removeAttribute('open'));
+      globalThis.HistoryCrossroadsFullscreen?.cleanupClone(doc);
       doc.getElementById('editor-dialog').removeAttribute('data-editor-bound');
       doc.getElementById('editor-dialog').classList.remove('flowchart-mode','map-maker-mode');
       for(const id of ['editor-root','info-content','scenario-open-content','story-panel','stats-panel','flags-panel','turn-label','scenario-title','scenario-subtitle','scenario-description','risk-summary','toast','status-message','player-map','map-reference-tools','scenario-mode-label','timeline-panel','timeline-note','play-guide-content']){const node=doc.getElementById(id);if(node){node.innerHTML='';node.textContent='';}}
