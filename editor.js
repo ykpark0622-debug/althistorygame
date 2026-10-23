@@ -90,7 +90,7 @@
       }
       const result = options.type === 'number' ? Number(node.value) : node.value;
       action(result);
-      mark();
+      if (options.mark !== false) mark();
     });
     wrap.append(node);
     if (options.help) wrap.append($('span', 'small muted', options.help));
@@ -123,35 +123,78 @@
     return !key || (country.name + ' ' + country.id).toLocaleLowerCase().includes(key);
   }
 
-  // Keep a native select for keyboard use, with an independent search field.
-  // Filtering never silently chooses another country, including zero matches.
+  let countryPickerSequence = 0;
+  const openCountryPickers = new Set();
+  function closeCountryPickers() { for (const picker of [...openCountryPickers]) picker.close(); }
+  // Search and selection happen in the same bounded popup. A query never
+  // changes the saved country; only choosing an explicit result does so.
   function countrySelect(label, value, getCountries, action, options = {}) {
-    const wrap = $('div', 'v2-country-search');
-    const searchLabel = $('label', 'field'), search = $('input');
-    search.type = 'search'; search.placeholder = '국가 이름 또는 ID 검색';
-    search.setAttribute('aria-label', label + ' 검색');
-    searchLabel.append($('span', '', label + ' 검색'), search);
-    const resultLabel = $('label', 'field'), result = $('select'), help = $('span', 'small muted');
-    result.setAttribute('aria-label', label);
-    resultLabel.append($('span', '', label), result);
-    let selected = value;
-    function fill() {
-      const all = getCountries(), matches = all.filter(country => countryMatches(country, search.value));
-      const existing = all.find(country => country.id === selected);
-      const visible = existing && !matches.some(country => country.id === selected) ? [existing, ...matches] : matches;
-      result.replaceChildren();
-      if (selected && !existing) { const missing = $('option', '', '⚠ 찾을 수 없음: ' + selected); missing.value = selected; result.append(missing); }
-      visible.forEach(country => { const option = $('option', '', country.name + ' · ' + country.id); option.value = country.id; result.append(option); });
-      result.value = selected || '';
-      help.textContent = matches.length.toLocaleString('ko-KR') + '개 검색됨 · 현재 선택은 유지됩니다.';
+    ensureMapEditorStyles();
+    const wrap = $('div', 'field v2-country-search'); wrap.setAttribute('data-country-picker', '');
+    const trigger = button('', () => popup.hidden ? open() : close(), 'secondary country-picker-trigger');
+    const popup = $('div', 'country-picker-popup'), search = $('input'), list = $('div', 'country-picker-results'), help = $('p', 'small muted');
+    const popupId = 'country-picker-' + (++countryPickerSequence);
+    popup.id = popupId; popup.hidden = true; search.type = 'search'; search.placeholder = '국가 이름 또는 ID 검색';
+    search.setAttribute('aria-label', label + ' 검색'); search.setAttribute('autocomplete', 'off');
+    trigger.setAttribute('aria-label', label); trigger.setAttribute('role', 'combobox'); trigger.setAttribute('aria-haspopup', 'listbox'); trigger.setAttribute('aria-expanded', 'false'); trigger.setAttribute('aria-controls', popupId + '-list');
+    list.id = popupId + '-list'; list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', label + ' 검색 결과');
+    search.setAttribute('aria-controls', list.id);
+    let selected = value, active = -1, visible = [];
+    const entries = () => [...(options.extra || []).map(item => ({ id: item[0], name: item[1], special: true })), ...getCountries()];
+    function dot(country) { const swatch = $('span', 'country-color-dot'); swatch.style.backgroundColor = /^#[\da-f]{6}$/i.test(country?.color || '') ? country.color : '#dfe3dd'; swatch.setAttribute('aria-hidden', 'true'); return swatch; }
+    function choose(country) { selected = country.id; close(); fill(); trigger.focus(); action(selected); if (options.mark !== false) mark(); }
+    function activate(index) {
+      active = index; const rows = [...list.children];
+      rows.forEach((row, i) => row.classList.toggle('is-active', i === active));
+      if (rows[active]) { search.setAttribute('aria-activedescendant', rows[active].id); rows[active].scrollIntoView?.({ block: 'nearest' }); }
+      else search.removeAttribute('aria-activedescendant');
     }
+    function fill() {
+      const all = entries(), matches = all.filter(country => countryMatches(country, search.value)), existing = all.find(country => country.id === selected);
+      trigger.replaceChildren(dot(existing), $('span', 'country-picker-value', existing?.name || '⚠ 찾을 수 없음: ' + (selected || '선택 없음')), $('span', 'country-picker-chevron', '⌄'));
+      trigger.setAttribute('data-country-id', selected == null ? '' : String(selected));
+      visible = matches.slice(0, 12); list.replaceChildren();
+      visible.forEach((country, index) => {
+        const row = button('', () => choose(country), 'secondary country-picker-option');
+        row.id = popupId + '-option-' + index; row.setAttribute('role', 'option'); row.setAttribute('aria-selected', String(country.id === selected)); row.setAttribute('data-country-id', country.id);
+        row.append(dot(country), $('span', 'country-picker-value', country.name));
+        if (!country.special) row.append($('small', 'muted', country.id));
+        row.addEventListener('keydown', event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); activate((index + (event.key === 'ArrowDown' ? 1 : -1) + visible.length) % visible.length); list.children[active]?.focus(); } else if (event.key === 'Escape') { event.preventDefault(); close(); trigger.focus(); } });
+        list.append(row);
+      });
+      help.textContent = matches.length ? matches.length.toLocaleString('ko-KR') + '개 검색됨' + (matches.length > 12 ? ' · 12개 표시, 검색어로 좁히세요.' : '') : '검색 결과가 없습니다. 현재 선택은 유지됩니다.';
+      activate(-1);
+    }
+    const controller = { close };
+    function position() {
+      const rect = trigger.getBoundingClientRect(); popup.style.position = 'fixed';
+      popup.style.width = Math.min(Math.max(rect.width, 270), Math.max(160, innerWidth - 24)) + 'px';
+      popup.style.left = Math.max(12, Math.min(rect.left, innerWidth - Math.min(Math.max(rect.width, 270), innerWidth - 24) - 12)) + 'px';
+      const below = innerHeight - rect.bottom - 16, above = rect.top - 16;
+      popup.style.maxHeight = Math.max(130, Math.min(390, Math.max(below, above))) + 'px';
+      if (below < 230 && above > below) { popup.style.top = 'auto'; popup.style.bottom = Math.max(12, innerHeight - rect.top + 5) + 'px'; }
+      else { popup.style.top = Math.max(12, rect.bottom + 5) + 'px'; popup.style.bottom = 'auto'; }
+    }
+    function outside(event) { if (!wrap.contains(event.target)) close(); }
+    function open() { closeCountryPickers(); popup.hidden = false; search.value = ''; fill(); position(); trigger.setAttribute('aria-expanded', 'true'); openCountryPickers.add(controller); document.addEventListener('pointerdown', outside, true); window.addEventListener('resize', position); window.addEventListener('scroll', position, true); search.focus(); }
+    function close() { popup.hidden = true; trigger.setAttribute('aria-expanded', 'false'); openCountryPickers.delete(controller); document.removeEventListener('pointerdown', outside, true); window.removeEventListener('resize', position); window.removeEventListener('scroll', position, true); }
     search.addEventListener('input', fill);
-    result.addEventListener('change', () => { selected = result.value; action(selected); if (options.mark !== false) mark(); });
-    fill(); wrap.append(searchLabel, resultLabel, help); wrap.refreshCountries = fill;
+    search.addEventListener('keydown', event => {
+      if (event.isComposing) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); if (visible.length) activate((active + (event.key === 'ArrowDown' ? 1 : -1) + visible.length) % visible.length); }
+      else if (event.key === 'Enter') { event.preventDefault(); if (visible[active < 0 ? 0 : active]) choose(visible[active < 0 ? 0 : active]); }
+      else if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); trigger.focus(); }
+      else if (event.key === 'Tab' && event.shiftKey) { close(); }
+    });
+    wrap.addEventListener('focusout', () => setTimeout(() => { if (!wrap.contains(document.activeElement)) close(); }, 0));
+    trigger.addEventListener('keydown', event => { if (['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); open(); } else if (event.key === 'Escape') close(); });
+    popup.append(search, list, help); fill(); wrap.append($('span', '', label), trigger, popup);
+    if (options.help) wrap.append($('span', 'small muted', options.help));
+    wrap.refreshCountries = fill; wrap.close = close;
     return wrap;
   }
 
-  function colorPicker(label, value, action) {
+  function colorPicker(label, value, action, options = {}) {
     const wrap = $('div', 'v2-color-picker'), controls = $('div', 'form-grid');
     const pickerLabel = $('label', 'field'), picker = $('input');
     picker.type = 'color'; picker.value = /^#[\da-f]{6}$/i.test(value || '') ? value : '#778899';
@@ -161,7 +204,7 @@
     code.type = 'text'; code.value = picker.value; code.maxLength = 7;
     code.setAttribute('aria-label', label + ' 코드 (선택)');
     codeLabel.append($('span', '', '색상 코드 (선택)'), code);
-    function choose(next) { picker.value = next; code.value = next; code.setCustomValidity(''); action(next); mark(); }
+    function choose(next) { picker.value = next; code.value = next; code.setCustomValidity(''); action(next); if (options.mark !== false) mark(); }
     picker.addEventListener('input', () => choose(picker.value));
     code.addEventListener('input', () => { const next = code.value.trim(); if (/^#[\da-f]{6}$/i.test(next)) choose(next); else code.setCustomValidity('색상표에서 고르거나 #RRGGBB 형식으로 입력해 주세요.'); });
     const presets = $('div', 'toolbar v2-color-presets');
@@ -422,7 +465,7 @@
           if (condition.field === 'marker') {
             row.append(checkbox('표식 없음(null)과 비교', condition.value === null, value => { condition.value = value ? null : ''; changedV2(scenario, onChange); renderRows(); }));
             if (condition.value !== null) row.append(input('표식 문구', condition.value, value => { condition.value = value; changedV2(scenario, onChange); }));
-          } else row.append(select('대상 국가', condition.value === null ? '__none__' : condition.value, [['__none__', '없음'], ...(config?.countries || []).map(country => [country.id, country.name])], value => { condition.value = value === '__none__' ? null : value; changedV2(scenario, onChange); }));
+          } else row.append(countrySelect('대상 국가', condition.value === null ? '__none__' : condition.value, () => allMapCountries(scenario), value => { condition.value = value === '__none__' ? null : value; changedV2(scenario, onChange); }, { extra: [['__none__', '없음']] }));
         } else {
           const flag = condition.kind === 'flag';
           row.append(select('대상', condition.key, (flag ? scenario.flags : scenario.stats).map(item => [item.id, item.name + ' · ' + item.id]), value => { condition.key = value; changed(); }),
@@ -449,16 +492,18 @@
     const rows = $('div'); wrap.append(rows);
     const changed = () => changedV2(scenario, onChange);
     function renderRows() {
+      rows.querySelectorAll('.v2-map-picker').forEach(container => globalThis.MapView?.dispose?.(container));
+      closeCountryPickers();
       rows.replaceChildren(); const config = mapConfig(scenario);
       (owner.territory || []).forEach((effect, index) => {
         const card = $('div', 'editor-card v2-effect-card');
         const province = provinceSelect('변경할 지역', effect.prov, config, value => { effect.prov = value; changed(); });
         card.append(province);
         const picker = $('div', 'v2-map-picker'); picker.hidden = true;
-        card.append(button('지도에서 지역 선택', () => { picker.hidden = !picker.hidden; if (!picker.hidden) { picker.replaceChildren(); paintMap(picker, scenario, value => { effect.prov = typeof value === 'string' ? value : value.id || value.prov; changed(); renderRows(); }); } }), picker);
+        card.append(button('지도에서 지역 선택', () => { picker.hidden = !picker.hidden; if (!picker.hidden) { globalThis.MapView?.dispose?.(picker); picker.replaceChildren(); paintMap(picker, scenario, value => { effect.prov = typeof value === 'string' ? value : value.id || value.prov; changed(); renderRows(); }); } else globalThis.MapView?.dispose?.(picker); }), picker);
         for (const [field, label] of [['to', '소유국'], ['occupation', '군사 점령국'], ['influence', '영향국']]) {
           const value = Object.prototype.hasOwnProperty.call(effect, field) ? effect[field] === null ? '__clear__' : effect[field] : '__keep__';
-          card.append(select(label, value, [['__keep__', '변경하지 않음'], ...(field === 'to' ? [] : [['__clear__', '없음으로 지우기']]), ...(config?.countries || []).map(country => [country.id, country.name])], next => { if (next === '__keep__') delete effect[field]; else effect[field] = next === '__clear__' ? null : next; changed(); }));
+          card.append(countrySelect(label, value, () => allMapCountries(scenario), next => { if (next === '__keep__') delete effect[field]; else effect[field] = next === '__clear__' ? null : next; changed(); }, { extra: [['__keep__', '변경하지 않음'], ...(field === 'to' ? [] : [['__clear__', '없음으로 지우기']])] }));
         }
         card.append(select('표식', Object.prototype.hasOwnProperty.call(effect, 'marker') ? effect.marker === null ? '__clear__' : '__text__' : '__keep__', [['__keep__', '변경하지 않음'], ['__clear__', '표식 지우기'], ['__text__', '문구 설정']], next => { if (next === '__keep__') delete effect.marker; else effect.marker = next === '__clear__' ? null : ''; changed(); renderRows(); }));
         if (typeof effect.marker === 'string') card.append(input('표식 문구', effect.marker, value => { effect.marker = value; changed(); }));
@@ -597,7 +642,24 @@
     if (draft.draft) content.append(notice('작성 중인 초안입니다. 빈 상태도 저장할 수 있습니다. 수치, 시작 사건, 기본 엔딩을 만든 뒤 “적용하고 새 게임”으로 플레이하세요.'));
   }
 
+  function ensureMapEditorStyles() {
+    if (document.getElementById('map-editor-ui-styles')) return;
+    const style = $('style'); style.id = 'map-editor-ui-styles';
+    style.textContent = `
+.editor-dialog .country-color-dot{display:inline-block;width:14px;height:14px;border:1px solid #0002;border-radius:4px;flex:0 0 14px}
+.editor-dialog .v2-country-search{position:relative;min-width:0;gap:5px}.editor-dialog .country-picker-trigger{display:flex;width:100%;gap:9px;align-items:center;min-height:40px;text-align:left;padding:9px 10px;transform:none}.country-picker-value{flex:1;min-width:0;overflow-wrap:anywhere}.country-picker-chevron{margin-left:auto}.editor-dialog .country-picker-popup{z-index:10000;padding:10px;background:#fffdf7;border:1px solid #cbd4c4;border-radius:9px;box-shadow:0 10px 35px #1b382333;display:flex;flex-direction:column;gap:6px;overflow:auto}.editor-dialog .country-picker-popup input{width:100%;min-width:0;flex:none}.country-picker-results{overflow:auto;min-height:0}.editor-dialog .country-picker-option{width:100%;min-height:39px;display:flex;align-items:center;text-align:left;gap:8px;padding:8px;border:1px solid transparent;background:transparent;transform:none}.country-picker-option small{font-size:10px}.editor-dialog .country-picker-option[aria-selected=true],.editor-dialog .country-picker-option.is-active{background:#e6eddf;border-color:#b2c5a4}.country-picker-popup p{margin:0;font-size:11px}
+.editor-dialog .map-ui-workspace{display:grid;grid-template-columns:275px minmax(0,1fr);gap:16px;min-height:0;height:100%;align-items:stretch}.editor-dialog .map-ui-sidebar{min-width:0;min-height:0;padding:15px;background:#fffdf7;border:1px solid #d8dfcf;border-radius:9px;overflow-y:auto;scrollbar-width:thin}.map-ui-sidebar>h3{font-size:15px;margin-bottom:11px}.map-ui-sidebar>input{width:100%;margin-top:13px}.map-ui-sidebar>.btn{width:100%}.map-ui-sidebar>.small{font-size:11px;margin:7px 0}.map-ui-country-list{display:flex;flex-direction:column;gap:3px;max-height:270px;overflow-y:auto}.editor-dialog .map-ui-country-row{display:flex;gap:9px;align-items:center;text-align:left;min-height:35px;padding:7px 8px;border-color:transparent;background:transparent;transform:none}.map-ui-country-name{flex:1;min-width:0;overflow-wrap:anywhere}.map-ui-country-row small{font-size:10px;white-space:nowrap}.editor-dialog .map-ui-country-row[aria-pressed=true]{background:#edf1e5;border-color:#c5d4b9}.map-ui-sidebar .editor-section{margin:15px 0 0;padding-top:14px;border-top:1px solid #d8dfcf}.map-ui-sidebar .editor-section>h3{font-size:13px}.map-ui-sidebar .form-grid{grid-template-columns:minmax(0,1fr);gap:6px}.map-ui-sidebar .field{margin-bottom:11px}.map-ui-sidebar .v2-color-picker .form-grid{grid-template-columns:60px minmax(0,1fr);gap:7px}.map-ui-sidebar .v2-color-presets{gap:5px;margin-top:0;flex-wrap:wrap}.map-ui-sidebar .v2-color-presets .btn{width:25px!important;height:25px!important;min-width:25px!important}.map-ui-sidebar .v2-color-picker input[type=color]{min-height:38px!important;padding:3px}.map-ui-sidebar .v2-color-picker .field>span{font-size:10px}.map-ui-create-form{background:#edf1e5;border:1px solid #cbd7bf;border-radius:8px;padding:11px;margin-top:10px}.map-ui-create-form>.btn{margin:5px 5px 0 0}.map-ui-error{color:#a34235;margin:5px 0}.map-ui-label-tools{font-size:12px;margin-top:13px}.map-ui-label-tools summary{cursor:pointer;margin-bottom:10px}.map-ui-label-tools .toolbar{flex-wrap:wrap;gap:5px}.map-ui-label-tools .btn{font-size:11px;padding:7px 8px}
+.editor-dialog .map-ui-board{min-width:0;min-height:0;overflow-y:auto;padding-right:3px;scrollbar-width:thin}.map-ui-tools{gap:5px;flex-wrap:wrap;margin-bottom:8px}.editor-dialog .map-ui-tools>.btn{font-size:12px;padding:8px 10px;min-height:36px}.editor-dialog .map-ui-tools>.btn[aria-pressed=true]{background:#234c3f;color:#fff;border-color:#234c3f}.map-ui-tools>.btn:last-child{margin-left:auto}.map-ui-current{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:9px 0 12px;font-size:13px}.map-ui-current>.small{margin-left:auto;font-size:11px}.map-ui-board .history-map{margin:0}.editor-dialog .map-ui-board .map-viewport{height:auto}.editor-dialog .map-ui-board .province-map{width:100%;height:clamp(320px,53vh,600px);max-height:none;aspect-ratio:auto}.map-ui-board .map-heading{padding:10px 14px}.map-ui-board .map-heading h2{font-size:15px}.map-ui-key-help{margin:7px 0;font-size:10px}.map-ui-selection-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:10px 0}.map-ui-selection-bar>span{flex:1;min-width:180px;font-size:11px}.map-ui-selection-bar>.btn{font-size:11px;padding:8px}.map-ui-province,.map-ui-settings{border:1px solid #d8dfcf;background:#fffdf7;border-radius:8px;padding:11px 13px;margin:10px 0}.map-ui-province>summary,.map-ui-settings>summary{font-size:13px;cursor:pointer;font-weight:600}.map-ui-province>div,.map-ui-settings-body{margin-top:14px}.map-ui-settings-body>h2{font-size:16px}.map-ui-settings-body .editor-section{margin:12px 0}.map-ui-settings-body .notice{font-size:11px}.map-ui-province>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.map-ui-province h3{grid-column:1/-1;font-size:13px}.map-ui-settings-body .regional-legacy-maps{margin:12px 0}.map-ui-settings-body .regional-legacy-maps>summary{cursor:pointer;font-size:12px}
+.editor-dialog.map-maker-mode{width:min(1540px,98vw);max-width:98vw}.map-maker-mode .editor-content.map-maker-content{padding:14px;overflow:hidden}.map-maker-mode .editor-top{padding:12px 18px 9px}.map-maker-mode .editor-top h2{font-size:20px}.map-maker-mode .editor-top p{font-size:11px}.map-maker-mode .editor-footer{padding:11px 16px}.map-maker-mode .editor-footer .btn{font-size:12px}.editor-dialog:not(.map-maker-mode) .map-ui-workspace{height:min(740px,70vh);min-height:420px}
+@media(max-width:1020px){.editor-dialog .map-ui-workspace{grid-template-columns:245px minmax(0,1fr);gap:10px}.editor-dialog .map-ui-sidebar{padding:11px}.map-ui-tools>.btn:last-child{margin-left:0}.map-ui-current>.small{margin-left:0}.map-maker-mode .editor-top>div:first-child{max-width:440px}}
+@media(max-width:760px){.editor-dialog .map-ui-workspace{display:flex;flex-direction:column;height:auto;align-items:stretch}.editor-dialog .map-ui-sidebar{order:2;overflow:visible}.editor-dialog .map-ui-board{order:1;overflow:visible}.map-maker-mode .editor-content.map-maker-content{overflow:auto;padding:10px}.editor-dialog:not(.map-maker-mode) .map-ui-workspace{height:auto;min-height:0}.editor-dialog .map-ui-board .province-map{height:clamp(290px,46vh,460px)}.map-ui-country-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:230px}.map-ui-province>div{grid-template-columns:1fr}.map-ui-province h3{grid-column:auto}.map-ui-tools>.btn{flex:1 1 auto}.map-ui-sidebar .editor-section .form-grid{grid-template-columns:60px minmax(0,1fr)}.map-ui-sidebar input[type=search],.country-picker-popup input{font-size:16px}}
+@media(pointer:coarse){.editor-dialog .map-ui-tools>.btn,.editor-dialog .country-picker-trigger,.editor-dialog .country-picker-option,.editor-dialog .map-ui-country-row{min-height:44px}}
+`;
+    document.head.append(style);
+  }
+
   function renderMap(content) {
+    ensureMapEditorStyles();
     const draft = current.draft, templates = globalThis.MapTemplates?.list() || [];
     content.append($('h2', '', '지역과 시대를 고른 뒤 지도 편집'), notice('① 지역 지도 → ② 시대 기본안 → ③ 지도 준비 순서로 시작하세요. 시대별 배치는 수정할 수 있는 출발점입니다. 지도의 지역을 눌러 소유국·점령·영향권·표식을 바로 고칠 수 있습니다.'));
     if (current.mapStatus) content.append(notice(current.mapStatus));
@@ -629,7 +691,7 @@
       else delete draft.map;
       const newPlayerName = plan.nextMap && allMapCountries(draft).find(country => country.id === draft.map.playerCountry)?.name;
       current.mapStatus = plan.playerChanged ? '이전 플레이 국가의 영토·점령·영향권이 새 지도 범위에 없어, 플레이 국가를 ' + (newPlayerName || draft.map.playerCountry) + '(으)로 설정했습니다. 아래에서 다른 국가로 바꿀 수 있습니다.' : '';
-      current.mapProvince = null; current.mapCountry = null; current.mapPaintUndo = []; current.mapBlankUndo = null; current.mapLabelPlacementCountry = null;
+      current.mapProvince = null; current.mapCountry = null; current.mapPaintUndo = []; current.mapBlankUndo = null; current.mapLabelPlacementCountry = null; current.mapSelected = []; current.mapCamera = null; current.mapCameraTemplate = null;
       current.mapSetup = mapSetupSelection(templateId);
       mark(); render();
     }
@@ -663,144 +725,165 @@
     legacy.append(select('지도 템플릿', regionalApplied ? '' : draft.map?.templateId || '', [['', regions.length ? '기존 템플릿을 선택하세요' : '지도 사용 안 함'], ...legacyTemplates.map(template => [template.id, template.name + ' · ' + template.provinceCount + '개 지역'])], value => { if (value || !regions.length) applyMap(value); }));
     content.append(legacy);
     const config = mapConfig(draft); if (!config) { content.append(notice(templates.length ? '템플릿을 선택하면 지도와 지역 편집기가 열립니다.' : '지도 템플릿 파일을 불러오지 못했습니다.')); return; }
-    // A blank map must retain every existing country as a possible paint target.
-    const countryList = () => allMapCountries(draft);
-    const countryItems = () => countryList().map(country => [country.id, country.name]);
-    const countrySearches = [];
+    const setupNodes = [...content.children]; content.replaceChildren();
+    const workspace = $('div', 'map-ui-workspace'), sidebar = $('aside', 'map-ui-sidebar'), board = $('section', 'map-ui-board');
+    sidebar.setAttribute('aria-label', '국가 목록과 편집'); sidebar.setAttribute('data-country-editor', ''); board.setAttribute('aria-label', '편집 중인 지도');
+    const settings = $('details', 'map-ui-settings'); settings.open = Boolean(current.mapSettingsOpen);
+    const settingsSummary = $('summary', '', '지도 설정'); settingsSummary.setAttribute('role', 'button'); settings.append(settingsSummary);
+    settings.addEventListener('toggle', () => { current.mapSettingsOpen = settings.open; });
+    const settingsBody = $('div', 'map-ui-settings-body'); settings.append(settingsBody);
+    if (current.mapOnly) settingsBody.append(input('지도 제목', draft.title, value => { draft.title = value; }, { maxLength: 120 }), input('지도 설명', draft.description, value => { draft.description = value; }, { multiline: true, rows: 2, maxLength: 1000, help: '시대와 가정, 수정한 국경 등을 적어 두세요.' }));
+    setupNodes.forEach(node => settingsBody.append(node));
+    const countryList = () => allMapCountries(draft), countrySearches = [];
     function ensureCountryOverride(id) {
       if (!draft.map.countries) draft.map.countries = [];
       let override = draft.map.countries.find(item => item.id === id);
       if (!override) {
-        const live = countryList().find(item => item.id === id);
-        if (!live) return null;
+        const live = countryList().find(item => item.id === id); if (!live) return null;
         if (draft.map.countries.length >= 1000) { showReport({ errors: ['사용자 국가가 1,000개여서 국가 표시 설정을 추가할 수 없습니다.'], warnings: [] }); return null; }
         override = { id: live.id, name: live.name, color: live.color }; draft.map.countries.push(override);
       }
       return override;
     }
-    content.append(select(current.mapOnly ? '중심 국가' : '플레이어 국가', draft.map.playerCountry, countryItems(), value => { draft.map.playerCountry = value; current.mapStatus = ''; mark(); render(); }, { help: current.mapOnly ? '지도 이동 버튼에서 사용할 국가입니다. 시나리오에 넣은 뒤 플레이어 국가를 다시 고를 수 있습니다.' : '지도는 선택한 지역 전체로 시작합니다. 오른쪽 국가 이동 버튼을 누르면 이 국가의 영토로 이동합니다.' }));
-    content.append(button('지역 ID 목록 내려받기', () => {
-      const text = JSON.stringify({ templateId: config.template.id, countries: config.countries,
-        provinces: config.template.provinces.map(({ id, name, owner }) => ({ id, name, owner })) }, null, 2);
-      const blob = new Blob([text + '\n'], { type: 'application/json;charset=utf-8' });
-      const url = URL.createObjectURL(blob), link = $('a'); link.href = url;
-      link.download = config.template.id + '-region-ids.json'; document.body.append(link); link.click(); link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }));
-    if (config.template.notice) content.append(notice(config.template.notice));
+    const available = countryList();
+    const selectedId = available.some(item => item.id === current.mapCountry) ? current.mapCountry : available.some(item => item.id === current.mapPaintCountry) ? current.mapPaintCountry : draft.map.playerCountry || available[0]?.id;
+    current.mapCountry = current.mapPaintCountry = selectedId;
+    if (!['inspect', 'paint', 'select', 'label'].includes(current.mapTool)) current.mapTool = current.mapLabelEditMode ? 'label' : current.mapPaintEnabled ? 'paint' : 'inspect';
+    current.mapLabelEditMode = current.mapTool === 'label'; current.mapPaintEnabled = current.mapTool === 'paint';
+    current.mapSelected = (current.mapSelected || []).filter(id => provinceIndex(config.template).byId.has(id));
+    const country = available.find(item => item.id === selectedId) || available[0];
     const initial = draft.map.initial || (draft.map.initial = {});
     for (const layer of ['owners', 'occupation', 'influence', 'markers']) if (!initial[layer]) initial[layer] = {};
-    const blankTools = section('백지도에서 시작', '지역 경계와 국가 목록은 유지하고, 모든 지역의 배정을 지웁니다. 사건·선택지·조건은 그대로 보관됩니다.');
-    blankTools.append(button('백지도 만들기', () => {
-      const plan = planBlankMap(draft);
-      if (plan.error) { showReport({ errors: [plan.error], warnings: [] }); return; }
-      if (!confirm('지도의 모든 시작 영토를 미배정 지역으로 바꾸고 점령·영향권·표식을 지울까요? 국가 목록과 사건·선택지는 유지됩니다. 이 작업은 “백지도 만들기 되돌리기”로 되돌릴 수 있습니다.')) return;
-      current.mapBlankUndo = copy(draft.map); draft.map = plan.nextMap;
-      current.mapPaintUndo = []; current.mapProvince = null; current.mapLabelPlacementCountry = null;
-      current.mapStatus = '백지도를 만들었습니다. “칠할 시작 소유국”에서 국가를 찾아 영토를 칠하세요.';
-      upgrade(draft); mark(); render();
-    }));
-    if (current.mapBlankUndo) blankTools.append(button('백지도 만들기 되돌리기', () => {
-      if (!confirm('백지도를 만들기 직전의 지도 전체 설정으로 돌아갈까요? 백지도 이후에 편집한 영토·색상·국명 위치도 함께 되돌아갑니다.')) return;
-      draft.map = copy(current.mapBlankUndo); current.mapBlankUndo = null;
-      current.mapPaintUndo = []; current.mapProvince = null; current.mapLabelPlacementCountry = null;
-      current.mapStatus = '백지도를 만들기 직전의 지도를 복원했습니다.'; mark(); render();
-    }));
-    content.append(blankTools);
-    const paintTools = section('지도를 누르며 세부 배치 수정', '빠른 칠하기를 켜면 클릭할 때마다 선택한 국가의 시작 영토로 바뀝니다. 끄면 지역별 점령·영향권·표식을 자세히 편집합니다.');
-    current.mapPaintCountry = countryList().some(country => country.id === current.mapPaintCountry) ? current.mapPaintCountry : draft.map.playerCountry;
-    const paintCountrySearch = countrySelect('칠할 시작 소유국', current.mapPaintCountry, countryList, value => { current.mapPaintCountry = value; }, { mark: false });
-    countrySearches.push(paintCountrySearch);
-    paintTools.append(grid(checkbox('빠른 칠하기', current.mapPaintEnabled, value => { current.mapPaintEnabled = value; if (value) { current.mapLabelEditMode = false; current.mapLabelPlacementCountry = null; } render(); }), paintCountrySearch));
+    const preview = $('div', 'v2-editor-map'), tools = $('div', 'toolbar map-ui-tools'), selectionBar = $('div', 'map-ui-selection-bar'), panel = $('details', 'map-ui-province'), panelBody = $('div');
+    preview.setAttribute('data-map-workspace-view', ''); panel.append($('summary', '', '선택한 지역의 세부 설정'), panelBody);
+    panel.open = Boolean(current.mapProvinceOpen); panel.addEventListener('toggle', () => { current.mapProvinceOpen = panel.open; });
+    const currentChip = $('div', 'map-ui-current'), counts = $('p', 'small muted'), countryRows = $('div', 'map-ui-country-list'), labelPositionStatus = $('p', 'small muted');
+    countryRows.setAttribute('aria-label', '국가 목록'); labelPositionStatus.setAttribute('data-map-label-position', '');
+    const countryQuery = $('input'); countryQuery.type = 'search'; countryQuery.value = current.mapCountryQuery || ''; countryQuery.placeholder = '국가 이름 또는 ID 검색'; countryQuery.setAttribute('aria-label', '국가 목록 검색');
+    countryQuery.addEventListener('input', () => { current.mapCountryQuery = countryQuery.value; refreshCountryList(); });
+    function countryDot(item) { const dot = $('span', 'country-color-dot'); dot.style.backgroundColor = /^#[\da-f]{6}$/i.test(item?.color || '') ? item.color : '#dfe3dd'; dot.setAttribute('aria-hidden', 'true'); return dot; }
+    function chooseWorking(id) { current.mapCountry = current.mapPaintCountry = id; current.mapLabelPlacementCountry = null; render(); }
+    function refreshCountryList() {
+      const countries = countryList(), filtered = countries.filter(item => countryMatches(item, countryQuery.value)), ownershipCounts = effectiveOwnerCounts(initialMapState(draft).map.owners);
+      countryRows.replaceChildren();
+      const selected = countries.find(item => item.id === current.mapCountry), matches = filtered.slice(0, 12);
+      if (selected && !countryQuery.value && !matches.some(item => item.id === selected.id)) matches.unshift(selected);
+      matches.slice(0, 12).forEach(item => {
+        const row = button('', () => chooseWorking(item.id), 'secondary map-ui-country-row');
+        row.setAttribute('aria-pressed', String(item.id === current.mapCountry)); row.setAttribute('data-country-id', item.id); row.setAttribute('data-country-row', item.id);
+        row.append(countryDot(item), $('span', 'map-ui-country-name', item.name), $('small', 'muted', (ownershipCounts[item.id] || 0).toLocaleString('ko-KR') + '개')); countryRows.append(row);
+      });
+      counts.textContent = filtered.length ? filtered.length.toLocaleString('ko-KR') + '개 국가 · 최대 12개 표시' : '검색 결과가 없습니다. 작업 국가는 그대로 유지됩니다.';
+      currentChip.replaceChildren(countryDot(selected), $('strong', '', selected?.name || '국가 선택'), $('span', 'small muted', '작업 국가 · ' + (ownershipCounts[current.mapCountry] || 0).toLocaleString('ko-KR') + '개 지역'));
+      assign.textContent = '선택한 지역 배정 (' + current.mapSelected.length + ')'; assign.disabled = !current.mapSelected.length;
+      selectionText.textContent = current.mapSelected.length ? current.mapSelected.length.toLocaleString('ko-KR') + '개 지역 선택됨 · ' + (selected?.name || '') + '에 배정할 수 있습니다.' : '드래그 칠하기로 영토를 칠하거나, 여러 지역을 선택한 뒤 한 번에 배정하세요.';
+    }
+    function setTool(mode) { current.mapTool = mode; current.mapPaintEnabled = mode === 'paint'; current.mapLabelEditMode = mode === 'label'; current.mapLabelPlacementCountry = null; render(); }
+    for (const [mode, title] of [['inspect', '이동'], ['paint', '드래그 칠하기'], ['select', '여러 지역 선택'], ['label', '국명 위치']]) {
+      const tool = button(title, () => setTool(mode)); tool.setAttribute('aria-pressed', String(current.mapTool === mode)); tool.setAttribute('data-map-tool', mode); tools.append(tool);
+    }
     const undoPaint = button('마지막 칠하기 되돌리기', () => {
-      const previous = current.mapPaintUndo?.pop(); if (!previous) return;
-      if (previous.exists) initial.owners[previous.id] = previous.value; else delete initial.owners[previous.id];
-      mark(); render();
+      const batch = current.mapPaintUndo?.pop(); if (!batch) return;
+      (batch.changes || [batch]).forEach(previous => { if (previous.exists) initial.owners[previous.id] = previous.value; else delete initial.owners[previous.id]; });
+      mark(); undoPaint.disabled = !current.mapPaintUndo?.length; redraw(); drawProvince(); refreshCountryList();
     });
-    undoPaint.disabled = !current.mapPaintUndo?.length; paintTools.append(undoPaint);
-    const preview = $('div', 'v2-editor-map'), panel = $('div', 'editor-card v2-province-panel');
-    const labelPositionStatus = $('p', 'small muted'); labelPositionStatus.setAttribute('data-map-label-position', '');
-    content.append(paintTools, preview, panel);
+    undoPaint.disabled = !current.mapPaintUndo?.length; tools.append(undoPaint);
+    const selectionText = $('span', 'small muted'), assign = button('선택한 지역 배정', () => assignProvinces(current.mapSelected, current.mapCountry));
+    selectionBar.append(selectionText, assign, button('선택 해제', () => { current.mapSelected = []; redraw(); refreshCountryList(); }));
+    function assignProvinces(ids, target) {
+      if (!countryList().some(item => item.id === target)) return;
+      const byId = provinceIndex(config.template).byId, effective = initialMapState(draft).map.owners, changes = [];
+      for (const id of new Set(ids)) {
+        const province = byId.get(id); if (!province || effective[id] === target) continue;
+        changes.push({ id, exists: Object.prototype.hasOwnProperty.call(initial.owners, id), value: initial.owners[id] });
+        if (province.owner === target) delete initial.owners[id]; else initial.owners[id] = target;
+      }
+      if (!changes.length) { redraw(); return; }
+      (current.mapPaintUndo || (current.mapPaintUndo = [])).push({ changes }); if (current.mapPaintUndo.length > 100) current.mapPaintUndo.shift();
+      undoPaint.disabled = false; mark(); redraw(); drawProvince(); refreshCountryList();
+    }
     function redraw() {
-      paintMap(preview, draft, id => {
-        current.mapProvince = typeof id === 'string' ? id : id.id;
-        if (current.mapPaintEnabled && !current.mapLabelEditMode && current.mapPaintCountry) {
-          const province = provinceIndex(config.template).byId.get(current.mapProvince);
-          if (province && (initial.owners[province.id] || province.owner) !== current.mapPaintCountry) {
-            if (!current.mapPaintUndo) current.mapPaintUndo = [];
-            current.mapPaintUndo.push({ id: province.id, exists: Object.prototype.hasOwnProperty.call(initial.owners, province.id), value: initial.owners[province.id] });
-            if (current.mapPaintUndo.length > 100) current.mapPaintUndo.shift();
-            if (province.owner === current.mapPaintCountry) delete initial.owners[province.id]; else initial.owners[province.id] = current.mapPaintCountry;
-            undoPaint.disabled = false; mark(); redraw();
-          }
-        }
-        drawProvince();
-      }, {
-        labelEditMode: Boolean(current.mapLabelEditMode),
-        labelPlacementCountry: current.mapLabelPlacementCountry || null,
-        onLabelMove: (countryId, point) => {
+      const paintCountry = countryList().find(item => item.id === current.mapCountry);
+      paintMap(preview, draft, id => { current.mapProvince = typeof id === 'string' ? id : id.id; panel.open = current.mapProvinceOpen = true; drawProvince(); }, {
+        interactionMode: current.mapTool === 'label' ? 'inspect' : current.mapTool,
+        initialCamera: current.mapCameraTemplate === config.template.id ? current.mapCamera : null,
+        paintColor: paintCountry?.color || '#778899', selectedProvinces: current.mapSelected,
+        onProvinceStroke: (ids, detail) => {
+          if (detail.mode === 'paint' && current.mapTool === 'paint') assignProvinces(ids, current.mapCountry);
+          else if (detail.mode === 'select' && current.mapTool === 'select') { current.mapSelected = [...new Set([...current.mapSelected, ...ids])]; redraw(); refreshCountryList(); }
+        },
+        labelEditMode: current.mapTool === 'label', labelPlacementCountry: current.mapLabelPlacementCountry || null,
+        onLabelMove: (id, point) => {
           if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite) || point[0] < 0 || point[0] > config.template.width || point[1] < 0 || point[1] > config.template.height) return;
-          const override = ensureCountryOverride(countryId); if (!override) return;
-          override.labelPosition = point.map(value => Math.round(value * 1000) / 1000);
-          current.mapLabelPlacementCountry = null; mark(); redraw();
-          const name = countryList().find(item => item.id === countryId)?.name || countryId;
-          labelPositionStatus.textContent = name + ' 국명 위치를 저장했습니다. (' + override.labelPosition.join(', ') + ')';
+          const override = ensureCountryOverride(id); if (!override) return;
+          override.labelPosition = point.map(value => Math.round(value * 1000) / 1000); current.mapLabelPlacementCountry = null; mark(); redraw();
+          labelPositionStatus.textContent = (countryList().find(item => item.id === id)?.name || id) + ' 국명 위치를 저장했습니다. (' + override.labelPosition.join(', ') + ')';
         }
       });
     }
     function drawProvince() {
-      panel.replaceChildren();
-      const province = config.template.provinces.find(item => item.id === current.mapProvince);
-      if (!province) { panel.append($('h3', '', '지역을 선택하세요'), notice('지도의 지역을 누르면 이곳에서 처음 상태를 바꿀 수 있습니다.')); return; }
-      panel.append($('h3', '', province.name + ' · ' + province.id));
-      panel.append(select('시작 소유국', initial.owners[province.id] || province.owner, countryItems(), value => { initial.owners[province.id] = value; mark(); redraw(); }));
-      panel.append(button('이 소유국 이름·색상 편집', () => {
-        current.mapCountry = initial.owners[province.id] || province.owner; current.mapLabelPlacementCountry = null;
-        render(); document.querySelector('[data-country-editor]')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }));
-      const effective=initialMapState(draft).map;
-      for (const [field, title] of [['occupation', '군사 점령국'], ['influence', '영향국']]) panel.append(select(title, effective[field][province.id] || '__none__', [['__none__', '없음'], ...countryItems()], value => { if (value === '__none__') { if(config.template.historicalInitial?.[field]?.[province.id]||(field==='influence'&&province.influence))initial[field][province.id]=null;else delete initial[field][province.id]; } else initial[field][province.id] = value; mark(); redraw(); }));
-      panel.append(input('시작 표식', effective.markers[province.id] || '', value => { if (value) initial.markers[province.id] = value; else if(config.template.historicalInitial?.markers?.[province.id])initial.markers[province.id]=null;else delete initial.markers[province.id]; mark(); redraw(); }));
-      panel.append(button('이 지역을 템플릿 기본값으로', () => { for (const layer of Object.values(initial)) if (layer && typeof layer === 'object') delete layer[province.id]; mark(); redraw(); drawProvince(); }));
+      closeCountryPickers(); panelBody.replaceChildren();
+      const province = provinceIndex(config.template).byId.get(current.mapProvince);
+      if (!province) { panelBody.append(notice('이동 도구에서 지역을 누르면 소유국·점령·영향권·표식을 자세히 편집할 수 있습니다.')); return; }
+      const effective = initialMapState(draft).map; panelBody.append($('h3', '', province.name + ' · ' + province.id));
+      panelBody.append(countrySelect('시작 소유국', effective.owners[province.id] || province.owner, countryList, value => assignProvinces([province.id], value)));
+      panelBody.append(button('이 소유국 이름·색상 편집', () => chooseWorking(effective.owners[province.id] || province.owner)));
+      for (const [field, title] of [['occupation', '군사 점령국'], ['influence', '영향국']]) panelBody.append(countrySelect(title, effective[field][province.id] || '__none__', countryList, value => {
+        if (value === '__none__') { if (config.template.historicalInitial?.[field]?.[province.id] || (field === 'influence' && province.influence)) initial[field][province.id] = null; else delete initial[field][province.id]; }
+        else initial[field][province.id] = value; mark(); redraw(); drawProvince();
+      }, { extra: [['__none__', '없음']] }));
+      panelBody.append(input('시작 표식', effective.markers[province.id] || '', value => { if (value) initial.markers[province.id] = value; else if (config.template.historicalInitial?.markers?.[province.id]) initial.markers[province.id] = null; else delete initial.markers[province.id]; mark(); redraw(); }));
+      panelBody.append(button('이 지역을 템플릿 기본값으로', () => { for (const layer of Object.values(initial)) if (layer && typeof layer === 'object') delete layer[province.id]; current.mapPaintUndo = []; undoPaint.disabled = true; mark(); redraw(); drawProvince(); refreshCountryList(); }));
     }
-    redraw(); drawProvince();
-    const countries = section('국가의 표시 이름과 색상');
-    countries.setAttribute('data-country-editor', '');
-    const availableCountries = countryList();
-    const selectedCountry = availableCountries.some(item => item.id === current.mapCountry) ? current.mapCountry : draft.map.playerCountry || availableCountries[0].id;
-    const editCountrySearch = countrySelect('편집할 국가', selectedCountry, countryList, value => { current.mapCountry = value; current.mapLabelPlacementCountry = null; render(); }, { mark: false });
-    countrySearches.push(editCountrySearch); countries.append(editCountrySearch);
-    const country = availableCountries.find(item => item.id === selectedCountry) || availableCountries[0];
-    function updateCountry(key, value) {
-      const override = ensureCountryOverride(country.id); if (!override) return;
-      override[key] = value; mark();
-      countrySearches.forEach(search => search.refreshCountries()); redraw(); drawProvince();
-    }
-    countries.append(input('표시 이름', country.name, value => updateCountry('name', value)), colorPicker('국가 색상', country.color, value => updateCountry('color', value)));
-    const labelTools = section('국명 위치 편집', '국명 위치 편집을 켜고 지도 위의 국명을 드래그하세요. 보이지 않는 국명은 위치 지정 버튼을 누른 뒤 지도에서 표시할 자리를 선택하세요. 지도 저장·JSON·갤러리에 위치가 함께 보관됩니다.');
-    labelTools.append(checkbox('국명 위치 편집', current.mapLabelEditMode, value => { current.mapLabelEditMode = value; current.mapLabelPlacementCountry = null; if (value) current.mapPaintEnabled = false; render(); }));
-    const labelActions = $('div', 'toolbar');
-    labelActions.append(button('선택한 국명 위치 지정', () => {
-      current.mapLabelEditMode = true; current.mapPaintEnabled = false; current.mapLabelPlacementCountry = country.id;
-      render();
-    }), button('국명 위치 자동 배치', () => {
-      const override = ensureCountryOverride(country.id); if (!override) return;
-      delete override.labelPosition; current.mapLabelPlacementCountry = null; mark(); redraw();
-      labelPositionStatus.textContent = country.name + ' 국명을 영토에 맞춰 자동 배치합니다.';
-    }), button('국명 숨기기', () => {
-      const override = ensureCountryOverride(country.id); if (!override) return;
-      override.labelPosition = null; current.mapLabelPlacementCountry = null; mark(); redraw();
-      labelPositionStatus.textContent = country.name + ' 국명을 숨겼습니다. 위치 지정 또는 자동 배치로 다시 표시할 수 있습니다.';
-    }));
-    labelPositionStatus.textContent = current.mapLabelPlacementCountry ? country.name + ' 국명을 표시할 위치를 지도에서 누르세요.' : country.labelPosition === null ? '현재 국명은 숨겨져 있습니다.' : Array.isArray(country.labelPosition) ? '저장된 국명 위치: ' + country.labelPosition.join(', ') : '현재 국명 위치: 영토에 맞춰 자동 배치';
-    labelTools.append(labelActions, labelPositionStatus); countries.append(labelTools);
-    countries.append(button('＋ 새 국가 추가', () => {
-      if ((draft.map.countries || []).length >= 1000) { showReport({ errors: ['사용자 국가는 1,000개까지 추가할 수 있습니다.'], warnings: [] }); return; }
+    const createForm = $('div', 'map-ui-create-form'); createForm.hidden = !current.mapCreating;
+    const make = button('＋ 국가 만들기', () => { current.mapCreating = !current.mapCreating; createForm.hidden = !current.mapCreating; if (current.mapCreating) createForm.querySelector('input')?.focus(); }, 'primary');
+    let newName = current.mapNewName || '', newColor = current.mapNewColor || '#6f9273';
+    createForm.append(input('새 국가 이름', newName, value => { newName = current.mapNewName = value; }, { maxLength: 100, mark: false }), colorPicker('새 국가 색상', newColor, value => { newColor = current.mapNewColor = value; }, { mark: false }));
+    const createError = $('p', 'small map-ui-error'); createError.setAttribute('role', 'alert');
+    createForm.append(createError, button('만들고 칠하기', () => {
+      const name = newName.trim(); if (!name) { createError.textContent = '새 국가 이름을 입력하세요.'; createForm.querySelector('input')?.focus(); return; }
+      if ((draft.map.countries || []).length >= 1000) { createError.textContent = '사용자 국가는 1,000개까지 추가할 수 있습니다.'; return; }
       const taken = new Set(countryList().map(item => item.id)); let index = 1; while (taken.has('country_' + index)) index++;
       const id = 'country_' + index; if (!draft.map.countries) draft.map.countries = [];
-      draft.map.countries.push({ id, name: '새 국가', color: '#778899' }); current.mapCountry = id; mark(); render();
+      draft.map.countries.push({ id, name, color: newColor }); current.mapCountry = current.mapPaintCountry = id;
+      current.mapCreating = false; current.mapNewName = ''; current.mapCountryQuery = ''; current.mapTool = 'paint'; current.mapLabelEditMode = false; current.mapLabelPlacementCountry = null;
+      mark(); render();
+    }, 'primary'), button('취소', () => { current.mapCreating = false; createForm.hidden = true; }));
+    sidebar.append($('h3', '', '국가 목록'), make, createForm, countryQuery, counts, countryRows);
+    const edit = section('작업 국가'), editSearch = countrySelect('편집할 국가', selectedId, countryList, chooseWorking, { mark: false }), paintSearch = countrySelect('칠할 시작 소유국', selectedId, countryList, chooseWorking, { mark: false });
+    countrySearches.push(editSearch, paintSearch);
+    function updateCountry(key, value) { const override = ensureCountryOverride(selectedId); if (!override) return; override[key] = value; mark(); countrySearches.forEach(search => search.refreshCountries()); redraw(); drawProvince(); refreshCountryList(); }
+    edit.append(editSearch, input('표시 이름', country?.name || '', value => updateCountry('name', value), { maxLength: 100 }), colorPicker('국가 색상', country?.color || '#778899', value => updateCountry('color', value)), paintSearch);
+    const labelTools = $('details', 'map-ui-label-tools'); labelTools.open = current.mapTool === 'label'; labelTools.append($('summary', '', '국명 위치 편집'));
+    labelTools.append(checkbox('국명 위치 편집', current.mapTool === 'label', value => setTool(value ? 'label' : 'inspect')), $('p', 'small muted', '국명 위치 도구에서 지도 위 국명을 드래그하세요. 저장·JSON·갤러리에 위치가 함께 보관됩니다.'));
+    const labelActions = $('div', 'toolbar');
+    labelActions.append(button('선택한 국명 위치 지정', () => { current.mapTool = 'label'; current.mapPaintEnabled = false; current.mapLabelEditMode = true; current.mapLabelPlacementCountry = selectedId; render(); }), button('국명 위치 자동 배치', () => { const override = ensureCountryOverride(selectedId); if (!override) return; delete override.labelPosition; current.mapLabelPlacementCountry = null; mark(); redraw(); labelPositionStatus.textContent = '국명을 영토에 맞춰 자동 배치합니다.'; }), button('국명 숨기기', () => { const override = ensureCountryOverride(selectedId); if (!override) return; override.labelPosition = null; current.mapLabelPlacementCountry = null; mark(); redraw(); labelPositionStatus.textContent = '국명을 숨겼습니다. 위치 지정 또는 자동 배치로 다시 표시할 수 있습니다.'; }));
+    labelPositionStatus.textContent = current.mapLabelPlacementCountry ? (country?.name || '') + ' 국명을 표시할 위치를 지도에서 누르세요.' : country?.labelPosition === null ? '현재 국명은 숨겨져 있습니다.' : Array.isArray(country?.labelPosition) ? '저장된 국명 위치: ' + country.labelPosition.join(', ') : '현재 국명 위치: 영토에 맞춰 자동 배치';
+    labelTools.append(labelActions, labelPositionStatus); edit.append(labelTools); sidebar.append(edit);
+    const center = countrySelect(current.mapOnly ? '중심 국가' : '플레이어 국가', draft.map.playerCountry, countryList, value => { draft.map.playerCountry = value; current.mapStatus = ''; mark(); redraw(); }, { help: '지도 이동 버튼의 기준입니다. 작업 국가를 바꿔도 중심 국가는 그대로 유지됩니다.' }); countrySearches.push(center); settingsBody.append(center);
+    const blankTools = section('백지도에서 시작', '지역 경계와 국가 목록은 유지하고, 모든 지역의 배정을 지웁니다. 사건·선택지·조건은 그대로 보관됩니다.');
+    blankTools.append(button('백지도 만들기', () => {
+      const plan = planBlankMap(draft); if (plan.error) { showReport({ errors: [plan.error], warnings: [] }); return; }
+      if (!confirm('지도의 모든 시작 영토를 미배정 지역으로 바꾸고 점령·영향권·표식을 지울까요? 국가 목록과 사건·선택지는 유지됩니다. 이 작업은 “백지도 만들기 되돌리기”로 되돌릴 수 있습니다.')) return;
+      current.mapBlankUndo = copy(draft.map); draft.map = plan.nextMap; current.mapPaintUndo = []; current.mapSelected = []; current.mapProvince = null; current.mapLabelPlacementCountry = null;
+      current.mapStatus = '백지도를 만들었습니다. 국가 목록에서 작업 국가를 고르고 드래그 칠하기로 영토를 칠하세요.'; upgrade(draft); mark(); render();
     }));
-    content.append(countries);
+    if (current.mapBlankUndo) blankTools.append(button('백지도 만들기 되돌리기', () => {
+      if (!confirm('백지도를 만들기 직전의 지도 전체 설정으로 돌아갈까요? 백지도 이후에 편집한 영토·색상·국명 위치도 함께 되돌아갑니다.')) return;
+      draft.map = copy(current.mapBlankUndo); current.mapBlankUndo = null; current.mapPaintUndo = []; current.mapSelected = []; current.mapProvince = null; current.mapLabelPlacementCountry = null;
+      current.mapStatus = '백지도를 만들기 직전의 지도를 복원했습니다.'; mark(); render();
+    }));
+    settingsBody.append(blankTools, button('지역 ID 목록 내려받기', () => {
+      const text = JSON.stringify({ templateId: config.template.id, countries: countryList(), provinces: config.template.provinces.map(({ id, name, owner }) => ({ id, name, owner })) }, null, 2);
+      const blob = new Blob([text + '\n'], { type: 'application/json;charset=utf-8' }), url = URL.createObjectURL(blob), link = $('a'); link.href = url; link.download = config.template.id + '-region-ids.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }));
+    if (config.template.notice) settingsBody.append(notice(config.template.notice));
+    board.append(tools, currentChip, preview, $('p', 'small muted map-ui-key-help', '지도를 클릭한 뒤 WASD 이동 · Shift로 빠르게 · 휠 확대·축소 · 입력 중에는 지도 이동이 멈춥니다.'), selectionBar, panel, settings);
+    workspace.append(sidebar, board); content.append(workspace); redraw(); drawProvince(); refreshCountryList();
+  }
+
+  function effectiveOwnerCounts(owners) {
+    const counts = Object.create(null); for (const id of Object.values(owners || {})) if (id) counts[id] = (counts[id] || 0) + 1; return counts;
   }
 
   function ensureReign(draft) {
@@ -1454,28 +1537,24 @@
   }
 
   function renderMapOnly(content) {
-    const draft = current.draft;
     content.classList.add('map-maker-content');
-    const workspace = $('div', 'map-maker-workspace'), settings = $('aside', 'map-maker-settings'), board = $('section', 'map-maker-board');
-    settings.setAttribute('aria-label', '지도 설정과 지역 편집');
-    board.setAttribute('aria-label', '편집 중인 지도');
-    settings.append(input('지도 제목', draft.title, value => { draft.title = value; }, { maxLength: 120 }));
-    settings.append(input('지도 설명', draft.description, value => { draft.description = value; }, { multiline: true, rows: 2, maxLength: 1000, help: '시대와 가정, 수정한 국경 등을 적어 두세요.' }));
-    const controls = $('div', 'map-maker-map-settings');
-    renderMap(controls);
-    // Keep the same live nodes and closures, but give the map its own column.
-    // Editing metadata or scrolling settings must never hide the map board.
-    const heading = controls.querySelector('h2'), preview = controls.querySelector('.v2-editor-map');
-    if (heading) { const introduction = heading.nextElementSibling; heading.remove(); if (introduction?.matches('p.notice')) introduction.remove(); }
-    if (preview) board.append(preview);
-    else board.append(notice('왼쪽에서 지역과 시대를 선택하고 “지도 준비”를 누르세요.'));
-    settings.append(controls);
-    workspace.append(settings, board);
-    content.append(workspace);
+    renderMap(content);
+  }
+
+  function disposeEditorMapViews(rememberCamera) {
+    if (!current) return;
+    closeCountryPickers();
+    current.dialog.querySelectorAll('.v2-editor-map, .v2-map-picker').forEach(container => {
+      const camera = globalThis.MapView?.getCamera?.(container);
+      if (rememberCamera && camera && camera.templateId === current.draft.map?.templateId && container.classList.contains('v2-editor-map')) { current.mapCamera = camera; current.mapCameraTemplate = camera.templateId; }
+      globalThis.MapView?.dispose?.(container);
+    });
   }
 
   function render() {
     if (!current) return;
+    ensureMapEditorStyles();
+    disposeEditorMapViews(true);
     if (current.flowchartCleanup) { current.flowchartCleanup(); current.flowchartCleanup = null; }
     current.dialog.classList.toggle('flowchart-mode', current.page === 'flowchart' && !current.mapOnly);
     current.dialog.classList.toggle('map-maker-mode', Boolean(current.mapOnly));
@@ -1540,6 +1619,7 @@
     if (!force && current.dirty && !confirm(current.mapOnly ? '아직 저장하지 않은 지도 수정을 닫을까요? 보관하려면 취소하고 “지도 저장” 또는 “지도 JSON 내보내기”를 누르세요.' : '아직 게임에 적용하지 않은 편집 초안을 닫을까요? 보관하려면 취소하고 JSON으로 내보내세요.')) return false;
     globalThis.MapMaker?.cancelPending?.();
     const dialog = current.dialog;
+    disposeEditorMapViews(false);
     if (current.flowchartCleanup) current.flowchartCleanup();
     dialog.classList.remove('flowchart-mode', 'map-maker-mode');
     dialog.setAttribute('aria-label', '시나리오 편집');
@@ -1578,5 +1658,5 @@
 
   globalThis.ScenarioEditor = { open, close: () => close(false), cancelPending: () => { ++openSequence; } };
   globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences, planMapChange, territoryReferences,
-    mapSetupSelection, mapSetupEras, mapSetupDefault, mapSetupTemplateId, planBlankMap, countryMatches };
+    mapSetupSelection, mapSetupEras, mapSetupDefault, mapSetupTemplateId, planBlankMap, countryMatches, effectiveOwnerCounts, countrySelect };
 })();

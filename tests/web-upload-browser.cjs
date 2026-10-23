@@ -80,7 +80,7 @@ async function main(){
   const offline=await routed(browser,html),p=offline.page;
   await p.goto(origin+'/offline.html');await p.evaluate(()=>HistoryCrossroads.ready);
   assert.equal(await p.evaluate(()=>HistoryCrossroads.getScenario().draft),true);
-  await p.evaluate(()=>MapMaker.startNew());await p.getByLabel('지도 제목',{exact:true}).waitFor();
+  await p.evaluate(()=>MapMaker.startNew());await p.getByRole('button',{name:'지도 설정',exact:true}).click();await p.getByLabel('지도 제목',{exact:true}).waitFor();
   await p.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption('europe_med');
   await p.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();
   await p.getByRole('button',{name:'지도 저장',exact:true}).click();

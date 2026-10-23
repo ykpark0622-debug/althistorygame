@@ -1,0 +1,49 @@
+v2.11 map-workshop browser validation
+Run against exact local release sources and generated standalone HTML.
+Chrome channel: installed Google Chrome, headless, Playwright.
+No production hosting, Supabase, gallery or remote map data is contacted.
+
+map-workshop-ui-v2.11-browser-report.json: 17 passed; browserErrors: []
+PASS Creating a named colored country immediately selects it for editing and drag painting without changing the map center country
+PASS One real pointer drag paints multiple provinces as one undoable action, and pointer cancellation commits no partial territory
+PASS Selecting multiple regions changes no ownership until explicit assignment, and the entire batch is reversible
+PASS Region details search custom countries for ownership, occupation and influence, and retain the explicit clear-to-none operations
+PASS Country-list editing and recoloring are independent of center selection; searchable center choices preserve all data when no country matches
+PASS The redesigned settings retain map title, the six regional selectors, existing era presets and all 28 template registrations
+PASS Country labels can still be placed, dragged, hidden and restored to automatic positioning without painting territory
+PASS Blank-map undo and actual exported JSON reimport preserve the exact edited document while map-only work leaves game and save bytes unchanged
+PASS Reopening cached maps makes no new geometry requests and the actual country-list workshop fits a 390px mobile viewport
+PASS Focused WASD pans in all four directions, held movement stops on keyup, Shift accelerates and typing/shortcuts/IME never pan or change ownership
+PASS Closing the workshop while a key is held cancels keyboard animation and leaves its detached map stable
+PASS Actual scenario condition, ownership, occupation, influence and player-country controls all search and retain the chosen custom country in the applied manuscript
+PASS Country popovers support keyboard selection and preserve condition-null, keep-existing and clear-occupation sentinel semantics
+PASS Two map widgets have independent keyboard focus; hidden and disposed views stop immediately without changing scenario or game-state data
+PASS Focused WASD pans in all four directions, held movement stops on keyup, Shift accelerates and typing/shortcuts/IME never pan or change ownership
+PASS Closing the workshop while a key is held cancels keyboard animation and leaves its detached map stable
+PASS The final generated standalone supports the redesigned country workflow and WASD with zero network assets
+
+map-workshop-tools-browser-report.json: 11 passed; browserErrors: []
+PASS Both country controls search by Korean name and ID while zero results preserve the selected country and all map data
+PASS Native color picking and palette clicks recolor every already-owned region; save/export/import retain the exact color
+PASS Cancelling the blank-map confirmation leaves the complete historical map untouched
+PASS historical_world_1939: blanking all 5939 regions clears historical occupation, influence and markers; undo restores the exact complete map and game progress
+PASS historical_europe_1444: blanking all 2431 regions clears historical occupation, influence and markers; undo restores the exact complete map and game progress
+PASS Dragging a country label after zoom and pan saves crop-local coordinates, preserves viewport and does not paint territory
+PASS Label coordinates survive JSON export/import; hiding stores explicit null and automatic placement removes the manual override
+PASS A newly added country can gain territory and place a label by clicking the map; display toggles preserve every saved coordinate and territory
+PASS An out-of-range imported label is rejected atomically while the edited map, stored map and active game are preserved
+PASS Creating a scenario carries the edited colors, ownership and custom label coordinates into the empty scenario
+PASS The generated offline program supports searchable color editing, label placement and reversible blank maps without network requests
+
+map-hatching-fixed-browser-report.json: 6 passed; browserErrors: []
+PASS Previously distributed 1444 gallery JSON opens with clean country colors and influence hatching off
+PASS Influence hatching can be shown and hidden while real region editing, stored map JSON and game progress stay unchanged
+PASS The installed 1444 era preset also defaults to no influence hatching and still contains all historical relations
+PASS 1939 military occupation remains visible by default and its checkbox works independently from influence
+PASS Region selection and zoom remain available with the new display controls
+PASS Re-rendering a map keeps its per-view layer preferences, reuses geometry and leaves scenario/state/template data byte-for-byte unchanged
+
+Exports inspect the real generated download Blob and reimport its JSON. Saving a browser download to the filesystem is not exercised.
+The new UI suite exercises both web and final generated standalone. The historical-layer suite is a web-only display regression.
+Visual inspection: map-country-list-v2.11-preview.png has the light country-list layout, independent map controls and fixed footer.
+Mobile 390px viewport: no horizontal document or dialog overflow.

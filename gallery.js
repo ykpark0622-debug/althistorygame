@@ -374,6 +374,7 @@
   }
   function renderDetail() {
     const item = detailItem; if (!item) return;
+    window.MapView?.dispose?.($('gallery-map-preview'));
     const hidden = item.status === 'hidden';
     const owner = state.user && item.author_id === state.user.id;
     $('detail-content').innerHTML = `<p class="eyebrow">${esc(item.author_name)} · ${esc(when(item.created_at))}${item.updated_at && item.updated_at !== item.created_at ? ` (수정 ${esc(when(item.updated_at))})` : ''}</p>
@@ -404,6 +405,7 @@
       if (detailItem?.id === item.id && holder.isConnected) window.MapView.render(holder, {id:data.id,map:data.map}, null);
     } catch (error) {
       if (detailItem?.id !== item.id || !holder.isConnected) return;
+      window.MapView?.dispose?.(holder);
       holder.replaceChildren();
       const message = document.createElement('p'); message.className = 'g-help'; message.textContent = '지도 미리보기를 불러오지 못했습니다. ' + friendlyError(error);
       const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'btn secondary'; retry.textContent = '지도 다시 불러오기'; retry.onclick = () => { holder.textContent = '지도를 불러오는 중…'; renderMapPreview(item); };
@@ -607,7 +609,7 @@
     if (event.target.id === 'upload-form') { event.preventDefault(); if (!upload.busy) submitUpload(); }
     if (event.target.id === 'report-form') { event.preventDefault(); submitReport(); }
   });
-  $('detail-dialog').addEventListener('close', () => { ++detailSequence; const url = new URL(location.href); url.searchParams.delete('id'); history.replaceState(null, '', url); detailItem = null; });
+  $('detail-dialog').addEventListener('close', () => { ++detailSequence; window.MapView?.dispose?.($('gallery-map-preview')); const url = new URL(location.href); url.searchParams.delete('id'); history.replaceState(null, '', url); detailItem = null; });
   $('upload-dialog').addEventListener('close', () => { ++upload.request; upload.checking = false; });
 
   // ---------------------------------------------------------------- start

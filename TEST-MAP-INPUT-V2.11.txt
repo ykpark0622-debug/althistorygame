@@ -1,0 +1,10 @@
+PASS Focused native keyboard control moves the camera and key release stops it
+PASS Text input, IME composition and modified shortcuts leave the camera unchanged
+PASS One paint gesture commits each crossed region once, without extra inspect clicks or camera panning
+PASS Canceled strokes restore color and retain the existing selection without committing
+PASS Selection strokes have an independent callback and leave no temporary preview behind
+PASS Explicit cleanup and recreation restore camera state and preserve ordinary inspect clicks
+PASS Hiding or disposing the view stops movement and all gestures preserve source data
+PASS Deterministic frame checks verify diagonal normalization, double Shift speed and no queued frame after key release
+PASS Switching between map widgets or removing a moving map releases its animation loop
+Map input browser: 9 checks passed; no remote requests or browser errors.

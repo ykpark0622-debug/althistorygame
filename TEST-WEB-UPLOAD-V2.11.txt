@@ -1,0 +1,4 @@
+PASS web entry and each program piece are small; reconstruction matches the complete offline program byte for byte
+PASS direct standalone link downloads the complete original offline HTML
+PASS missing program piece preserves private manuscript/progress; retry downloads a clean standalone HTML
+PASS downloaded program opens blank and edits Europe/South America entirely offline

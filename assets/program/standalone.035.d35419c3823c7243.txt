@@ -1,0 +1,2078 @@
+ceholder', value); }, { maxLength: 100, help: '이름 입력칸이 비어 있을 때 표시할 문구입니다. 비워 두어도 됩니다.' }),
+      $('p', 'small muted', '기존 시나리오에 이름 설정이 없어도 이름 입력은 기본으로 켜집니다. 시작 화면을 건너뛰려면 위 항목을 끄세요. 이 설정은 값을 바꿀 때만 시나리오에 추가됩니다.'));
+    content.append(details);
+  }
+
+  function renderStats(content) {
+    const draft = current.draft;
+    content.append($('h2', '', '수치'));
+    content.append($('p', 'muted', '선택지의 효과는 이 값에 더해집니다. 게임에서는 최솟값과 최댓값 사이로 제한됩니다.'));
+    draft.stats.forEach((stat, index) => {
+      const card = $('section', 'editor-card');
+      card.append($('h3', '', stat.name || '새 수치'));
+      card.append(grid(
+        input('표시 이름', stat.name, value => { stat.name = value; }),
+        idInput('연결용 ID', stat, 'stat')
+      ));
+      card.append(grid(
+        input('시작값', stat.initial, value => { stat.initial = value; }, { type: 'number', step: 'any' }),
+        input('최솟값', stat.min, value => { stat.min = value; }, { type: 'number', step: 'any' }),
+        input('최댓값', stat.max, value => { stat.max = value; }, { type: 'number', step: 'any' }),
+        input('색상', stat.color || '#b58e59', value => { stat.color = value; }, { placeholder: '#b58e59', help: '예: #b58e59' })
+      ));
+      card.append(input('설명', stat.description, value => { stat.description = value; }));
+      card.append(button('수치 삭제', () => {
+        if (!confirm('이 수치를 삭제할까요? 이 ID를 사용하는 효과와 조건도 수정해야 합니다.')) return;
+        draft.stats.splice(index, 1); mark(); render();
+      }, 'danger'));
+      content.append(card);
+    });
+    content.append(button('＋ 수치 추가', () => {
+      draft.stats.push({ id: allocate('stat'), name: '새 수치', initial: 50, min: 0, max: 100, color: '#b58e59', description: '' });
+      mark(); render();
+    }));
+  }
+
+  function renderFlags(content) {
+    const draft = current.draft;
+    content.append($('h2', '', '선택 기록'));
+    content.append($('p', 'muted', '의회를 세웠다, 차관을 받았다처럼 과거의 결정을 참/거짓으로 기억합니다. 선택지에서 바꾸고 사건·선택지·엔딩 조건에서 읽습니다.'));
+    draft.flags.forEach((flag, index) => {
+      const card = $('section', 'editor-card');
+      card.append(grid(
+        input('표시 이름', flag.name, value => { flag.name = value; }),
+        idInput('연결용 ID', flag, 'flag')
+      ));
+      card.append(checkbox('처음부터 이 기록을 보유함', flag.initial, value => { flag.initial = value; }));
+      card.append(button('기록 삭제', () => {
+        if (!confirm('이 기록을 삭제할까요? 이 ID를 사용하는 선택지와 조건도 수정해야 합니다.')) return;
+        draft.flags.splice(index, 1); mark(); render();
+      }, 'danger'));
+      content.append(card);
+    });
+    content.append(button('＋ 선택 기록 추가', () => {
+      draft.flags.push({ id: allocate('flag'), name: '새 선택 기록', initial: false }); mark(); render();
+    }));
+  }
+
+  function move(list, index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= list.length) return index;
+    [list[index], list[target]] = [list[target], list[index]];
+    mark();
+    return target;
+  }
+
+  function renderEventList(content) {
+    const draft = current.draft;
+    content.append($('h2', '', '사건과 선택지'));
+    content.append($('p', 'muted', '사건 목록의 순서는 편집용입니다. 실제 진행은 각 사건·선택지의 “다음 장면” 연결로 결정됩니다.'));
+    const list = $('div', 'editor-list');
+    draft.events.forEach((event, index) => {
+      list.append(button((index + 1) + '. ' + (event.title || '제목 없음') + ' · ' + event.id,
+        () => { current.eventIndex = index; render(); }, index === current.eventIndex ? 'secondary selected' : 'secondary'));
+    });
+    const toolbar = $('div', 'toolbar');
+    toolbar.append(button('＋ 사건 추가', () => {
+      draft.events.push({ id: allocate('event'), title: '새 사건', chapter: '', date: '', speaker: '', body: '', when: [], next: 'END',
+        choices: [{ text: '다음으로', description: '', effects: {}, setFlags: {}, when: [] }] });
+      if (!draft.start) draft.start = draft.events[draft.events.length - 1].id;
+      current.eventIndex = draft.events.length - 1;
+      mark(); render();
+    }));
+    content.append(list, toolbar);
+    if (!draft.events.length) { content.append(notice('사건을 추가한 뒤 기본 설정에서 시작 사건을 지정해 주세요.')); return; }
+    current.eventIndex = Math.max(0, Math.min(current.eventIndex, draft.events.length - 1));
+    const index = current.eventIndex;
+    const event = draft.events[index];
+    const controls = $('div', 'toolbar');
+    const up = button('↑ 위로', () => { current.eventIndex = move(draft.events, index, -1); render(); });
+    const down = button('↓ 아래로', () => { current.eventIndex = move(draft.events, index, 1); render(); });
+    up.disabled = index === 0;
+    down.disabled = index === draft.events.length - 1;
+    controls.append(up, down, button('사건 복제', () => {
+      const duplicate = copy(event);
+      duplicate.id = allocate('event');
+      duplicate.title = (duplicate.title || '사건') + ' (복사)';
+      draft.events.splice(index + 1, 0, duplicate);
+      current.eventIndex = index + 1; mark(); render();
+    }), button('사건 삭제', () => {
+      if (!confirm('이 사건을 삭제할까요? 시작 사건과 다른 사건의 연결도 확인해 주세요.')) return;
+      draft.events.splice(index, 1);
+      if (!draft.events.length) { draft.start = null; draft.draft = true; }
+      mark(); render();
+    }, 'danger'));
+    const details = section('사건 본문');
+    details.append(controls, grid(
+      input('제목', event.title, value => { event.title = value; }),
+      idInput('연결용 ID', event, 'event')
+    ), grid(
+      input('장 / 부', event.chapter, value => { event.chapter = value; }),
+      input('날짜 / 시점', event.date, value => { event.date = value; }),
+      input('화자 / 보고자', event.speaker, value => { event.speaker = value; })
+    ), input('본문', event.body, value => { event.body = value; }, { multiline: true, rows: 7 }),
+    select('기본 다음 장면', event.next, eventOptions(false), value => { event.next = value; },
+      { help: '선택지에 별도 연결이 있으면 선택지 설정을 우선합니다. 등장 조건을 만족하지 않은 사건은 이 기본 연결을 따라 건너뜁니다.' }));
+    if (!Array.isArray(event.when)) event.when = [];
+    details.append(builder(event.when, '사건 등장 조건'));
+    if (draft.mode === 'reign') details.append(select('치세 카드 분야', event.part || '', [['', '분야 미지정'], ...(draft.reign?.parts || []).map(part => [part.id, part.name])], value => { if (value) event.part = value; else delete event.part; }, { help: '치세·연도 탭의 해당 연도 사건 목록에도 이 사건을 넣으세요. 치세에서는 일반 next 연결 대신 분야별 카드를 고릅니다.' }));
+    content.append(details);
+    renderChoices(content, event);
+  }
+
+  function renderChoices(content, event) {
+    const choices = section('선택지', '수치 효과는 증가·감소량입니다. 예: 15는 +15, -10은 -10입니다. 선택 기록은 “유지”를 고르면 기존 값을 그대로 둡니다.');
+    event.choices.forEach((choice, index) => {
+      const card = $('section', 'editor-card');
+      card.append($('h4', '', '선택지 ' + (index + 1)));
+      card.append(input('버튼에 표시할 문장', choice.text, value => { choice.text = value; }));
+      card.append(input('보충 설명', choice.description, value => { choice.description = value; }, { multiline: true, rows: 2 }));
+      card.append(input('선택 후 결과 본문', choice.result, value => { choice.result = value; upgrade(current.draft); }, { multiline: true, rows: 3 }),
+        checkbox('실제 역사에서 선택한 경로로 표시', choice.historical === true, value => { choice.historical = value; upgrade(current.draft); }, '표시된 선택지만 역사 비교의 기준으로 사용합니다. 가상의 선택을 실제 역사로 표시하지 마세요.'));
+      if (!choice.effects || typeof choice.effects !== 'object') choice.effects = {};
+      if (!choice.setFlags || typeof choice.setFlags !== 'object') choice.setFlags = {};
+      const effects = $('div', 'effects-grid');
+      current.draft.stats.forEach(stat => effects.append(input(stat.name + ' 변화', choice.effects[stat.id] || 0, value => {
+        if (value === 0) delete choice.effects[stat.id];
+        else choice.effects[stat.id] = value;
+      }, { type: 'number', compact: true, step: 'any' })));
+      card.append(effects);
+      const flags = $('div', 'effects-grid');
+      current.draft.flags.forEach(flag => flags.append(select(flag.name,
+        Object.prototype.hasOwnProperty.call(choice.setFlags, flag.id) ? String(choice.setFlags[flag.id]) : '',
+        [['', '유지'], ['true', '참으로 기록'], ['false', '거짓으로 기록']], value => {
+          if (value === '') delete choice.setFlags[flag.id];
+          else choice.setFlags[flag.id] = value === 'true';
+        }, { compact: true })));
+      card.append(flags);
+      const knownStats = new Set(current.draft.stats.map(stat => stat.id));
+      const knownFlags = new Set(current.draft.flags.map(flag => flag.id));
+      const orphans = [
+        ...Object.keys(choice.effects).filter(key => !knownStats.has(key)).map(key => ['effects', key]),
+        ...Object.keys(choice.setFlags).filter(key => !knownFlags.has(key)).map(key => ['setFlags', key])
+      ];
+      if (orphans.length) {
+        const stale = $('div', 'notice');
+        stale.append($('p', 'small', '삭제되었거나 이름이 바뀐 ID가 남아 있습니다. 제거하거나 JSON에서 수정하세요.'));
+        orphans.forEach(([kind, key]) => stale.append(button(key + ' 연결 제거', () => {
+          delete choice[kind][key]; mark(); render();
+        }, 'danger')));
+        card.append(stale);
+      }
+      card.append(select('선택 후 다음 장면', choice.next || '', eventOptions(true), value => {
+        if (value) choice.next = value;
+        else delete choice.next;
+      }));
+      if (!Array.isArray(choice.when)) choice.when = [];
+      card.append(builder(choice.when, '선택 가능한 조건', '조건을 모두 만족할 때 이 선택지를 고를 수 있습니다. 충족하지 못한 선택지는 플레이 화면에서 잠깁니다.'));
+      card.append(territoryEditor(current.draft, choice, mark));
+      const toolbar = $('div', 'toolbar');
+      const up = button('↑', () => { move(event.choices, index, -1); render(); });
+      const down = button('↓', () => { move(event.choices, index, 1); render(); });
+      up.disabled = index === 0;
+      down.disabled = index === event.choices.length - 1;
+      toolbar.append(up, down, button('복제', () => {
+        event.choices.splice(index + 1, 0, copy(choice)); mark(); render();
+      }), button('선택지 삭제', () => {
+        event.choices.splice(index, 1); mark(); render();
+      }, 'danger'));
+      card.append(toolbar);
+      choices.append(card);
+    });
+    choices.append(button('＋ 선택지 추가', () => {
+      event.choices.push({ text: '새 선택지', description: '', effects: {}, setFlags: {}, when: [] });
+      mark(); render();
+    }));
+    content.append(choices);
+  }
+
+  function renderRandomEvents(content) {
+    const draft = current.draft;
+    const rules = draft.randomEvents || [];
+    content.append($('h2', '', '돌발 사건'));
+    content.append(notice('일반 사건에서 선택하면 즉시 종료 엔딩을 먼저 판정하고, 게임이 계속될 때 돌발 사건을 추첨합니다. 조건을 만족하는 규칙을 우선순위가 높은 순서로 판정하며 한 번에 하나만 발생합니다. 확률은 매 선택마다 독립적으로 판정합니다. 중간 사건에 대응하는 동안에는 새 돌발 사건을 추첨하지 않습니다.'));
+    content.append($('p', 'muted', '돌발 사건은 일반 사건과 같은 본문·선택지를 사용합니다. 대응 사건의 다음 장면을 RETURN으로 지정하면, 대응을 마친 뒤 중단했던 원래 흐름으로 돌아갑니다.'));
+    const list = $('div', 'editor-list');
+    rules.forEach((rule, index) => list.append(button((index + 1) + '. ' + (rule.title || '이름 없는 규칙') + ' · ' + rule.id,
+      () => { current.randomIndex = index; render(); }, index === current.randomIndex ? 'secondary selected' : 'secondary')));
+    const toolbar = $('div', 'toolbar');
+    const addRule = button('＋ 돌발 사건 규칙 추가', () => {
+      if (!draft.randomEvents) draft.randomEvents = [];
+      draft.randomEvents.push({ id: allocate('random'), title: '새 돌발 사건 규칙', eventId: (draft.events.find(event => event.next === 'RETURN') || draft.events[0]).id,
+        when: [], chance: 25, priority: 10, once: true, cooldown: 0 });
+      current.randomIndex = draft.randomEvents.length - 1;
+      mark(); render();
+    });
+    addRule.disabled = !draft.events.length;
+    const protest = button('민심 시위 예시 추가', () => {
+      const existing = (draft.randomEvents || []).findIndex(rule => rule.id === 'people_protest');
+      if (existing >= 0) { current.randomIndex = existing; render(); return; }
+      const eventId = allocate('protest');
+      const statIds = new Set(draft.stats.map(stat => stat.id));
+      const effects = values => Object.fromEntries(Object.entries(values).filter(([key]) => statIds.has(key)));
+      draft.events.push({
+        id: eventId, title: '광장에 모인 사람들', chapter: '돌발 사건', date: '', speaker: '시민 대표',
+        body: '물가와 생활고를 견디지 못한 사람들이 관청 앞 광장을 메웠다. 대표들은 당장 대책을 내놓으라고 요구하고, 군 지휘부는 해산 명령을 기다리고 있다.\n\n“오늘도 기다리라는 말씀만 하실 겁니까?”',
+        when: [], next: 'RETURN', choices: [
+          { text: '구호 예산을 풀고 주민들과 협상한다.', description: '당장의 구호와 대화에 힘을 쏟는다.', when: [], effects: effects({ people: 10, treasury: -8, army: -2 }), setFlags: {} },
+          { text: '병력을 투입해 광장을 해산한다.', description: '시위를 진압하고 지휘부의 요구를 받아들인다.', when: [], effects: effects({ people: -10, treasury: -2, army: 6 }), setFlags: {} },
+          { text: '대표자들과 공개 면담을 연다.', description: '대화를 시작하고 해결책을 함께 찾는다.', when: [], effects: effects({ people: 4, army: -1 }), setFlags: {} }
+        ]
+      });
+      if (!draft.randomEvents) draft.randomEvents = [];
+      const taken = new Set([draft.id, ...draft.stats.map(item => item.id), ...draft.flags.map(item => item.id),
+        ...draft.events.map(item => item.id), ...draft.endings.map(item => item.id), ...draft.randomEvents.map(item => item.id)]);
+      draft.randomEvents.push({ id: taken.has('people_protest') ? allocate('people_protest') : 'people_protest',
+        title: '민심 악화에 따른 시위', eventId, when: [{ kind: 'stat', key: 'people', op: 'lte', value: 30 }],
+        chance: 30, priority: 100, once: false, cooldown: 2 });
+      current.randomIndex = draft.randomEvents.length - 1;
+      mark(); render();
+    });
+    const hasPeople = draft.stats.some(stat => stat.id === 'people');
+    protest.disabled = !hasPeople || !draft.events.length;
+    toolbar.append(addRule, protest);
+    content.append(list, toolbar);
+    if (addRule.disabled) content.append($('p', 'small muted', '규칙이 연결할 사건이 필요합니다. 사건·선택지 탭이나 분기 흐름도에서 일반 사건을 먼저 추가하세요.'));
+    content.append($('p', 'small muted', !hasPeople
+      ? '시위 예시를 넣으려면 수치 탭에서 연결용 ID가 people인 수치를 먼저 추가하세요.'
+      : !draft.events.length ? '시위 대응 후 돌아갈 원래 이야기가 필요합니다. 일반 사건을 먼저 추가하세요.'
+      : '예시: 민심(people) 30 이하에서 30% 확률로 발생합니다. 발생 뒤 대응 선택을 포함해 선택 2회 동안 다시 발생하지 않습니다. 재정·군부 효과는 해당 수치가 있을 때만 추가합니다.'));
+    if (!rules.length) return;
+    current.randomIndex = Math.max(0, Math.min(current.randomIndex, rules.length - 1));
+    const index = current.randomIndex;
+    const rule = rules[index];
+    const details = section('돌발 사건 규칙 편집');
+    const controls = $('div', 'toolbar');
+    const up = button('↑ 위로', () => { current.randomIndex = move(rules, index, -1); render(); });
+    const down = button('↓ 아래로', () => { current.randomIndex = move(rules, index, 1); render(); });
+    up.disabled = index === 0;
+    down.disabled = index === rules.length - 1;
+    controls.append(up, down, button('규칙 복제', () => {
+      const duplicate = copy(rule);
+      duplicate.id = allocate('random'); duplicate.title = (duplicate.title || '돌발 사건') + ' (복사)';
+      rules.splice(index + 1, 0, duplicate); current.randomIndex = index + 1;
+      mark(); render();
+    }), button('규칙 삭제', () => {
+      rules.splice(index, 1);
+      mark(); render();
+    }, 'danger'));
+    details.append(controls, grid(
+      input('규칙 이름', rule.title, value => { rule.title = value; }),
+      input('연결용 ID', rule.id, value => { rule.id = value; })
+    ), select('발생할 사건', rule.eventId, draft.events.map(event => [event.id, event.id + ' · ' + event.title]), value => { rule.eventId = value; },
+      { help: '이 사건이 원래 흐름 사이에 등장합니다. 대응 후 돌아오려면 해당 사건의 기본 다음 장면을 RETURN으로 설정하세요.' }),
+    grid(
+      input('발생 확률 (%)', rule.chance, value => { rule.chance = value; }, { type: 'number', min: 0, max: 100, step: 'any', help: '100%는 조건 충족 시 확정 발생, 0%는 발생하지 않음입니다.' }),
+      input('우선순위', rule.priority, value => { rule.priority = value; }, { type: 'number', step: 'any', help: '숫자가 같으면 목록에서 앞선 규칙부터 판정합니다.' }),
+      input('재발동 대기 (선택 횟수)', rule.cooldown === undefined ? 0 : rule.cooldown, value => { rule.cooldown = value; }, { type: 'number', min: 0, step: '1', help: '발생 이후의 선택 횟수이며 대응 사건에서 고르는 선택도 포함합니다. 0이면 복귀 후 다음 본편 선택에서 재추첨할 수 있습니다.' })
+    ), checkbox('한 플레이에서 한 번만 발생', rule.once !== false, value => { rule.once = value; }));
+    const editEvent = button('연결된 사건의 본문·선택지 편집', () => {
+      const eventIndex = draft.events.findIndex(event => event.id === rule.eventId);
+      if (eventIndex >= 0) { current.eventIndex = eventIndex; navigate('events'); }
+    });
+    editEvent.disabled = !draft.events.some(event => event.id === rule.eventId);
+    details.append(editEvent);
+    if (!Array.isArray(rule.when)) rule.when = [];
+    details.append(builder(rule.when, '돌발 사건 발생 조건', '아래 조건과 연결된 사건의 등장 조건을 모두 만족할 때만 추첨합니다. 조건이 없으면 대기 횟수와 1회 제한에 따라 항상 추첨 대상이 됩니다.'));
+    content.append(details);
+  }
+
+  function renderEndings(content) {
+    const draft = current.draft;
+    content.append($('h2', '', '엔딩'));
+    content.append(notice('조건을 만족한 엔딩 중 우선순위 숫자가 가장 높은 결말을 선택합니다. 숫자가 같으면 목록에서 앞선 엔딩이 우선합니다. 일치하는 결말이 없으면 기본 엔딩으로 마칩니다.'));
+    content.append(select('기본 엔딩', draft.defaultEnding || '', draft.endings.length ? draft.endings.map(ending => [ending.id, ending.title + ' (' + ending.id + ')']) : [['', '엔딩을 먼저 추가하세요']], value => { draft.defaultEnding = value || null; },
+      { help: '기본 엔딩은 조건을 비우고 “조건 충족 시 즉시 종료”를 꺼야 합니다. 다른 결말에 해당하지 않을 때 도달하는 결말입니다.' }));
+    const list = $('div', 'editor-list');
+    draft.endings.forEach((ending, index) => list.append(button((index + 1) + '. ' + (ending.title || '제목 없음') + ' · ' + ending.id,
+      () => { current.endingIndex = index; render(); }, index === current.endingIndex ? 'secondary selected' : 'secondary')));
+    content.append(list, button('＋ 엔딩 추가', () => {
+      draft.endings.push({ id: allocate('ending'), title: '새 엔딩', kind: 'mixed', summary: '', body: '', priority: 10, immediate: false, when: [] });
+      if (!draft.defaultEnding) draft.defaultEnding = draft.endings[draft.endings.length - 1].id;
+      current.endingIndex = draft.endings.length - 1; mark(); render();
+    }));
+    const armyCoup = button('군부 쿠데타 예시 추가', () => {
+      const existingIndex = draft.endings.findIndex(item => item.id === 'army_coup');
+      if (existingIndex >= 0) { current.endingIndex = existingIndex; render(); return; }
+      const taken = new Set([draft.id, ...draft.stats.map(item => item.id), ...draft.flags.map(item => item.id),
+        ...draft.events.map(item => item.id), ...draft.endings.map(item => item.id), ...(draft.randomEvents || []).map(item => item.id)]);
+      draft.endings.push({
+        id: taken.has('army_coup') ? allocate('army_coup') : 'army_coup',
+        title: '새벽의 군홧발', kind: 'bad', summary: '군부의 불만이 쿠데타로 이어져 정부가 전복되었다.',
+        body: '새벽 종이 울리기 전에 관청의 문이 열렸다. 복도를 채운 군홧발 소리에 경비병들은 총을 내려놓았다. 장교들이 책상 위에 계엄 포고문을 놓았다.\n\n정부는 군의 신뢰를 잃었다. 당신의 인장은 회수되었고, 첫 명령은 이미 군사회의의 이름으로 내려가고 있었다. 나라의 내일을 정하는 자리에 당신은 더 이상 앉아 있지 않았다.',
+        when: [{ kind: 'stat', key: 'army', op: 'lte', value: 20 }], priority: 900, immediate: true, chance: 25
+      });
+      current.endingIndex = draft.endings.length - 1;
+      mark(); render();
+    });
+    armyCoup.disabled = !draft.stats.some(stat => stat.id === 'army');
+    content.append(armyCoup, $('p', 'small muted', armyCoup.disabled
+      ? '군부 쿠데타 예시를 넣으려면 수치 탭에서 연결용 ID가 army인 수치를 먼저 추가하세요.'
+      : '군부 수치(army)가 20 이하이면 매 선택 후 25% 확률로 종료하는 예시입니다. 기존 army_coup 엔딩이 있으면 그 엔딩을 엽니다.'));
+    if (!draft.endings.length) return;
+    current.endingIndex = Math.max(0, Math.min(current.endingIndex, draft.endings.length - 1));
+    const index = current.endingIndex;
+    const ending = draft.endings[index];
+    if (!ending.immediate && Object.prototype.hasOwnProperty.call(ending, 'chance')) {
+      delete ending.chance;
+      mark();
+    }
+    const details = section('결말 편집');
+    const toolbar = $('div', 'toolbar');
+    const up = button('↑ 위로', () => { current.endingIndex = move(draft.endings, index, -1); render(); });
+    const down = button('↓ 아래로', () => { current.endingIndex = move(draft.endings, index, 1); render(); });
+    up.disabled = index === 0;
+    down.disabled = index === draft.endings.length - 1;
+    toolbar.append(up, down, button('엔딩 복제', () => {
+      const duplicate = copy(ending); duplicate.id = allocate('ending'); duplicate.title += ' (복사)';
+      draft.endings.splice(index + 1, 0, duplicate); current.endingIndex = index + 1; mark(); render();
+    }), button('엔딩 삭제', () => {
+      if (!confirm('이 엔딩을 삭제할까요? 기본 엔딩으로 지정되어 있다면 새 기본 엔딩을 선택해야 합니다.')) return;
+      draft.endings.splice(index, 1);
+      if (!draft.endings.length) { draft.defaultEnding = null; draft.draft = true; }
+      mark(); render();
+    }, 'danger'));
+    details.append(toolbar, grid(
+      input('엔딩 제목', ending.title, value => { ending.title = value; }),
+      idInput('연결용 ID', ending, 'ending')
+    ), grid(
+      select('결말 분위기', ending.kind, [['good', '밝은 결말'], ['mixed', '복합적인 결말'], ['bad', '어두운 결말']], value => { ending.kind = value; }),
+      input('우선순위', ending.priority, value => { ending.priority = value; }, { type: 'number', step: '1' })
+    ), input('짧은 요약', ending.summary, value => { ending.summary = value; }),
+    input('결말 본문', ending.body, value => { ending.body = value; }, { multiline: true, rows: 7 }),
+    checkbox('조건 충족 시 즉시 종료', ending.immediate, value => {
+      ending.immediate = value;
+      if (value && ending.chance === undefined) ending.chance = 100;
+      if (!value) delete ending.chance;
+      mark();
+      render();
+    }),
+    $('p', 'small muted', '즉시 종료를 켜면 매 선택의 수치 변화와 선택 기록을 적용한 직후 조건을 검사합니다. 끄면 이야기가 END에 도달했을 때 검사합니다.'));
+    if (ending.immediate) {
+      details.append(input('조건 충족 시 매 선택 후 발생 확률 (%)', ending.chance === undefined ? 100 : ending.chance,
+        value => { ending.chance = value; }, { type: 'number', min: 0, max: 100, step: 'any',
+          help: '100%는 조건을 만족하면 확정 종료, 0%는 발생하지 않음입니다. 25%라면 조건이 유지되는 동안 선택할 때마다 독립적으로 25%를 판정합니다. 확률은 매번 더해지지 않습니다.' }));
+    }
+    if (!Array.isArray(ending.when)) ending.when = [];
+    details.append(builder(ending.when, '엔딩 조건'));
+    content.append(details);
+  }
+
+  async function parseJSON(text) {
+    let value;
+    try { value = JSON.parse(text); }
+    catch (error) { return { errors: ['JSON 문법 오류: ' + error.message], warnings: [], value: null }; }
+    try {
+      if (needsTemplate(value)) showReport({ errors: [], warnings: [] }, '선택한 지도의 파일을 불러오는 중입니다. 현재 초안은 준비가 끝난 뒤 반영합니다.');
+      await ensureTemplate(value);
+    }
+    catch (error) { return { errors: ['지도 파일을 불러오지 못했습니다. 편집 내용은 유지했습니다. 다시 시도해 주세요.\n' + error.message], warnings: [], value: null }; }
+    const report = validation(value);
+    return { ...report, value };
+  }
+
+  async function acceptJSON(redraw) {
+    const owner = current, text = owner.jsonBuffer;
+    const result = await parseJSON(text);
+    if (current !== owner || owner.jsonBuffer !== text) return false;
+    if (result.errors.length) { showReport(result); return false; }
+    cancelMapPreparation();
+    current.draft = copy(result.value);
+    current.jsonDirty = false;
+    current.dirty = true;
+    if (redraw) render();
+    showReport(result, 'JSON 내용을 편집 초안에 반영했습니다. 게임에 넣으려면 “적용하고 새 게임”을 누르세요.');
+    return true;
+  }
+
+  function renderJSON(content) {
+    content.append($('h2', '', 'JSON 직접 편집'));
+    content.append(notice('전체 시나리오를 한 번에 수정하거나 다른 편집기로 옮길 수 있습니다. “JSON을 편집 초안에 반영”을 누르면 문법과 연결을 검사합니다. JSON 내보내기는 현재 초안을 파일로 저장합니다.'));
+    if (!current.jsonDirty) current.jsonBuffer = JSON.stringify(current.draft, null, 2);
+    const wrap = $('label', 'field');
+    wrap.append($('span', '', '전체 시나리오 JSON'));
+    const area = $('textarea', 'json-editor');
+    area.rows = 26;
+    area.spellcheck = false;
+    area.value = current.jsonBuffer;
+    area.addEventListener('input', () => { current.jsonBuffer = area.value; current.jsonDirty = true; mark(); });
+    wrap.append(area);
+    content.append(wrap);
+    const toolbar = $('div', 'toolbar');
+    toolbar.append(button('JSON을 편집 초안에 반영', () => acceptJSON(true), 'primary'), button('JSON 편집 취소', () => {
+      if (current.jsonDirty && !confirm('이 화면에서 수정한 JSON을 버리고 편집 초안으로 되돌릴까요?')) return;
+      current.jsonDirty = false; render();
+    }));
+    content.append(toolbar);
+  }
+
+  async function exportJSON() {
+    const owner = current, buffer = owner.jsonBuffer;
+    let text;
+    if (current.jsonDirty) {
+      const result = await parseJSON(buffer);
+      if (current !== owner || owner.jsonBuffer !== buffer) return;
+      if (result.errors.length) { showReport(result); return; }
+      text = JSON.stringify(result.value, null, 2);
+    } else {
+      const result = validation(current.draft);
+      if (result.errors.length) { showReport(result); return; }
+      text = JSON.stringify(current.draft, null, 2);
+    }
+    const blob = new Blob([text + '\n'], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = $('a');
+    anchor.href = url;
+    const safeID = String(current.draft.id || 'scenario').replace(/[^a-zA-Z0-9_-]/g, '_');
+    anchor.download = safeID + '.json';
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showReport({ errors: [], warnings: [] }, '현재 편집 초안을 JSON으로 내보냈습니다. 게임에도 적용하려면 “적용하고 새 게임”을 누르세요.');
+  }
+
+  function importJSON(file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showReport({ errors: ['JSON 파일은 5MB 이하로 준비해 주세요.'], warnings: [] }); return; }
+    const owner = current;
+    const reader = new FileReader();
+    const request = owner.importRequest = (owner.importRequest || 0) + 1;
+    reader.addEventListener('load', async () => {
+      if (current !== owner) return;
+      const result = await parseJSON(String(reader.result).replace(/^\uFEFF/, ''));
+      if (current !== owner || owner.importRequest !== request) return;
+      if (result.errors.length) { showReport(result); return; }
+      if (current.dirty && !confirm('가져온 파일로 현재 편집 초안을 교체할까요? 아직 내보내지 않은 수정은 사라집니다.')) return;
+      cancelMapPreparation();
+      current.draft = copy(result.value);
+      current.jsonDirty = false;
+      current.eventIndex = 0;
+      current.endingIndex = 0;
+      current.randomIndex = 0;
+      mark(); render();
+      showReport(result, '파일을 편집 초안으로 가져왔습니다. 게임에 넣으려면 “적용하고 새 게임”을 누르세요.');
+    });
+    reader.addEventListener('error', () => {
+      if (current === owner) showReport({ errors: ['파일을 읽지 못했습니다. 다시 선택해 주세요.'], warnings: [] });
+    });
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  async function check() {
+    if (current.jsonDirty) {
+      const owner = current, text = owner.jsonBuffer;
+      const parsed = await parseJSON(text);
+      if (current !== owner || owner.jsonBuffer !== text) return;
+      if (parsed.errors.length) { showReport(parsed); return; }
+      showReport(playReport(parsed.value), '플레이 검사를 통과했습니다. JSON 내용은 아직 편집 초안에 반영하지 않았습니다.');
+      return;
+    }
+    showReport(playReport(current.draft), '플레이 검사를 통과했습니다. “적용하고 새 게임”으로 실행할 수 있습니다.');
+  }
+
+  async function apply() {
+    if (current.jsonDirty && !await acceptJSON(false)) return;
+    const result = playReport(current.draft);
+    if (result.errors.length) { showReport(result); return; }
+    const owner = current;
+    try {
+      const playable = copy(owner.draft);
+      delete playable.draft;
+      owner.onApply(playable);
+      owner.dirty = false;
+      close(true);
+    } catch (error) {
+      showReport({ errors: ['시나리오 적용 중 오류가 발생했습니다: ' + error.message], warnings: [] });
+    }
+  }
+
+  async function saveDraft() {
+    if (current.jsonDirty && !await acceptJSON(false)) return;
+    const saved = copy(current.draft);
+    saved.draft = true;
+    const result = validation(saved);
+    if (result.errors.length) { showReport(result); return; }
+    const owner = current;
+    try {
+      owner.onApply(saved);
+      owner.dirty = false;
+      close(true);
+    } catch (error) {
+      showReport({ errors: ['초안 저장 중 오류가 발생했습니다: ' + error.message], warnings: [] });
+    }
+  }
+
+  function clearAll() {
+    if (!confirm('사건·선택지·연결·돌발 사건 규칙·수치·선택 기록·엔딩을 전부 삭제하고 빈 초안으로 시작할까요? 삭제 직전 내용은 이 페이지를 새로고침하기 전까지 한 번 되돌릴 수 있습니다.')) return;
+    resetUndo = { draft: copy(current.draft), eventIndex: current.eventIndex, endingIndex: current.endingIndex,
+      randomIndex: current.randomIndex, jsonBuffer: current.jsonBuffer, jsonDirty: current.jsonDirty, page: current.page };
+    cancelMapPreparation();
+    current.draft = GameEngine.createBlankScenario();
+    current.eventIndex = 0;
+    current.endingIndex = 0;
+    current.randomIndex = 0;
+    current.jsonBuffer = '';
+    current.jsonDirty = false;
+    current.page = 'flowchart';
+    mark(); render();
+    showReport({ errors: [], warnings: [] }, '모든 내용을 비운 초안입니다. 흐름도에서 첫 사건을 추가하거나 수치·엔딩을 작성하세요. “초안 저장”을 누르면 빈 상태도 보관됩니다.');
+  }
+
+  function undoClear() {
+    if (!resetUndo) return;
+    const hasNewContent = current.jsonDirty || JSON.stringify(current.draft) !== JSON.stringify(GameEngine.createBlankScenario());
+    if (hasNewContent && !confirm('전체 삭제 직전의 내용으로 되돌릴까요? 삭제 후 새로 작성한 내용은 교체됩니다.')) return;
+    cancelMapPreparation();
+    current.draft = copy(resetUndo.draft);
+    current.eventIndex = resetUndo.eventIndex;
+    current.endingIndex = resetUndo.endingIndex;
+    current.randomIndex = resetUndo.randomIndex;
+    current.jsonBuffer = resetUndo.jsonBuffer;
+    current.jsonDirty = resetUndo.jsonDirty;
+    current.page = resetUndo.page;
+    resetUndo = null;
+    mark(); render();
+    showReport({ errors: [], warnings: [] }, '전체 삭제 직전의 편집 내용을 복원했습니다.');
+  }
+
+  async function navigate(page) {
+    if (current.page === 'json' && current.jsonDirty && page !== 'json') {
+      if (!await acceptJSON(false)) return;
+    }
+    current.page = page;
+    render();
+  }
+
+  async function runMapAction(action, { saved = false, closeAfter = false } = {}) {
+    const owner = current;
+    if (!owner?.mapOnly || typeof owner.mapActions?.[action] !== 'function') return;
+    try {
+      let result = owner.mapActions[action](copy(owner.draft));
+      if (result && typeof result.then === 'function') result = await result;
+      if (result === false) return;
+      if (current !== owner) return;
+      if (saved) owner.dirty = false;
+      if (closeAfter) close(true);
+      else if (typeof result === 'string') showReport({ errors: [], warnings: [] }, result);
+    } catch (error) {
+      if (current === owner) showReport({ errors: [error.message || '지도 작업을 완료하지 못했습니다.'], warnings: [] });
+    }
+  }
+
+  async function importMapJSON(file) {
+    const owner = current;
+    if (!file || !owner?.mapOnly) return;
+    const request = owner.importRequest = (owner.importRequest || 0) + 1;
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new Error('지도 JSON 파일은 5MB 이하로 준비해 주세요.');
+      const text = await file.text();
+      if (current !== owner || owner.importRequest !== request) return;
+      await owner.mapActions.importText(text);
+    } catch (error) {
+      if (current === owner) showReport({ errors: [error.message || '지도 JSON을 읽지 못했습니다.'], warnings: [] });
+    }
+  }
+
+  function renderMapOnly(content) {
+    content.classList.add('map-maker-content');
+    renderMap(content);
+  }
+
+  function disposeEditorMapViews(rememberCamera) {
+    if (!current) return;
+    closeCountryPickers();
+    current.dialog.querySelectorAll('.v2-editor-map, .v2-map-picker').forEach(container => {
+      const camera = globalThis.MapView?.getCamera?.(container);
+      if (rememberCamera && camera && camera.templateId === current.draft.map?.templateId && container.classList.contains('v2-editor-map')) { current.mapCamera = camera; current.mapCameraTemplate = camera.templateId; }
+      globalThis.MapView?.dispose?.(container);
+    });
+  }
+
+  function render() {
+    if (!current) return;
+    ensureMapEditorStyles();
+    disposeEditorMapViews(true);
+    if (current.flowchartCleanup) { current.flowchartCleanup(); current.flowchartCleanup = null; }
+    current.dialog.classList.toggle('flowchart-mode', current.page === 'flowchart' && !current.mapOnly);
+    current.dialog.classList.toggle('map-maker-mode', Boolean(current.mapOnly));
+    const root = document.getElementById('editor-root');
+    root.replaceChildren();
+    const shell = $('div', 'editor-shell');
+    const top = $('header', 'editor-top');
+    const title = $('div');
+    title.append($('h2', '', current.mapOnly ? '지도 작업실' : '시나리오 작업실'), $('p', 'small muted', current.mapOnly ? '지도만 만들고 저장하거나 갤러리에 공유하세요. 현재 플레이 중인 이야기는 그대로 보관됩니다.' : '작성 중에는 초안 저장, 완성하면 적용하고 새 게임을 사용하세요. 수정한 파일은 JSON으로 따로 보관해 두세요.'));
+    const tools = $('div', 'toolbar');
+    const fileInput = $('input');
+    fileInput.type = 'file'; fileInput.accept = '.json,application/json'; fileInput.hidden = true;
+    fileInput.addEventListener('change', () => { if (current.mapOnly) importMapJSON(fileInput.files[0]); else importJSON(fileInput.files[0]); fileInput.value = ''; });
+    if (current.mapOnly) tools.append(button('지도 JSON 가져오기', () => fileInput.click()), button('지도 JSON 내보내기', () => runMapAction('export')), fileInput, button('새 지도', () => runMapAction('new')));
+    else {
+      tools.append(button('JSON 가져오기', () => fileInput.click()), button('JSON 내보내기', exportJSON), fileInput, button('전체 삭제', clearAll, 'danger'));
+      if (resetUndo) tools.append(button('전체 삭제 되돌리기', undoClear));
+    }
+    top.append(title, tools);
+    const nav = $('nav', 'editor-nav');
+    nav.setAttribute('aria-label', '시나리오 편집 탭');
+    (current.mapOnly ? [] : tabs).forEach(([id, label]) => {
+      const tab = button(label, () => navigate(id), current.page === id ? 'secondary selected' : 'secondary');
+      if (current.page === id) tab.setAttribute('aria-current', 'page');
+      nav.append(tab);
+    });
+    const content = $('main', 'editor-content' + (current.page === 'flowchart' ? ' flowchart-content' : ''));
+    if (current.mapOnly) renderMapOnly(content);
+    else if (current.page !== 'flowchart') {
+      ({ overview: renderOverview, stats: renderStats, flags: renderFlags, events: renderEventList, map: renderMap, reign: renderReign, randomEvents: renderRandomEvents, endings: renderEndings, json: renderJSON })[current.page](content);
+    }
+    const report = $('div', 'notice');
+    report.id = 'editor-report'; report.hidden = true; report.setAttribute('role', 'status'); report.setAttribute('aria-live', 'polite');
+    const footer = $('footer', 'editor-footer');
+    if (current.mapOnly) {
+      const share=button('갤러리에 공유', () => runMapAction('share', { saved: true }));
+      share.setAttribute('data-community-only','');
+      footer.append(button('지도 검사', () => runMapAction('check')), button('지도 저장', () => runMapAction('save', { saved: true }), 'primary'), share, button('이 지도로 시나리오 만들기', () => runMapAction('createScenario', { saved: true, closeAfter: true })), button('닫기', () => close(false)));
+    }
+    else footer.append(button('검사하기', check), button('초안 저장', saveDraft), button('적용하고 새 게임', apply, 'primary'), button('닫기', () => close(false)));
+    shell.append(top);
+    if (!current.mapOnly) shell.append(nav);
+    shell.append(content, report, footer);
+    root.append(shell);
+    if (current.page === 'flowchart' && !current.mapOnly) {
+      current.flowchartCleanup = ScenarioFlowchart.mount(content, {
+        scenario: current.draft,
+        onChange: mark,
+        onOpenRandomEvents: () => navigate('randomEvents'),
+        onOpenReign: () => navigate('reign'),
+        onOpenEvent: eventId => {
+          const index = current.draft.events.findIndex(event => event.id === eventId);
+          if (index >= 0) { current.eventIndex = index; navigate('events'); }
+        }
+      });
+    }
+  }
+
+  function close(force) {
+    ++openSequence;
+    if (!current) { globalThis.MapMaker?.cancelPending?.(); return true; }
+    if (!force && current.dirty && !confirm(current.mapOnly ? '아직 저장하지 않은 지도 수정을 닫을까요? 보관하려면 취소하고 “지도 저장” 또는 “지도 JSON 내보내기”를 누르세요.' : '아직 게임에 적용하지 않은 편집 초안을 닫을까요? 보관하려면 취소하고 JSON으로 내보내세요.')) return false;
+    globalThis.MapMaker?.cancelPending?.();
+    const dialog = current.dialog;
+    disposeEditorMapViews(false);
+    if (current.flowchartCleanup) current.flowchartCleanup();
+    dialog.classList.remove('flowchart-mode', 'map-maker-mode');
+    dialog.setAttribute('aria-label', '시나리오 편집');
+    current = null;
+    if (dialog.open && typeof dialog.close === 'function') dialog.close();
+    else dialog.removeAttribute('open');
+    return true;
+  }
+
+  function open(scenario, onApply, options = {}) {
+    globalThis.MapMaker?.cancelPending?.();
+    const request = ++openSequence;
+    if (needsTemplate(scenario)) return ensureTemplate(scenario).then(() => request === openSequence ? openReady(scenario, onApply, options) : false);
+    return openReady(scenario, onApply, options);
+  }
+
+  function openReady(scenario, onApply, options) {
+    const report = validation(scenario);
+    if (report.errors.length) throw new Error('편집할 시나리오를 확인해 주세요.\n' + report.errors.map(messageText).join('\n'));
+    if (typeof onApply !== 'function') throw new Error('시나리오 적용 함수가 없습니다.');
+    if (current && !close(false)) return;
+    const dialog = document.getElementById('editor-dialog');
+    if (!dialog || !document.getElementById('editor-root')) throw new Error('편집기 dialog 요소가 없습니다.');
+    current = { draft: copy(scenario), onApply, dialog, dirty: false, page: options.mapOnly ? 'map' : tabs.some(([id]) => id === options.page) ? options.page : 'overview', mapOnly: Boolean(options.mapOnly), mapActions: options.mapActions || {}, eventIndex: 0, endingIndex: 0, randomIndex: 0, reignIndex: 0, mapProvince: null, mapCountry: null, jsonBuffer: '', jsonDirty: false, flowchartCleanup: null };
+    dialog.setAttribute('aria-label', current.mapOnly ? '지도 편집' : '시나리오 편집');
+    if (!dialog.dataset.editorBound) {
+      dialog.dataset.editorBound = 'true';
+      dialog.addEventListener('cancel', event => { event.preventDefault(); close(false); });
+    }
+    if (typeof dialog.showModal === 'function') { if (!dialog.open) dialog.showModal(); }
+    else dialog.setAttribute('open', '');
+    render();
+    (current.mapOnly ? dialog.querySelector('[aria-label="지도 제목"]') : dialog.querySelector('[aria-current="page"]'))?.focus({ preventScroll: true });
+    return true;
+  }
+
+  globalThis.ScenarioEditor = { open, close: () => close(false), cancelPending: () => { ++openSequence; } };
+  globalThis.ScenarioEditorV2 = { upgrade, mapConfig, initialMapState, conditions: conditionsEditor, territory: territoryEditor, rewriteReferences, planMapChange, territoryReferences,
+    mapSetupSelection, mapSetupEras, mapSetupDefault, mapSetupTemplateId, planBlankMap, countryMatches, effectiveOwnerCounts, countrySelect };
+})();
+</script>
+<script id="map-maker-script">/* Standalone map documents share the existing territory editor, never game saves. */
+(function () {
+  'use strict';
+
+  let options = { onCreateScenario: null };
+  let openSequence = 0;
+  async function ensureDocument(value, blank = false) {
+    const templateId = value?.map?.templateId || (blank ? 'regional_eastasia_1592' : null);
+    if (!templateId) return;
+    if (!globalThis.MapTemplates?.get(templateId)) {
+      if (!globalThis.MapTemplates?.ensure) throw new Error('지도 로더를 준비하지 못했습니다. 새로고침 후 다시 시도해 주세요.');
+      await MapTemplates.ensure(templateId);
+    }
+  }
+  const D = () => {
+    if (!globalThis.MapDocument || !globalThis.ScenarioEditor) throw new Error('지도 작업실 파일을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
+    return globalThis.MapDocument;
+  };
+
+  function configure(next) {
+    if (next && typeof next === 'object') options = { ...options, ...next };
+  }
+
+  function readRaw() {
+    const api = D(); let raw;
+    try { raw = localStorage.getItem(api.STORAGE_KEY); }
+    catch (_) { throw new Error('브라우저의 지도 저장 공간에 접근하지 못했습니다. 새 지도를 만들고 JSON 파일로 보관하거나, 브라우저 저장소 설정을 확인해 주세요.'); }
+    if (!raw) return null;
+    try { return JSON.parse(raw); }
+    catch (error) { throw new Error('저장된 지도를 읽지 못했습니다. 저장 내용은 보존했습니다. 지도 JSON을 다시 가져오거나 새 지도를 만드세요.\n' + error.message); }
+  }
+
+  async function readStored() {
+    const value = readRaw();
+    if (!value) return null;
+    try { await ensureDocument(value); return D().normalize(value); }
+    catch (error) { throw new Error('저장된 지도를 열지 못했습니다. 저장 내용은 보존했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.\n' + error.message); }
+  }
+
+  function saveDocument(document) {
+    const api = D(), normalized = api.normalize(document);
+    try { localStorage.setItem(api.STORAGE_KEY, JSON.stringify(normalized)); }
+    catch (_) { throw new Error('브라우저 저장 공간에 지도를 보관하지 못했습니다. “지도 JSON 내보내기”로 파일을 먼저 보관해 주세요.'); }
+    return normalized;
+  }
+
+  function downloadDocument(mapDocument) {
+    const normalized = D().normalize(mapDocument), text = JSON.stringify(normalized, null, 2) + '\n';
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' }));
+    const anchor = documentElement('a');
+    anchor.href = url;
+    anchor.download = String(normalized.id || 'my-map').replace(/[^a-zA-Z0-9_-]/g, '_') + '.map.json';
+    (document.querySelector('dialog[open]') || document.body).append(anchor);
+    anchor.click();
+    setTimeout(() => anchor.remove(), 1000);
+    // Keep the Blob alive while the browser schedules the download.
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+
+  function documentElement(tag) { return globalThis.document.createElement(tag); }
+
+  async function open(document, newMap = false) {
+    const request = ++openSequence;
+    globalThis.ScenarioEditor?.cancelPending?.();
+    const api = D(), value = newMap ? null : document === undefined ? readRaw() : document;
+    const blank = newMap || (document === undefined && value === null);
+    await ensureDocument(value, blank);
+    if (request !== openSequence) return false;
+    const mapDocument = blank ? api.create() : api.normalize(value);
+    const scenario = api.toScenario(mapDocument);
+    const fromDraft = draft => api.fromScenario(draft, { id: mapDocument.id });
+    return ScenarioEditor.open(scenario, draft => saveDocument(fromDraft(draft)), {
+      mapOnly: true,
+      mapActions: {
+        check(draft) { fromDraft(draft); return '지도 검사를 통과했습니다. 제목·지역·국가와 영토 배치를 확인했습니다.'; },
+        save(draft) { saveDocument(fromDraft(draft)); return '이 브라우저에 지도를 저장했습니다. 다른 기기로 옮기려면 지도 JSON을 내려받거나 갤러리에 공유하세요.'; },
+        export(draft) { downloadDocument(fromDraft(draft)); return '지도를 JSON 파일로 내보냈습니다. 이 파일은 지도 작업실이나 시나리오 제작에 다시 사용할 수 있습니다.'; },
+        importText(text) {
+          let parsed;
+          try { parsed = JSON.parse(String(text).replace(/^\uFEFF/, '')); }
+          catch (_) { throw new Error('지도 JSON 문법을 확인해 주세요. 현재 지도와 저장 내용은 유지했습니다.'); }
+          return importDocument(parsed);
+        },
+        new() { return startNew(); },
+        share(draft) {
+          const normalized = fromDraft(draft);
+          if (new Blob([JSON.stringify(normalized)]).size > 1024 * 1024) throw new Error('갤러리에 공유하는 지도 JSON은 1MB 이하로 준비해 주세요. 파일로 내보내기는 5MB까지 가능합니다.');
+          saveDocument(normalized);
+          globalThis.location.assign('gallery.html?kind=map#upload');
+          return '지도를 저장했습니다. 갤러리에서 설명과 공개 여부를 확인한 뒤 공유하세요.';
+        },
+        createScenario(draft) {
+          if (typeof options.onCreateScenario !== 'function') throw new Error('시나리오 만들기를 연결하지 못했습니다. 지도를 JSON으로 내보낸 뒤 다시 열어 주세요.');
+          const normalized = saveDocument(fromDraft(draft));
+          const result = options.onCreateScenario(api.toScenario(normalized));
+          if (result === false) return false;
+          return '이 지도를 넣은 빈 시나리오를 만들었습니다.';
+        }
+      }
+    });
+  }
+
+  function startNew() { return open(undefined, true); }
+  function importDocument(document) { return open(document); }
+
+  globalThis.MapMaker = { configure, open, startNew, importDocument, getStored: readStored, cancelPending() { ++openSequence; } };
+})();
+</script>
+<script id="ai-script">/* AI handoff helpers: build copyable prompts and read pasted AI answers.
+   No network access. The site never calls an AI service directly. */
+(function (root) {
+  'use strict';
+
+  const EXAMPLE = {
+    schemaVersion: 1,
+    id: 'example_salt_city',
+    title: '소금 도시의 겨울',
+    subtitle: '봉쇄된 항구 도시의 마지막 석 달',
+    description: '형식 예시용 짧은 시나리오입니다.',
+    player: { askName: true, label: '시장의 이름', defaultName: '시장' },
+    start: 'e_blockade',
+    stats: [
+      { id: 'food', name: '식량', description: '도시가 버틸 수 있는 양식', min: 0, max: 100, initial: 50, color: '#8a6d3b' },
+      { id: 'trust', name: '민심', description: '시민들이 시장을 믿는 정도', min: 0, max: 100, initial: 60, color: '#3f6d4f' }
+    ],
+    flags: [
+      { id: 'smugglers', name: '밀수업자와 손잡음', initial: false }
+    ],
+    events: [
+      {
+        id: 'e_blockade', chapter: '제1장', date: '11월', speaker: '항만 관리관', title: '봉쇄 첫날',
+        body: '적 함대가 항구 입구를 막았습니다. 창고의 곡물은 석 달을 버티기 어렵습니다. {name} 시장님, 어떻게 하시겠습니까?',
+        next: 'e_winter',
+        choices: [
+          { text: '배급제를 시행한다', description: '공평하지만 모두가 배고프다', effects: { food: 15, trust: -10 } },
+          { text: '밀수업자에게 길을 연다', description: '식량은 들어오지만 소문이 돈다', effects: { food: 25, trust: -5 }, setFlags: { smugglers: true } },
+          { text: '시민에게 사실을 알린다', effects: { trust: 10, food: -5 } }
+        ]
+      },
+      {
+        id: 'e_winter', chapter: '제2장', date: '1월', title: '혹한',
+        body: '항구가 얼어붙었습니다. 시민들이 광장에 모여 시장의 답을 기다립니다.',
+        next: 'END',
+        choices: [
+          { text: '밀수 창고를 열어 나눈다', when: [{ kind: 'flag', key: 'smugglers', op: 'eq', value: true }], effects: { food: -10, trust: 20 } },
+          { text: '끝까지 버티자고 연설한다', effects: { trust: 5, food: -15 } },
+          { text: '항복 협상을 준비한다', effects: { trust: -20 }, next: 'END' }
+        ]
+      },
+      {
+        id: 'e_fire', title: '창고 화재',
+        body: '한밤중 곡물 창고에서 불길이 치솟았습니다.',
+        next: 'RETURN',
+        choices: [
+          { text: '병사를 보내 불을 끈다', effects: { food: -5 } },
+          { text: '방화범을 먼저 쫓는다', effects: { food: -15, trust: 5 } }
+        ]
+      }
+    ],
+    randomEvents: [
+      { id: 'r_fire', title: '창고 화재', eventId: 'e_fire', when: [{ kind: 'stat', key: 'food', op: 'gte', value: 40 }], chance: 30, priority: 1, once: true }
+    ],
+    endings: [
+      { id: 'end_riot', title: '굶주린 폭동', summary: '광장은 분노로 가득 찼다.', body: '식량이 바닥나자 시민들이 시청을 덮쳤습니다.', kind: 'bad', priority: 10, immediate: true, when: [{ kind: 'stat', key: 'food', op: 'lte', value: 0 }] },
+      { id: 'end_spring', title: '봄의 항구', summary: '도시는 겨울을 이겨 냈다.', body: '얼음이 녹고 봉쇄가 풀렸습니다. 사람들은 {name}의 이름을 오래 기억했습니다.', kind: 'good', priority: 5, immediate: false, when: [{ kind: 'stat', key: 'trust', op: 'gte', value: 60 }, { kind: 'stat', key: 'food', op: 'gte', value: 20 }] },
+      { id: 'end_shadow', title: '그림자 시장', summary: '살아남았지만 빚이 남았다.', body: '밀수업자들은 이제 도시의 진짜 주인이 되었습니다.', kind: 'mixed', priority: 3, immediate: false, when: [{ kind: 'flag', key: 'smugglers', op: 'eq', value: true }] },
+      { id: 'end_surrender', title: '조용한 항복', summary: '도시는 함락되지 않고 넘겨졌다.', body: '피는 흐르지 않았지만, 깃발은 바뀌었습니다.', kind: 'mixed', priority: 0, immediate: false }
+    ],
+    defaultEnding: 'end_surrender'
+  };
+
+  const SIZES = {
+    short: { label: '짧게', events: '6~9', note: '추천' },
+    medium: { label: '보통', events: '12~16', note: '' },
+    long: { label: '길게', events: '20~30', note: '답변이 끊길 수 있음' }
+  };
+
+  const RULES = `[JSON 형식 규칙]
+1. 답변은 JSON 객체 하나뿐이다. 앞뒤 설명, 주석(//), 말줄임(...)을 쓰지 마라. \`\`\`json 코드블록으로 감싸는 것은 괜찮다.
+2. 모든 id는 영문자로 시작하고 영문·숫자·밑줄(_)만 쓴다. 같은 종류 안에서 중복 금지. 사건 id로 END, RETURN, REIGN은 쓸 수 없다.
+3. start, next, eventId, defaultEnding, effects·setFlags·when의 key는 정의된 id를 가리켜야 한다. 지도 지역·국가 id만 선택한 기본 지도의 목록을 참조한다.
+4. 조건 when은 배열이다. 수치: {"kind":"stat","key":"수치id","op":"gte","value":50} / 기록: {"kind":"flag","key":"기록id","op":"eq","value":true}. op는 eq, ne, gte, lte, gt, lt 중 하나이고 기록에는 eq, ne만 쓴다. 여러 조건은 모두 만족해야 한다.
+5. 수치(stats)는 min < max, min ≤ initial ≤ max인 숫자. effects 값은 숫자(예: -10, 15). color는 "#RRGGBB".
+6. 기록(flags)의 initial과 setFlags 값은 true 또는 false.
+7. 모든 사건(events)에는 id, title, body, next, choices(1~20개, 보통 2~4개)가 있어야 한다. next는 사건 id 또는 "END"(돌발 사건은 "RETURN").
+8. 모든 사건에는 when이 없는 선택지가 적어도 1개 있어야 한다. 그래야 선택지가 모두 잠기지 않는다.
+9. 모든 엔딩에는 id, title, body, kind("good"/"mixed"/"bad"), priority(숫자), immediate(true/false)가 있어야 한다. chance는 immediate:true인 엔딩에만 쓴다.
+10. defaultEnding은 immediate:false이고 when이 없는 엔딩의 id여야 한다.
+11. 개수 제한: 수치 1~20, 기록 0~200, 사건 1~1000, 엔딩 1~100. "draft" 속성은 넣지 마라.
+12. schemaVersion은 숫자 1 또는 2다. 기존 V1은 사건형(chronicle)이다. 지도나 연차 통치(reign)를 쓰면 숫자 2를 사용한다. V2의 mode는 "chronicle" 또는 "reign"이다.`;
+
+  const GAME = `[게임 규칙 — 이 규칙대로 작동하도록 설계해라]
+- 플레이어는 사건(event)을 읽고 선택지(choice) 하나를 고른다. 선택지의 effects만큼 수치가 오르내리고(min~max 범위로 잘림), setFlags로 기록이 켜지거나 꺼진다.
+- 다음 사건: 선택지에 next가 있으면 그곳으로, 없으면 사건의 next로 간다. "END"에 도착하면 이야기가 끝나고 엔딩을 고른다.
+- 사건에 when(등장 조건)이 있고 맞지 않으면 그 사건을 건너뛰고 그 사건의 next로 간다.
+- 선택지에 when이 있고 맞지 않으면 그 선택지는 잠긴 채 보인다.
+- 즉시 엔딩(immediate:true): 매 선택 직후 조건을 검사해 맞으면 곧바로 게임이 끝난다(예: 식량 0 이하 → 폭동). chance(1~99)를 주면 그 확률로만 발동한다.
+- 일반 엔딩(immediate:false): "END"에 도착했을 때 조건이 맞는 엔딩 중 priority가 가장 높은 것이 나온다. 하나도 맞지 않으면 defaultEnding이 나온다.
+- 돌발 사건(randomEvents, 선택 사항): 매 선택 후 조건이 맞으면 chance% 확률로 eventId의 사건이 끼어든다. 그 사건의 next를 "RETURN"으로 두면 원래 가려던 사건으로 돌아간다. once:true면 한 번만 일어난다.
+- 본문·제목에 {name}을 쓰면 플레이어가 입력한 이름으로 바뀐다.
+- 사건에는 chapter, date, speaker(말하는 사람), 선택지에는 description(짧은 설명)을 선택적으로 넣을 수 있다.`;
+
+  const CRAFT = `[재미있는 시나리오를 위한 지침]
+- 엔딩마다 서로 다른 수치·기록 조합으로 도달하게 하고, 각 엔딩에 실제로 도달할 수 있는 경로가 있는지 확인해라.
+- 수치가 극단으로 치우치면 나오는 즉시 엔딩(bad)을 2~3개 두면 긴장감이 생긴다.
+- 선택지마다 얻는 것과 잃는 것이 함께 있게 하라. 정답이 뻔한 선택지는 피하라.
+- 중요한 결정은 setFlags로 기록하고, 뒤의 사건 등장 조건·잠긴 선택지·엔딩 조건에 활용하라.
+- 이야기가 한 줄로만 흐르지 않도록 선택에 따라 다른 사건으로 갈라졌다가 다시 만나게 하라.`;
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+
+  function settings(options = {}) {
+    const base = options.baseScenario || {};
+    const mode = ['chronicle', 'reign'].includes(options.mode) ? options.mode : (base.schemaVersion === 2 && base.mode === 'reign' ? 'reign' : 'chronicle');
+    const id = Object.prototype.hasOwnProperty.call(options, 'mapTemplateId') ? options.mapTemplateId : base.map?.templateId;
+    const templateId = typeof id === 'string' ? id : '';
+    const template = templateId && root.MapTemplates && typeof root.MapTemplates.get === 'function' ? root.MapTemplates.get(templateId) : null;
+    if (templateId && !template) throw new Error('선택한 지도 틀을 찾을 수 없습니다: ' + templateId);
+    return { mode, template, countryId: options.mapCountryId || base.map?.playerCountry || '', version: mode === 'reign' || template || base.schemaVersion === 2 ? 2 : 1 };
+  }
+
+  function promptProvinces(template, countryId, base) {
+    const limit = 300;
+    if (template.provinces.length <= limit) return template.provinces;
+    const byId = new Map(template.provinces.map(province => [province.id, province])), selected = new Map();
+    const add = province => { if (province && selected.size < limit) selected.set(province.id, province); };
+    // Keep the existing scenario's actual targets ahead of optional examples.
+    add(template.provinces[0]);
+    if (base?.map?.templateId === template.id) {
+      for (const values of Object.values(base.map.initial || {})) for (const id of Object.keys(values || {})) add(byId.get(id));
+      const visit = value => {
+        if (!value || typeof value !== 'object' || selected.size >= limit) return;
+        if (value.prov) add(byId.get(value.prov));
+        if (value.kind === 'territory') add(byId.get(value.key));
+        for (const child of Object.values(value)) if (child && typeof child === 'object') visit(child);
+      };
+      visit(base.events); visit(base.reign); visit(base.endings);
+    }
+    if (countryId) {
+      for (const province of template.provinces) if ((base?.map?.initial?.owners?.[province.id] || province.owner) === countryId) add(province);
+    } else {
+      // Give a new world scenario real IDs from different countries, rather
+      // than filling the prompt with the first alphabetic country's districts.
+      const owners = new Set();
+      for (const province of template.provinces) if (!owners.has(province.owner)) { owners.add(province.owner); add(province); }
+    }
+    for (const province of template.provinces) add(province);
+    return [...selected.values()];
+  }
+
+  function mapInstructions(template, countryId, base) {
+    if (!template) return '[지도 선택]\n- 지도를 사용하지 않는다. map과 territory 및 kind:"territory" 조건을 새로 만들지 마라.';
+    const provinces = promptProvinces(template, countryId, base), limited = provinces.length < template.provinces.length;
+    return [
+      '[선택한 기본 지도]',
+      '- templateId: ' + template.id + ' / 이름: ' + template.name,
+      '- 아래의 지역·국가 id를 그대로 사용해라. 지도 그림이나 SVG path를 생성하지 마라.',
+      template.notice ? '- 지도 안내: ' + template.notice : '',
+      template.regionId ? '- 지도 범위: '+template.regionId+' / 시대 기본안: '+template.eraId+'. 이 지도 밖의 지역 ID를 쓰지 마라. 기본 소유국은 이미 시대 기본안을 반영하므로 바꿀 지역만 initial에 넣어라.' : '',
+      '국가 목록: ' + JSON.stringify(template.countries.filter(c=>c.available!==false||c.id===countryId).map(({ id, name, color }) => ({ id, name, color }))),
+      limited ? '- 촘촘한 지도: 전체 ' + template.provinces.length.toLocaleString() + '개 중 실제 ID ' + provinces.length + '개만 아래에 싣는다.' + (countryId ? ' 현재 플레이 국가 ' + countryId + '와 기존 시나리오에서 참조한 지역을 우선한다.' : ' 국가별 대표 지역을 우선한다.') : '',
+      '지역 목록: ' + JSON.stringify(provinces.map(({ id, name, owner }) => ({ id, name, owner }))),
+      limited ? '- 아래 목록과 [현재 시나리오]에 없는 지역 ID를 추측하거나 새로 만들지 마라. 더 필요한 지역은 편집기의 지역 검색 또는 지도·초기 영토 탭의 "지역 ID 목록 내려받기"에서 확인한 ID 목록을 사용자에게 받아 사용해라. 지도 전체를 initial.owners에 복사하지 말고 변경할 지역만 지정해라.' : '',
+      '- map 형식: {"templateId":"' + template.id + '","playerCountry":"위 국가 id","countries":[],"initial":{"owners":{},"occupation":{},"influence":{},"markers":{}}}. countries는 기본 국가를 덮어쓰거나 추가할 때 id/name/color를 넣는다.',
+      '- country.labelPosition은 선택사항이다. 기존 값은 유지하고, 새 좌표는 요청받았을 때만 지도 안의 [가로,세로]로 쓴다. 범위는 [0,0]부터 [' + template.width + ',' + template.height + ']까지이며 null은 국명 숨김, 생략은 자동 배치다. focusBounds(국가로 이동할 때의 확대 범위)와 혼동하지 마라.',
+      '- initial.owners의 키는 지역 id, 값은 국가 id다. 지정하지 않은 소유권은 기본 지도를 따른다. occupation(점령)·influence(영향권)는 지역→국가, markers(주석)는 지역→짧은 문장이다.',
+      '- 선택지 territory: [{"prov":"지역 id","to":"소유 국가 id","occupation":"점령 국가 id 또는 null","influence":"영향 국가 id 또는 null","marker":"짧은 문장 또는 null"}]. 바꿀 필드만 적어라. null은 소유권 이외 층을 지운다. to에는 null을 쓰지 마라.',
+      '- 영토 조건: {"kind":"territory","key":"지역 id","field":"owner","op":"eq","value":"국가 id"}. field는 owner/occupation/influence/marker, op는 eq/ne다. marker는 문장/null, 비소유 층은 국가 id/null도 비교할 수 있다.',
+      '- 소유·점령·영향권은 구별해라. 실제 국경과 게임용 구획의 차이는 안내하고, 역사와 다른 영토 변경은 선택 결과로 설명해라.'
+    ].filter(Boolean).join('\n');
+  }
+
+  function reignInstructions(mode) {
+    if (mode !== 'reign') return '[진행 방식]\n- mode:"chronicle": 기존 사건과 선택지의 next를 따라 분기한다.';
+    return `[진행 방식: 연차 통치 모드]
+- schemaVersion:2, mode:"reign". reign:{parts:[{id,name,color}],turns:[{id,date,title,body,eventIds:[],between:[],settlements:[]}]}를 작성한다.
+- parts는 조정·군무·외교 등 결정 분야다. 일반 사건에 part:"분야 id"를 붙인다. 각 turn.eventIds에는 그 연차의 사건 id만 나열한다. 분야마다 현재 조건을 만족하는 첫 사건을 사용한다.
+- 플레이어는 현재 열린 모든 분야에서 하나씩 결정한 뒤 연차를 결산한다. 해당 모드의 일반 선택지는 next로 다음 사건을 직접 선택하지 않는다. 연차와 분야를 설계해라.
+- 매 연차에 when 없는 일반 사건을 적어도 하나 배치하고, 각 사건에도 조건 없는 선택지를 남겨라. 이전 결정으로 다음 분야와 다음 연차의 사건이 달라지게 하라.
+- between은 연차 진입 때(첫 연차 포함), settlements는 결산 때 적용하는 규칙 배열이다. {id,text,when:[],effects:{},setFlags:{},territory:[]} 형식이며 만족한 규칙을 나열한 순서대로 모두 적용한다. 뒤 규칙은 앞 규칙의 변경을 본다.
+- 지연 결과는 이전 선택의 setFlags를 다음 연차 between/settlements.when에서 확인하여 표현한다. result에는 선택 직후 보여줄 결과 문장을 적는다.
+- 돌발 사건은 같은 events 배열에 두되 turn.eventIds에는 넣지 않고 next:"RETURN"으로 복귀시킨다. 마지막 연차 결산 후 일반 엔딩을 판정한다.
+- historical:true는 실제 역사에서 이루어진 선택이라고 확인한 경우에만 표시한다. 편의상 첫 선택지를 모두 실제 역사로 지정하지 마라.`;
+  }
+
+  function gameInstructions(mode) {
+    if (mode !== 'reign') return GAME;
+    return GAME.split('\n').map(line => {
+      if (line.startsWith('- 플레이어는 사건')) return '- 플레이어는 한 연차에 열린 분야별 사건을 읽고 각 분야에서 선택지 하나씩을 고른 뒤 결산한다. 수치는 min~max 범위로 잘리고 setFlags로 기록이 바뀐다.';
+      if (line.startsWith('- 다음 사건:')) return '- 다음 진행은 reign.turns의 순서다. 일반 사건·선택지의 next로 연차를 건너뛰지 않는다.';
+      if (line.startsWith('- 사건에 when')) return '- 일반 사건의 when은 해당 연차·분야에서 표시할 카드의 자격이다. 조건이 안 맞으면 같은 분야에서 다음으로 자격 있는 사건을 찾는다.';
+      if (line.startsWith('- 일반 엔딩')) return '- 일반 엔딩(immediate:false)은 마지막 연차 결산 후 조건이 맞는 엔딩 중 priority가 가장 높은 것으로 고른다. 하나도 맞지 않으면 defaultEnding이다.';
+      if (line.startsWith('- 즉시 엔딩')) return line + ' 연차 결산 뒤에도 즉시 엔딩을 검사한다.';
+      return line;
+    }).join('\n');
+  }
+
+  function buildExample(options = {}) {
+    const selected = settings(options);
+    const example = copy(EXAMPLE);
+    if (selected.version === 2) { example.schemaVersion = 2; example.mode = selected.mode; }
+    example.events.forEach(event => event.choices.forEach(choice => { choice.result = '결정의 효과가 반영되었습니다.'; }));
+    if (selected.template) {
+      const template = selected.template;
+      const province = template.provinces[0];
+      const country = template.countries.find(item => item.id === province?.owner) || template.countries[0];
+      if (!province || !country) throw new Error('기본 지도에 지역과 국가가 필요합니다.');
+      const other = template.countries.find(item => item.id !== country.id&&item.available!==false) || country;
+      example.map = { templateId: template.id, playerCountry: country.id, countries: [], initial: { owners: {}, occupation: {}, influence: {}, markers: {} } };
+      example.events[0].choices[0].territory = [{ prov: province.id, influence: country.id, marker: '구호품 도착' }];
+      example.events[0].choices[1].territory = [{ prov: province.id, to: other.id, occupation: other.id }];
+      example.events[1].choices[0].territory = [{ prov: province.id, occupation: null, marker: null }];
+    }
+    if (selected.mode === 'reign') {
+      example.id = 'example_reign_city';
+      example.events[0].part = 'council';
+      example.events[1].part = 'council';
+      example.events.push(
+        { id: 'e_patrol', part: 'guard', title: '호송대 편성', body: '구호선의 항로를 순찰할 인력이 필요합니다.', next: 'END', choices: [
+          { text: '호송대를 늘린다', effects: { food: -5, trust: 5 }, result: '구호선에 호위가 붙었습니다.' },
+          { text: '연안의 자율 순찰을 지원한다', effects: { trust: -3, food: 3 }, result: '도시의 지출을 줄였습니다.' }
+        ] },
+        { id: 'e_audit', part: 'guard', title: '창고의 장부', body: '겨울 창고의 분배를 점검할 시기입니다.', next: 'END', choices: [
+          { text: '장부를 공개하고 구휼한다', effects: { food: -5, trust: 8 }, result: '시민들이 분배 과정을 확인했습니다.' },
+          { text: '예비 식량을 쌓는다', effects: { food: 5, trust: -5 }, result: '도시의 비축이 늘었습니다.' }
+        ] }
+      );
+      example.reign = {
+        parts: [{ id: 'council', name: '조정', color: '#3f6d4f' }, { id: 'guard', name: '경비', color: '#8a6d3b' }],
+        turns: [
+          { id: 'turn_autumn', date: '11월', title: '봉쇄의 시작', body: '조정과 경비의 결정을 각각 내립니다.', eventIds: ['e_blockade', 'e_patrol'],
+            between: [{ id: 'entry_rations', text: '도시의 기본 배급에 식량을 썼습니다.', when: [], effects: { food: -3 } }],
+            settlements: [{ id: 'autumn_accounts', text: '가을의 분배 장부를 정리했습니다.', when: [], effects: { trust: 2 } }] },
+          { id: 'turn_winter', date: '1월', title: '겨울의 결산', body: '이전 선택의 결과가 돌아옵니다.', eventIds: ['e_winter', 'e_audit'],
+            between: [{ id: 'smuggler_debt', text: '밀수업자들이 지난 약속의 대가를 청했습니다.', when: [{ kind: 'flag', key: 'smugglers', op: 'eq', value: true }], effects: { trust: -8, food: 5 } }],
+            settlements: [{ id: 'winter_accounts', text: '마지막 겨울을 결산합니다.', when: [], effects: { food: -3 } }] }
+        ]
+      };
+    }
+    return example;
+  }
+
+  function buildPrompt(options = {}) {
+    const idea = String(options.idea || '').trim();
+    const size = SIZES[options.size] || SIZES.short;
+    const endings = Number(options.endings) || 5;
+    const base = options.baseScenario;
+    const selected = settings(options);
+    const featureRules = '[선택한 형식]\n- schemaVersion:' + selected.version + ', mode:"' + selected.mode + '". 이 선택을 기준으로 전체 원고를 작성해라.' +
+      (selected.version === 2 ? '\n- 선택지 result에는 결정 직후의 결과 문장을 적을 수 있다. historical:true는 실제 역사에서 이루어진 선택으로 확인한 경우에만 표시한다. 첫 선택지를 일괄적으로 실제 역사라고 표시하지 마라.' : '') +
+      '\n\n' + reignInstructions(selected.mode) + '\n\n' + mapInstructions(selected.template, selected.countryId, base);
+    const head = '너는 선택형 텍스트 게임 「역사의 갈림길」의 시나리오 작가다.';
+    if (base) {
+      return [
+        head,
+        '아래 [현재 시나리오] JSON을 [요청]에 맞게 고치거나 늘려라. 바뀌지 않은 부분까지 모두 포함한 전체 JSON 하나로만 답해라.',
+        '',
+        '[요청]',
+        idea || '이야기를 더 풍성하게 다듬고, 사건과 엔딩을 조금 더 늘려 줘.',
+        '',
+        gameInstructions(selected.mode), '', RULES, '', featureRules, '', CRAFT, '',
+        '[현재 시나리오]',
+        JSON.stringify(base)
+      ].join('\n');
+    }
+    return [
+      head,
+      '아래 [만들 이야기]로 시나리오를 쓰고, [JSON 형식 규칙]에 정확히 맞는 JSON 하나로만 답해라.',
+      '',
+      '[만들 이야기]',
+      idea || '주제는 네가 골라라. 실제 역사의 한 갈림길에서 다른 선택을 했다면 어떻게 되었을지 그리는 대체역사 이야기.',
+      '',
+      '[분량]',
+      `- 사건(events) ${size.events}개, 엔딩(endings) ${endings}개(그중 즉시 엔딩 1~3개), 수치(stats) 3~5개, 기록(flags) 2~6개.`,
+      '- 사건 본문은 3~6문장, 엔딩 본문은 3~7문장으로 간결하게 써라. 답변이 길어져 중간에 끊기지 않도록 분량을 지켜라.',
+      '- 모든 글은 한국어로 쓴다. id만 영문으로 쓴다.',
+      '',
+      gameInstructions(selected.mode), '', RULES, '', featureRules, '', CRAFT, '',
+      '[형식 예시 — 구조만 참고하고 내용·id·수치는 새로 만들어라]',
+      JSON.stringify(buildExample(options))
+    ].join('\n');
+  }
+
+  function buildRepairPrompt(problem) {
+    const lines = ['방금 준 시나리오 JSON을 「역사의 갈림길」에 불러왔더니 아래 문제가 있었다.'];
+    if (problem.kind === 'truncated') {
+      lines.push('', '[문제]', '- 답변이 중간에 끊겨 JSON이 완성되지 않았다.', '',
+        '같은 이야기를 사건 본문과 엔딩 본문을 더 짧게 줄이고 필요하면 사건 수도 줄여서, 처음부터 끝까지 완성된 전체 JSON 하나로 다시 출력해라. 설명은 쓰지 말고 JSON만 출력해라.');
+    } else if (problem.kind === 'parse') {
+      lines.push('', '[문제]', `- JSON 문법 오류: ${problem.detail}`, '- 쉼표 누락·남는 쉼표, 따옴표(" 대신 “ ”), 닫히지 않은 괄호, 주석이나 말줄임(...)이 있는지 확인해라.', '',
+        '문법을 고친 전체 JSON을 처음부터 끝까지 다시 출력해라. 설명은 쓰지 말고 JSON만 출력해라.');
+    } else if (problem.kind === 'empty') {
+      lines.push('', '[문제]', '- 답변에서 JSON 객체({ ... })를 찾지 못했다.', '',
+        '설명 없이 시나리오 전체를 JSON 객체 하나로 출력해라.');
+    } else {
+      const errors = (problem.errors || []).slice(0, 40);
+      lines.push('', '[문제]', ...errors.map(item => '- ' + item));
+      if ((problem.errors || []).length > errors.length) lines.push(`- 그 밖에 ${problem.errors.length - errors.length}개`);
+      lines.push('', '위 문제를 모두 고친 전체 JSON을 처음부터 끝까지 다시 출력해라. 고친 부분만이 아니라 전체를 출력하고, 설명은 쓰지 마라.');
+    }
+    lines.push('', '원래 원고가 schemaVersion:2이면 지도와 연차 통치 설정을 유지해라. 모드를 임의로 V1로 낮추거나 지역·국가 id를 바꾸지 마라.', '', RULES);
+    return lines.join('\n');
+  }
+
+  class PasteError extends Error {
+    constructor(kind, message, detail = '') { super(message); this.kind = kind; this.detail = detail; }
+  }
+
+  // Walks text outside JSON strings. Returns the end index of the balanced object, or -1.
+  function balancedEnd(text, start) {
+    let depth = 0, inString = false, escaped = false;
+    for (let i = start; i < text.length; i += 1) {
+      const c = text[i];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (c === '\\') escaped = true;
+        else if (c === '"') inString = false;
+        continue;
+      }
+      if (c === '/' && text[i + 1] === '/') { while (i < text.length && text[i] !== '\n') i += 1; continue; }
+      if (c === '/' && text[i + 1] === '*') { const close = text.indexOf('*/', i + 2); if (close < 0) return -1; i = close + 1; continue; }
+      if (c === '"') inString = true;
+      else if (c === '{' || c === '[') depth += 1;
+      else if (c === '}' || c === ']') { depth -= 1; if (depth === 0) return i; }
+    }
+    return -1;
+  }
+
+  // Light, string-aware cleanup: comments and trailing commas only.
+  function looseClean(text) {
+    let out = '', inString = false, escaped = false;
+    for (let i = 0; i < text.length; i += 1) {
+      const c = text[i];
+      if (inString) {
+        out += c;
+        if (escaped) escaped = false;
+        else if (c === '\\') escaped = true;
+        else if (c === '"') inString = false;
+        continue;
+      }
+      if (c === '"') { inString = true; out += c; continue; }
+      if (c === '/' && text[i + 1] === '/') { while (i < text.length && text[i] !== '\n') i += 1; out += '\n'; continue; }
+      if (c === '/' && text[i + 1] === '*') { const end = text.indexOf('*/', i + 2); out += ' '; i = end < 0 ? text.length : end + 1; continue; }
+      out += c;
+    }
+    let cleaned = ''; inString = false; escaped = false;
+    for (let i = 0; i < out.length; i += 1) {
+      const c = out[i];
+      if (inString) {
+        cleaned += c;
+        if (escaped) escaped = false;
+        else if (c === '\\') escaped = true;
+        else if (c === '"') inString = false;
+        continue;
+      }
+      if (c === '"') inString = true;
+      if (c === ',') {
+        let next = i + 1; while (next < out.length && /\s/.test(out[next])) next += 1;
+        if (out[next] === '}' || out[next] === ']') continue;
+      }
+      cleaned += c;
+    }
+    return cleaned;
+  }
+
+  function locate(text, position) {
+    const before = text.slice(0, position), line = before.split('\n').length, column = position - before.lastIndexOf('\n');
+    const snippet = text.slice(Math.max(0, position - 30), position + 30).replace(/\s+/g, ' ').trim();
+    return `${line}번째 줄 ${column}번째 글자 근처 “${snippet}”`;
+  }
+
+  function extract(raw) {
+    if (typeof raw !== 'string' || !raw.trim()) throw new PasteError('empty', '붙여 넣은 내용이 없습니다. AI의 답변을 복사해 붙여 넣어 주세요.');
+    // Drop markdown fence lines so a continued answer can be appended at the end.
+    const text = raw.replace(/^﻿/, '').split(/\r?\n/).filter(line => !/^\s*```/.test(line)).join('\n');
+    let fallback = null, parseError = null, truncated = false;
+    const candidates = /\{(?=\s*(?:"|\}|\/))/g;
+    let candidate;
+    while ((candidate = candidates.exec(text))) {
+      const start = candidate.index;
+      const likelyScenario = /"(?:schemaVersion|events|scenario|stats|endings)"\s*:/.test(text.slice(start, start + 300));
+      const end = balancedEnd(text, start);
+      if (end < 0) { if (likelyScenario) truncated = true; continue; }
+      const body = text.slice(start, end + 1);
+      let value, cleaned = false;
+      try { value = JSON.parse(body); }
+      catch (first) {
+        try { value = JSON.parse(looseClean(body)); cleaned = true; }
+        catch {
+          if (!parseError || likelyScenario) {
+            const match = /position (\d+)/.exec(first.message);
+            const detail = match ? locate(body, Number(match[1])) : '정확한 위치를 찾지 못했습니다';
+            parseError = new PasteError('parse', `JSON 문법 오류가 있습니다. ${detail}`, detail);
+          }
+          continue;
+        }
+      }
+      if (value && typeof value === 'object' && !Array.isArray(value) && value.schemaVersion === undefined && !Array.isArray(value.events)) {
+        const inner = Object.values(value).filter(item => item && typeof item === 'object' && !Array.isArray(item) && Array.isArray(item.events));
+        if (inner.length === 1) value = inner[0];
+      }
+      const result = { value, cleaned };
+      if (value && typeof value === 'object' && Array.isArray(value.events)) return result;
+      if (!fallback || (value && value.schemaVersion !== undefined && fallback.value?.schemaVersion === undefined)) fallback = result;
+      candidates.lastIndex = end + 1;
+    }
+    if (truncated) throw new PasteError('truncated', 'AI 답변이 중간에 끊긴 것 같습니다. JSON의 끝(마지막 } )이 없습니다.');
+    if (parseError) throw parseError;
+    if (fallback) return fallback;
+    throw new PasteError('empty', '붙여 넣은 내용에서 JSON({ … })을 찾지 못했습니다. AI 답변 전체를 복사했는지 확인해 주세요.');
+  }
+
+  // Fill fields AI answers commonly omit. Only unambiguous defaults; returns notes.
+  function normalize(scenario) {
+    const fixes = [];
+    if (!scenario || typeof scenario !== 'object' || Array.isArray(scenario)) return fixes;
+    if (scenario.schemaVersion === undefined) { scenario.schemaVersion = scenario.map || scenario.reign || scenario.mode === 'reign' ? 2 : 1; fixes.push('schemaVersion'); }
+    else if (scenario.schemaVersion === '1' || scenario.schemaVersion === '2') { scenario.schemaVersion = Number(scenario.schemaVersion); fixes.push('schemaVersion'); }
+    if (scenario.schemaVersion === 2 && scenario.mode === undefined) { scenario.mode = scenario.reign ? 'reign' : 'chronicle'; fixes.push('mode'); }
+    if (typeof scenario.id !== 'string' || !/^[a-z][a-z0-9_]*$/i.test(scenario.id)) { scenario.id = 'ai_scenario'; fixes.push('시나리오 id'); }
+    if (scenario.flags === undefined) { scenario.flags = []; fixes.push('flags'); }
+    if (scenario.draft !== undefined) { delete scenario.draft; fixes.push('draft 제거'); }
+    if (Array.isArray(scenario.events)) scenario.events.forEach(event => {
+      if (event && typeof event === 'object' && event.next === undefined) { event.next = 'END'; fixes.push(`사건 ${event.id || ''}의 next`); }
+    });
+    if (Array.isArray(scenario.endings)) {
+      scenario.endings.forEach(ending => {
+        if (!ending || typeof ending !== 'object') return;
+        if (typeof ending.immediate !== 'boolean') { ending.immediate = ending.chance !== undefined; fixes.push(`엔딩 ${ending.id || ''}의 immediate`); }
+        if (typeof ending.priority !== 'number') { ending.priority = Number(ending.priority) || 0; fixes.push(`엔딩 ${ending.id || ''}의 priority`); }
+        if (!['good', 'mixed', 'bad'].includes(ending.kind)) { ending.kind = 'mixed'; fixes.push(`엔딩 ${ending.id || ''}의 kind`); }
+      });
+      const ids = new Set(scenario.endings.map(ending => ending && ending.id));
+      if (!ids.has(scenario.defaultEnding)) {
+        const fallback = scenario.endings.find(ending => ending && ending.immediate === false && (!ending.when || ending.when.length === 0));
+        if (fallback) { scenario.defaultEnding = fallback.id; fixes.push('defaultEnding'); }
+      }
+    }
+    if (Array.isArray(scenario.events) && scenario.events.length && !scenario.events.some(event => event && event.id === scenario.start)) {
+      scenario.start = scenario.events[0] && scenario.events[0].id; fixes.push('start');
+    }
+    return fixes;
+  }
+
+  root.ScenarioAI = { EXAMPLE, SIZES, buildExample, buildPrompt, buildRepairPrompt, extract, normalize, PasteError };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script id="app-script">(function () {
+  'use strict';
+  const E = GameEngine;
+  const byId = id => document.getElementById(id);
+  const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+  const hash = value => { let h=2166136261;for(const c of JSON.stringify(value)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(36); };
+  const baseKey = 'history-crossroads:web:v1';
+  const MAX_SCENARIO_BYTES = 5 * 1024 * 1024;
+  let storageOK = true, timer, scenario, state, awaitingName=false, nameReturnState=null;
+  let launcherMode='file', ai={idea:'',size:'short',endings:'5',mode:'chronicle',mapTemplateId:'',base:false,paste:'',prompt:'',promptNote:'',showPrompt:false,problem:null,repair:'',repairNote:'',showRepair:false};
+  let compareMap=false,referenceCache=null;
+  let launcherBusy=false, launcherError='', launcherMessage='', failedScenarioUrl=null, loadSequence=0, pendingUrlController=null;
+  let deferredStoredScenario=null, startupRetry=false, startupRestore=true, aiMapLoading=false, aiMapSequence=0, aiMapError='';
+  const provinceNameIndexes=new WeakMap();
+  const requestedHome=new URL(location.href).searchParams.get('home')==='1';
+  let homeMode=true;
+  const storage = {
+    get(key){try{return JSON.parse(localStorage.getItem(baseKey+':'+key));}catch{return null;}},
+    set(key,value){try{localStorage.setItem(baseKey+':'+key,JSON.stringify(value));return true;}catch{storageOK=false;return false;}}
+  };
+  try{localStorage.setItem(baseKey+':check','1');localStorage.removeItem(baseKey+':check');}catch{storageOK=false;}
+  const custom = storage.get('scenario');
+  // A saved map must be loaded before full engine validation. Until then, keep
+  // the original manuscript and autosave untouched rather than rejecting it.
+  scenario=E.clone(DEFAULT_SCENARIO);state=null;
+  const signature = () => hash(scenario);
+  function sourceContext(){
+    const page=new URL(location.href),path=page.searchParams.get('scenario');
+    if(!path)return 'local';
+    try{const source=new URL(path,page);source.hash='';return 'url:'+source.href;}catch{return 'invalid:'+path;}
+  }
+  function saveSourceContext(saved=true){
+    if(saved)storage.set('sourceContext',{context:sourceContext(),signature:signature()});
+  }
+  const discovered = () => storage.get('collection:'+signature()) || [];
+  function storedState(){
+    const template=globalThis.MapTemplates?.get(scenario.map?.templateId);
+    if(!state?.map||!template||template.provinces.length<=1000)return E.clone(state);
+    // Template owners are immutable assets; save only differences, plus verified replay history.
+    const saved=E.clone({...state,map:null}),owners={};
+    for(const p of template.provinces)if(state.map.owners[p.id] !== (scenario.map.initial?.owners?.[p.id]||p.owner))owners[p.id]=state.map.owners[p.id];
+    saved.map={...E.clone({...state.map,owners:{}}),owners};saved.mapEncoding='template-delta-v1';return saved;
+  }
+  function restoreSavedState(raw){
+    if(raw?.mapEncoding!=='template-delta-v1')return E.restoreState(scenario,raw);
+    const template=globalThis.MapTemplates?.get(scenario.map?.templateId);if(!template||!raw.map?.owners)throw Error('저장한 지도의 템플릿을 찾을 수 없습니다.');
+    const owners={...Object.fromEntries(template.provinces.map(p=>[p.id,p.owner])),...(scenario.map.initial?.owners||{}),...raw.map.owners};
+    const expanded={...raw,map:{...raw.map,owners}};delete expanded.mapEncoding;return E.restoreState(scenario,expanded);
+  }
+  const envelope = () => ({signature:signature(),state:storedState(),at:new Date().toISOString()});
+  const display = value => E.formatText(value,state);
+  const t = value => escape(display(value));
+  const playerSettings = () => ({askName:true,label:'당신의 이름',defaultName:'집정관',placeholder:'이름을 입력하세요',...(scenario.player||{})});
+  const reignMode = () => scenario.schemaVersion===2&&scenario.mode==='reign';
+  const isEmptyScenario = () => scenario.draft===true&&!scenario.events.length&&!scenario.stats.length&&!scenario.endings.length&&!scenario.flags.length&&!(scenario.randomEvents||[]).length;
+  function notify(message){byId('toast').textContent=message;byId('toast').hidden=false;clearTimeout(timer);timer=setTimeout(()=>{byId('toast').hidden=true;},3500);}
+  function status(message,error=false){const node=byId('status-message');node.textContent=message;node.classList.toggle('error',error);node.hidden=!message;}
+  function saveAuto(){storage.set('autosave',envelope());}
+  function rememberEnding(){
+    if(!state||awaitingName||!state.endingId)return;
+    const list=discovered();if(!list.includes(state.endingId)){list.push(state.endingId);storage.set('collection:'+signature(),list);}
+  }
+  function effectText(effects){return Object.entries(effects||{}).filter(([,v])=>v!==0).map(([id,v])=>`${scenario.stats.find(s=>s.id===id)?.name||id} ${v>0?'+':''}${v}`).join(' · ');}
+  function immediateRisks(candidate){
+    const risks=[];
+    for(const ending of scenario.endings.filter(e=>e.immediate&&e.id!==scenario.defaultEnding&&E.testConditions(e.when,candidate)).sort((a,b)=>b.priority-a.priority)){
+      const chance=ending.chance===undefined?100:ending.chance;
+      if(chance>0)risks.push({ending,chance});
+      if(chance===100)break;
+    }
+    return risks;
+  }
+  function projectedRiskMarkup(choice){
+    const projected={...state,turn:state.turn+1,stats:{...state.stats},flags:{...state.flags,...(choice.setFlags||{})}};
+    if(state.map&&(choice.territory||[]).length){
+      projected.map={...state.map};const copied=new Set();
+      const setLayer=(layer,province,value)=>{if(!copied.has(layer)){projected.map[layer]={...state.map[layer]};copied.add(layer);}projected.map[layer][province]=value;};
+      for(const change of choice.territory){
+        if(change.to!==undefined)setLayer('owners',change.prov,change.to);
+        for(const [field,layer] of [['occupation','occupation'],['influence','influence'],['marker','markers']])if(Object.hasOwn(change,field))setLayer(layer,change.prov,change[field]);
+      }
+    }
+    for(const [id,delta] of Object.entries(choice.effects||{})){
+      const stat=scenario.stats.find(s=>s.id===id);
+      if(stat)projected.stats[id]=Math.max(stat.min,Math.min(stat.max,projected.stats[id]+delta));
+    }
+    const risks=immediateRisks(projected);
+    const destination=choice.next===undefined?E.getEvent(scenario,state)?.next:choice.next;
+    const encounters=risks.some(r=>r.chance===100)||(destination==='RETURN'&&(!reignMode()||state.activeRandomEventId))?[]:encounterRisks(projected);
+    return (risks.length?`<span class="choice-risk">⚠ 선택 후 ${risks.map(r=>`${t(r.ending.title)} ${r.chance}%`).join(' · ')}</span>`:'')+
+      (encounters.length?`<span class="choice-encounter">◇ 돌발 사건 ${encounters.map(r=>`${t(r.title)} ${r.chance}%`).join(' · ')}${risks.length?' · 즉시 엔딩이 발생하지 않으면 추첨':''}</span>`:'');
+  }
+  function encounterRisks(candidate){
+    const result=[];
+    for(const rule of E.getRandomEventRisks(scenario,candidate)){
+      if(rule.chance>0)result.push(rule);
+      if(rule.chance===100)break;
+    }
+    return result;
+  }
+  function riskResultText(record){
+    return [
+      ...(record.riskRolls||[]).filter(r=>r.chance>0).map(r=>`${scenario.endings.find(e=>e.id===r.endingId)?.title||r.endingId} ${r.chance}%: ${r.triggered?'발생':'통과'}`),
+      ...(record.eventRolls||[]).filter(r=>r.chance>0).map(r=>`${(scenario.randomEvents||[]).find(e=>e.id===r.randomEventId)?.title||r.randomEventId} ${r.chance}%: ${r.triggered?'발생':'미발생'}`)
+    ].join(' · ');
+  }
+  function effectMarkup(choice){
+    const nums=Object.entries(choice.effects||{}).filter(([,v])=>v!==0).map(([id,v])=>`<span class="effect ${v>0?'up':'down'}">${t(scenario.stats.find(s=>s.id===id)?.name||id)} ${v>0?'＋':'−'}${Math.abs(v)}</span>`).join('');
+    const flags=Object.entries(choice.setFlags||{}).map(([id,v])=>`<span class="effect flag">${v?'◇':'↩'} ${t(scenario.flags.find(f=>f.id===id)?.name||id)}${v?'':' 해제'}</span>`).join('');
+    const ids=[...new Set((choice.territory||[]).map(change=>change.prov))];
+    const template=globalThis.MapTemplates?.get(scenario.map?.templateId);
+    let names=template&&provinceNameIndexes.get(template);
+    if(template&&!names){names=new Map(template.provinces.map(p=>[p.id,p.name]));provinceNameIndexes.set(template,names);}
+    const first=ids.length?(names?.get(ids[0])||ids[0]):'';
+    const label=ids.length>1?`${first} 외 ${ids.length-1}개 지역에 변화`:`${first}에 변화`;
+    const details=ids.slice(0,6).map(id=>names?.get(id)||id).join(' · ')+(ids.length>6?` · 외 ${ids.length-6}개 지역`:'');
+    const mapEffects=ids.length?`<span class="effect flag map-effect-summary" title="${escape(details)}">⌖ ${escape(label)}</span>`:'';
+    return nums+flags+mapEffects?`<span class="choice-effects">${nums}${flags}${mapEffects}</span>`:'';
+  }
+  function renderMap(){
+    const panel=byId('player-map-panel');if(!panel)return;
+    panel.hidden=!scenario.map;byId('map-reference-tools').hidden=!scenario.map;if(!scenario.map){MapView.dispose?.(byId('player-map'));return;}
+    if(!referenceCache||referenceCache.signature!==signature())referenceCache={signature:signature(),reference:E.getHistoricalReference?.(scenario)};
+    const reference=referenceCache.reference;
+    byId('map-reference-tools').innerHTML=reference?.complete?`<button class="btn secondary" data-map-compare aria-pressed="${compareMap}" title="작성자가 표시한 기준 선택의 최종 지도와 비교합니다.">${compareMap?'기준 역사 비교 끄기':'기준 역사와 비교'}</button>`:'';
+    MapView.render(byId('player-map'),scenario,state,{compareState:compareMap&&reference?.complete?reference.state:null});
+  }
+  function decisionResultMarkup(){
+    if(!state||awaitingName||!state.history.length)return '';
+    const record=state.history[state.history.length-1],event=scenario.events.find(e=>e.id===record.eventId),choice=event?.choices[record.choiceIndex];
+    if(!choice?.result)return '';
+    const historical=event.choices.find(c=>c.historical);
+    return `<section class="decision-result"><strong>직전 결정의 결과</strong><p>${t(choice.result)}</p>${historical?`<p class="small">기준 선택: ${t(historical.text)}${choice.historical?' · 같은 길을 택했습니다.':' · 다른 길을 택했습니다.'}</p>`:''}</section>`;
+  }
+  function timelineChoice(record){
+    const event=scenario.events.find(item=>item.id===record.eventId),choice=event?.choices[record.choiceIndex];
+    const part=scenario.reign?.parts?.find(item=>item.id===event?.part);
+    const color=/^#[0-9a-f]{6}$/i.test(part?.color||'')?part.color:'#65785c';
+    return `<p>${part?`<span class="timeline-part" style="--part-color:${color}">${t(part.name)}</span>`:''}${record.historical||choice?.historical?'<span class="historical-mark" title="작성자가 표시한 기준 역사와 같은 선택">기준</span>':''}${t(record.choiceText)}</p>`;
+  }
+  function renderTimeline(){
+    const panel=byId('timeline-panel');if(!panel)return;
+    byId('timeline-count').textContent=state&&!awaitingName?String(state.history.length):'0';
+    if(!state||awaitingName){panel.innerHTML='<p class="empty-memory">이야기를 시작하면 선택한 길이 이곳에 쌓입니다.</p>';byId('timeline-note').textContent='';return;}
+    if(reignMode()){
+      const groups=new Map();let index=0;
+      for(const record of state.history){
+        const turnIndex=record.action==='settle'&&Number.isInteger(record.turnIndex)?record.turnIndex:index;
+        if(!groups.has(turnIndex))groups.set(turnIndex,[]);groups.get(turnIndex).push(record);
+        if(record.action==='settle')index=turnIndex+1;
+      }
+      const current=state.reign.turnIndex,turns=scenario.reign.turns,start=Math.max(0,current-16),end=Math.min(turns.length,Math.max(32,current+17));
+      panel.innerHTML=turns.slice(start,end).map((turn,offset)=>{
+        const turnIndex=start+offset,records=groups.get(turnIndex)||[],settled=records.some(record=>record.action==='settle');
+        const cls=settled?'played':turnIndex===current?'current':'upcoming';
+        const choices=records.filter(record=>record.action!=='settle'),settlement=records.find(record=>record.action==='settle');
+        return `<article class="timeline-entry ${cls}" ${cls==='current'?'aria-current="step"':''}><div class="timeline-date">${t(turn.date||String(turnIndex+1)+'번째 해')}</div><div class="timeline-copy"><h3>${t(turn.title)}</h3>${choices.slice(-8).map(timelineChoice).join('')}${choices.length>8?`<p>이 해에 ${choices.length}번의 결정</p>`:''}${settlement?.result?`<p>${t(settlement.result)}</p>`:''}${!choices.length?`<p>${turnIndex===current?(state.endingId?'이 해에 통치 종료':'지금 당신의 결정을 기다립니다.'):turnIndex>current?'예정':'기록 없음'}</p>`:''}${settled&&!settlement?.result?'<p>정산 완료</p>':''}</div></article>`;
+      }).join('');
+      byId('timeline-note').textContent=(start||end<turns.length?'현재 해 주변의 기록을 표시합니다. 전체 선택 기록에서 모든 결정을 볼 수 있습니다. ':'')+'앞으로의 사건과 선택지는 지금까지의 결정에 따라 달라질 수 있습니다.';
+    }else{
+      const records=state.history.slice(-8);
+      const current=!state.endingId?E.getEvent(scenario,state):null;
+      panel.innerHTML=records.map(record=>{const event=scenario.events.find(item=>item.id===record.eventId);return `<article class="timeline-entry played"><div class="timeline-date">${t(event?.date||'#'+record.turn)}</div><div class="timeline-copy"><h3>${t(record.eventTitle)}</h3>${timelineChoice(record)}${record.result?`<p>${t(record.result)}</p>`:''}</div></article>`;}).join('')+(current?`<article class="timeline-entry current" aria-current="step"><div class="timeline-date">${t(current.date||'현재')}</div><div class="timeline-copy"><h3>${t(current.title)}</h3><p>${state.activeRandomEventId?'돌발 사건 대응 중':'지금 당신의 결정을 기다립니다.'}</p></div></article>`:'');
+      if(!panel.innerHTML)panel.innerHTML='<p class="empty-memory">아직 선택한 사건이 없습니다.</p>';
+      byId('timeline-note').textContent=state.history.length>8?'최근 8번의 결정을 표시합니다. 전체 선택 기록에서 앞선 결정도 볼 수 있습니다.':'기준 표시는 시나리오 작성자가 지정한 역사 선택입니다.';
+    }
+  }
+  function renderPlayGuide(){
+    const mode=reignMode();
+    byId('play-guide-title').textContent=mode?'치세 모드는 이렇게 움직입니다':'연대기 모드는 이렇게 움직입니다';
+    byId('play-guide-content').innerHTML=`<ul>${mode?'<li><strong>한 해에 여러 결정:</strong> 각 분야의 카드에서 하나씩 고릅니다. 고를 때마다 수치와 지도가 바뀝니다.</li><li><strong>정산:</strong> 현재 선택 가능한 모든 분야를 결정하면 정산할 수 있습니다. 결정의 조합으로 추가 결과가 붙고 다음 해가 열립니다.</li><li><strong>달라지는 선택지:</strong> 앞선 결정과 현재 수치에 따라 다음 해에 나타나는 카드와 선택지가 달라집니다.</li>':'<li><strong>장면마다 한 번의 결정:</strong> 사건을 읽고 선택지를 고르면 수치와 기록이 바뀌고 다음 장면으로 이어집니다.</li><li><strong>이어지는 갈림길:</strong> 선택, 수치, 앞선 결정에 따라 다른 사건이 열리고 여러 결말로 이어집니다.</li>'}<li><strong>돌발 사건과 위기:</strong> 작성자가 설정한 조건과 확률에 따라 새로운 사건이나 즉시 결말이 발생할 수 있습니다.</li>${scenario.map?'<li><strong>선택이 남긴 지도:</strong> 지역을 눌러 주인과 상태를 확인하세요. 마우스 휠로 확대·축소하고 지도를 끌어 이동할 수 있습니다. 기준 역사 비교는 작성자가 지정한 선택의 최종 결과를 보여 줍니다.</li>':''}</ul>`;
+  }
+  function render(){
+    document.body.classList.toggle('is-home',homeMode);
+    if(homeMode){renderHome();return;}
+    const empty=isEmptyScenario();
+    document.title=empty?'역사의 갈림길 · 시나리오 플레이어':display(scenario.title)+' · 역사의 갈림길';
+    byId('scenario-title').textContent=empty?'당신의 이야기를 여세요':display(scenario.title);
+    byId('scenario-subtitle').textContent=empty?'시나리오 파일을 불러오거나 빈 공간에서 새 이야기를 만드세요.':display(scenario.subtitle||'당신의 결정으로 쓰는 또 하나의 역사');
+    byId('scenario-description').textContent=empty?'프로그램에는 시나리오가 포함되어 있지 않습니다. JSON 파일은 이 브라우저에서 읽습니다.':display(scenario.description||'');
+    document.body.classList.toggle('empty-workspace',empty);
+    document.body.classList.toggle('has-player-map',Boolean(scenario.map));
+    byId('scenario-mode-label').textContent=empty?'YOUR STORY, YOUR CHOICES':reignMode()?'치세 · 한 해의 여러 결정':'연대기 · 장면마다 달라지는 역사';
+    renderPlayGuide();renderTimeline();
+    renderMap();
+    for(const id of ['save-button','restart-button','journal-button','collection-button'])byId(id).disabled=!state||awaitingName;
+    if(!state){renderDraft();return;}
+    byId('turn-label').textContent=awaitingName?'통치자의 이름을 정하고 이야기를 시작하세요.':`${state.playerName} · ${reignMode()?'치세 '+(state.reign.turnIndex+1)+'번째 해 · ':''}${state.turn}번의 기록`;
+    byId('stats-panel').innerHTML=scenario.stats.map(s=>{
+      const value=state.stats[s.id],percent=100*(value-s.min)/(s.max-s.min);
+      const color=/^#[0-9a-f]{6}$/i.test(s.color||'')?s.color:'#688764';
+      const last=state.history[state.history.length-1],delta=awaitingName?0:(last?.effects?.[s.id]||0)+(last?.results||[]).reduce((sum,result)=>sum+(result.effects?.[s.id]||0),0);
+      return `<div class="stat" title="${t(s.description||s.name)}"><div class="stat-top"><span class="stat-name">${t(s.name)}</span><span class="stat-number">${value}<small>/ ${s.max}</small>${delta?`<small class="stat-delta ${delta<0?'down':''}">${delta>0?'+':''}${delta}</small>`:''}</span></div><div class="stat-track" role="progressbar" aria-label="${t(s.name)}" aria-valuemin="${s.min}" aria-valuemax="${s.max}" aria-valuenow="${value}"><div class="stat-fill" style="width:${percent}%;background:${color}"></div></div><div class="stat-help">${t(s.description||'')}</div></div>`;
+    }).join('');
+    const active=state.endingId?[]:immediateRisks(state);
+    const encounters=state.endingId||active.some(r=>r.chance===100)?[]:encounterRisks({...state,turn:state.turn+1});
+    byId('risk-summary').hidden=!active.length&&!encounters.length&&!state.activeRandomEventId;
+    byId('risk-summary').innerHTML=(active.length?`<strong>현재 위기 조건 충족</strong>${active.map(r=>`<span>${t(r.ending.title)} · 선택 후 ${r.chance}%</span>`).join('')}`:'')+
+      (encounters.length?`<strong class="encounter-label">현재 돌발 사건 조건 충족</strong>${encounters.map(r=>`<span>${t(r.title)} · 선택 후 ${r.chance}%</span>`).join('')}`:'')+
+      (state.activeRandomEventId?'<strong class="encounter-label">돌발 사건 대응 중</strong><small>대응 선택에서는 돌발 사건을 추가 추첨하지 않습니다. 즉시 엔딩 조건은 계속 적용됩니다.</small>':'<small>선택의 수치 변화를 반영한 뒤 조건을 다시 판정합니다.</small>');
+    const flags=scenario.flags.filter(f=>state.flags[f.id]);
+    byId('flags-count').textContent=flags.length;
+    byId('flags-panel').innerHTML=flags.length?`<div class="flag-badges">${flags.map(f=>`<span class="flag-badge">◇ ${t(f.name)}</span>`).join('')}</div>`:'<p class="empty-memory">아직 중요한 결정이 없습니다.<br>당신의 선택이 이곳에 쌓입니다.</p>';
+    byId('ending-count').textContent=`${discovered().filter(id=>scenario.endings.some(e=>e.id===id)).length} / ${scenario.endings.length} →`;
+    const manual=storage.get('save');
+    byId('load-button').disabled=!manual||manual.signature!==signature();
+    byId('save-status').textContent=storageOK?'매 선택마다 이 브라우저에 자동 저장됩니다.':'브라우저 저장을 사용할 수 없습니다.';
+    byId('story-panel').classList.toggle('game-over',Boolean(state.endingId&&scenario.endings.find(e=>e.id===state.endingId)?.kind==='bad'));
+    if(awaitingName)renderNameSetup();else if(state.endingId)renderEnding();else if(reignMode()&&!state.activeRandomEventId)renderReign();else renderEvent();
+  }
+  function renderHome(){
+    document.title='역사의 갈림길 · 초기 화면';
+    document.body.classList.add('empty-workspace');
+    document.body.classList.remove('has-player-map');
+    byId('scenario-title').textContent='당신의 이야기를 여세요';
+    byId('scenario-subtitle').textContent='시나리오를 불러오거나 새로운 이야기를 만드세요.';
+    byId('scenario-mode-label').textContent='YOUR STORY, YOUR CHOICES';
+    byId('scenario-description').textContent='';
+    MapView.dispose?.(byId('player-map'));
+    byId('player-map-panel').hidden=true;byId('map-reference-tools').hidden=true;
+    byId('story-panel').classList.remove('game-over');
+    const current=Boolean(deferredStoredScenario||scenario.map||!isEmptyScenario());
+    const savedScenario=deferredStoredScenario||scenario,isDraft=savedScenario.draft===true;
+    byId('story-panel').innerHTML=(current?`<section class="home-resume" style="display:block" aria-label="저장된 시나리오 시작 방법"><div style="min-width:0;overflow-wrap:anywhere"><div class="small-label">이 브라우저에 저장된 시나리오</div><h2 style="font-size:22px;margin:10px 0">${escape(savedScenario.title||'저장한 시나리오')}</h2><p>${isDraft?'작성하던 초안을 다시 열 수 있습니다.':'이전 진행을 이어가거나 같은 시나리오를 처음부터 시작하세요.'}</p></div><div class="toolbar" style="display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 10px"><button type="button" class="btn primary" id="resume-scenario-link" data-launch-action="resume-scenario">${isDraft?'작성하던 시나리오로 돌아가기':'이어서 하기'}</button>${isDraft?'':'<button type="button" class="btn secondary" id="restart-scenario-button" data-launch-action="restart-scenario">처음부터 시작하기</button>'}</div><p>선택한 뒤에 필요한 지도를 불러옵니다. 다른 이야기는 아래에서 열 수 있습니다.</p></section>`:'')+launcherMarkup(false);
+    updateLauncherFeedback();
+  }
+  function leaveHome(){
+    if(!homeMode)return;
+    homeMode=false;
+    try{const url=new URL(location.href);url.searchParams.delete('home');globalThis.history?.replaceState(null,'',url.href);}catch{}
+  }
+  function renderNameSetup(){
+    const settings=playerSettings(),remembered=storage.get('playerName');
+    const suggested=nameReturnState?.playerName||(typeof remembered==='string'?remembered:'');
+    byId('story-panel').classList.remove('game-over');
+    byId('risk-summary').hidden=true;
+    byId('story-panel').innerHTML=`<section class="name-setup"><div class="small-label">A NEW CHAPTER BEGINS</div><h2>누구의 역사를 쓰시겠습니까?</h2><p>이름을 정하면 당신의 선택으로 이야기가 시작됩니다.</p><form id="player-name-form"><label class="field name-field"><span>${escape(settings.label)}</span><input id="player-name-input" name="playerName" type="text" maxlength="48" autocomplete="off" placeholder="${escape(settings.placeholder)}" value="${escape(suggested)}" aria-describedby="player-name-help name-error" required></label><p id="player-name-help" class="small muted">최대 24자. 이야기 속 이름과 진행 저장에 함께 사용됩니다.</p><p id="name-error" class="name-error" role="alert" hidden></p><div class="toolbar"><button class="btn primary" type="submit">이 이름으로 시작</button><button class="btn secondary" type="button" data-action="default-name">${escape(settings.defaultName)} 이름으로 시작</button>${nameReturnState?'<button class="btn secondary" type="button" data-action="cancel-name">진행으로 돌아가기</button>':''}</div></form></section>`;
+  }
+  function startWithName(value){
+    if(!awaitingName)return;
+    try{
+      const playerName=E.normalizePlayerName(value);
+      const started=E.createState(scenario,{seed:state.seed,playerName});
+      state=started;awaitingName=false;nameReturnState=null;
+      storage.set('playerName',playerName);rememberEnding();saveAuto();render();status(`${playerName}의 이야기를 시작합니다.`);
+      byId('story-panel').focus({preventScroll:true});
+    }catch(error){const box=byId('name-error');box.textContent=error.message;box.hidden=false;byId('player-name-input').focus();}
+  }
+  function renderDraft(){
+    byId('turn-label').textContent='시나리오를 작성하는 중입니다.';
+    byId('stats-panel').innerHTML=scenario.stats.length?'<p class="empty-memory">초안에 수치 '+scenario.stats.length+'개가 있습니다.</p>':'<p class="empty-memory">수치부터 자유롭게 만들어 보세요.</p>';
+    byId('risk-summary').hidden=true;byId('risk-summary').innerHTML='';
+    byId('flags-count').textContent='0';byId('flags-panel').innerHTML='<p class="empty-memory">작성한 선택 기록은 플레이할 때 표시됩니다.</p>';
+    byId('ending-count').textContent='0 / '+scenario.endings.length+' →';byId('load-button').disabled=true;
+    byId('save-status').textContent=storageOK?'초안은 이 브라우저에 저장됩니다. 원고는 JSON으로 따로 보관하세요.':'JSON으로 초안을 내려받아 보관하세요.';
+    byId('story-panel').classList.remove('game-over');
+    byId('story-panel').innerHTML=isEmptyScenario()?launcherMarkup(false):`<div class="empty-authoring"><div class="small-label">YOUR EMPTY CANVAS</div><h2>이야기를 작성하고 있습니다</h2><p>사건 ${scenario.events.length}개 · 수치 ${scenario.stats.length}개 · 엔딩 ${scenario.endings.length}개</p><p>흐름도에서 첫 사건과 선택지를 만들고, 수치와 기본 엔딩을 추가하세요. 준비가 되면 편집기에서 ‘적용하고 새 게임’을 누르면 됩니다.</p><div class="toolbar"><button class="btn primary" data-action="edit-flow">흐름도에서 작성하기</button><button class="btn secondary" data-action="edit-scenario">기본 설정·수치·엔딩 편집</button><button class="btn secondary" data-launch-action="choose-file">다른 JSON 불러오기</button></div></div>`;
+    updateLauncherFeedback();
+  }
+  function renderEvent(){
+    const event=E.getEvent(scenario,state),choices=E.getChoices(scenario,state);
+    if(!event)throw Error('현재 사건을 찾을 수 없습니다.');
+    const speaker=display(event.speaker||'국정 회의');
+    const returnName=state.pendingNext==='REIGN'?'현재 해의 분야별 카드':state.pendingNext==='END'?'기존 엔딩 판정':scenario.events.find(e=>e.id===state.pendingNext)?.title;
+    const encounterNotice=state.activeRandomEventId?`<div class="encounter-notice"><strong>돌발 사건</strong><span>복귀 경로를 선택하면 ${t(returnName||'예정된 다음 사건')}${state.pendingNext==='END'?'으로 진행합니다.':'(으)로 돌아갑니다.'}</span></div>`:'';
+    byId('story-panel').innerHTML=`${encounterNotice}<div class="event-meta"><span class="chapter">${t(event.chapter||'새로운 역사')}<span class="event-number">선택 ${String(state.turn+1).padStart(2,'0')}</span></span><span>${t(event.date||'')}</span></div><div class="speaker-line"><div class="portrait" aria-hidden="true">${escape(speaker.replace(/\s/g,'').slice(0,1))}</div><div class="speaker-name">${escape(speaker)}<span class="speaker-caption">A VOICE IN HISTORY</span></div></div><h2 class="event-title">${t(event.title)}</h2><div class="event-body">${t(event.body)}</div><div class="choice-section-label">당신의 결정은</div><div class="choices">${choices.map(({choice,index,enabled,reason})=>`<button class="choice ${enabled?'':'locked'}" data-choice="${index}" ${enabled?'':'disabled'}><span class="choice-key">${index+1}</span><span class="choice-copy"><span class="choice-title">${t(choice.text)}</span>${choice.description?`<span class="choice-description">${t(choice.description)}</span>`:''}${effectMarkup(choice)}${enabled?projectedRiskMarkup(choice):''}${enabled?'':`<span class="choice-locked">🔒 ${t(reason||'조건을 충족하지 못했습니다.')}</span>`}</span><span class="choice-arrow" aria-hidden="true">↗</span></button>`).join('')}</div>`;
+    byId('story-panel').insertAdjacentHTML('afterbegin',`<span class="mode-badge">${reignMode()?'치세':'연대기'} · ${state.activeRandomEventId?'돌발 사건 대응':'장면과 선택'}</span>${decisionResultMarkup()}`);
+  }
+  function renderReign(){
+    const status=E.getReignStatus(scenario,state),turn=status.turn;
+    if(!turn)throw Error('현재 치세의 해를 찾을 수 없습니다.');
+    const resultList=(list,title,cls)=>list?.length?`<section class="${cls}"><strong>${title}</strong>${list.map(r=>`<p>${t(typeof r==='string'?r:r.text)}</p>`).join('')}</section>`:'';
+    const settlements=(status.results||[]).filter(result=>typeof result==='string'||result.type!=='choice');
+    const responses=(status.results||[]).filter(result=>result.type==='choice'&&!result.partId);
+    byId('story-panel').innerHTML=`<span class="mode-badge">치세 · 분야별 결정과 정산</span><div class="event-meta"><span class="chapter">${t(turn.date||'제 '+(status.turnIndex+1)+'년')}</span><span>${Object.keys(status.decisions||{}).length}개 분야 결정</span></div><h2 class="event-title">${t(turn.title)}</h2><div class="event-body">${t(turn.body||'각 분야에서 하나씩 선택한 뒤 정산하세요.')}</div>${resultList(status.between,'그 사이에 일어난 일','reign-between')}${resultList(settlements,'정산의 결과','reign-results')}${resultList(responses,'돌발 사건 대응의 결과','reign-responses')}${status.cards.map(({part,event,choices})=>{
+      const pick=status.decisions?.[part.id],selected=pick&&scenario.events.find(e=>e.id===pick.eventId)?.choices[pick.choiceIndex];
+      return `<article class="reign-card ${pick?'selected':''}" data-reign-card="${escape(part.id)}" style="--part-color:${/^#[0-9a-f]{6}$/i.test(part.color||'')?part.color:'#537b63'}"><div class="reign-card-heading"><span class="reign-part">${t(part.name)}</span>${pick?'<span class="reign-decided">결정함</span>':''}</div><h3>${t(event.title)}</h3>${pick?`<p class="reign-pick">✓ ${t(selected?.text||'결정 완료')}</p>${selected?effectMarkup(selected):''}${selected?.result?`<p class="reign-choice-result">${t(selected.result)}</p>`:''}`:`<div class="event-body">${t(event.body)}</div>${choices.map(({choice,index,enabled,reason})=>`<button class="choice" data-part-event="${escape(event.id)}" data-part-choice="${index}" ${enabled?'':'disabled'}><span class="choice-copy"><span class="choice-title">${t(choice.text)}</span>${choice.description?`<span class="choice-description">${t(choice.description)}</span>`:''}${effectMarkup(choice)}${enabled?projectedRiskMarkup(choice):`<span class="choice-locked">${t(reason)}</span>`}</span><span class="choice-arrow">↗</span></button>`).join('')}`}</article>`;
+     }).join('')}<button class="btn primary reign-settle" data-action="settle-reign" ${status.ready?'':'disabled'}>${status.ready?'정산하고 '+(status.turnIndex+1===scenario.reign.turns.length?'결말 보기':'다음 해로'):'각 분야의 결정을 마치면 정산할 수 있습니다'}</button>`;
+  }
+  function playReign(eventId,index){
+    if(!state||awaitingName)return;try{state=E.choosePart(scenario,state,eventId,index);rememberEnding();saveAuto();render();status('분야별 결정을 반영했습니다.');}catch(error){status(error.message,true);}
+  }
+  function settleReign(){
+    if(!state||awaitingName)return;try{state=E.settleTurn(scenario,state);rememberEnding();saveAuto();render();status('선택의 조합을 정산했습니다.');byId('story-panel').focus({preventScroll:true});}catch(error){status(error.message,true);}
+  }
+  function renderEnding(){
+    const ending=scenario.endings.find(e=>e.id===state.endingId);
+    byId('story-panel').innerHTML=`<div class="event-meta"><span class="chapter">${ending.kind==='bad'?'정부의 통치가 끝났습니다':'역사의 한 페이지가 닫혔습니다'}</span><span>${state.turn}번의 결정</span></div><p class="ending-banner">${ending.kind==='bad'?'GAME OVER · BAD ENDING':'ANOTHER HISTORY, YOUR LEGACY'}</p><div class="ending-ornament" aria-hidden="true">${ending.kind==='bad'?'敗':'終'}</div><h2 class="ending-title">${t(ending.title)}</h2><p class="ending-summary">${t(ending.summary||'당신의 선택이 남긴 역사입니다.')}</p><div class="ending-body">${t(ending.body||'')}</div><div class="ending-actions"><button class="btn primary" data-action="restart">다른 역사를 써보기</button><button class="btn secondary" data-action="journal">선택의 기록</button><button class="btn secondary" data-action="collection">발견한 결말</button></div><p class="ending-footnote">${t(riskResultText(state.history[state.history.length-1]||{})||'수치와 선택 기록의 조합으로 결정된 결말입니다. 다른 선택은 또 다른 역사를 만듭니다.')}</p>`;
+    if(reignMode()&&state.reign.results?.length)byId('story-panel').insertAdjacentHTML('afterbegin',`<section class="reign-results"><strong>마지막 정산</strong>${state.reign.results.map(r=>`<p>${t(typeof r==='string'?r:r.text)}</p>`).join('')}</section>`);
+    if(!reignMode())byId('story-panel').insertAdjacentHTML('afterbegin',decisionResultMarkup());
+  }
+  function play(index){
+    if(awaitingName||!state)return;
+    try{state=E.choose(scenario,state,index);rememberEnding();saveAuto();render();const last=state.history[state.history.length-1];status('직전 결정: '+display(last.choiceText)+(effectText(last.effects)?' · '+effectText(last.effects):'')+(riskResultText(last)?' | 위기 판정: '+riskResultText(last):''));byId('story-panel').focus({preventScroll:true});}
+    catch(error){status(error.message,true);}
+  }
+  function restart(ask=true){
+    if(!state||awaitingName)return;
+    if(ask&&state.turn>0&&!state.endingId&&!confirm('현재 회차를 끝내고 처음부터 시작할까요? 직접 저장한 진행은 남아 있습니다.'))return;
+    try{
+      const previous=state;
+      state=E.createState(scenario,{playerName:previous.playerName});awaitingName=playerSettings().askName!==false;
+      nameReturnState=awaitingName?previous:null;
+      if(!awaitingName)saveAuto();render();status('');
+    }catch(error){status(error.message,true);}
+  }
+  function info(title,body){byId('info-content').innerHTML=`<h2>${escape(title)}</h2>${body}`;byId('info-dialog').showModal();}
+  function journal(){
+    const entries=state?.history.map((h,i)=>{
+      const effects={...(h.effects||{})};for(const result of h.results||[])for(const [id,delta] of Object.entries(result.effects||{}))effects[id]=(effects[id]||0)+delta;
+      const resultText=h.result||(h.results||[]).map(r=>r.text).filter(Boolean).join('\n');
+      return `<article class="journal-entry"><h3>${i+1}. ${t(h.eventTitle)}</h3><p>${t(h.choiceText)}</p><p>${t(effectText(effects)||'수치 변화 없음')}</p>${resultText?`<p>${t(resultText)}</p>`:''}${h.historical?'<p class="small">기준 역사와 같은 선택</p>':''}${riskResultText(h)?`<p class="journal-risk">사건·위기 판정 · ${t(riskResultText(h))}</p>`:''}</article>`;
+    });info('지나온 선택',entries?.length?entries.join(''):'<p>아직 선택한 사건이 없습니다.</p>');
+  }
+  function collection(){const found=discovered();info('당신이 발견한 결말',scenario.endings.map(e=>found.includes(e.id)?`<article class="ending-item"><h3>${t(e.title)}</h3><p>${t(e.summary||'')}</p></article>`:'<article class="ending-item undiscovered"><h3>아직 쓰이지 않은 역사</h3><p>다른 선택을 통해 이 결말을 발견해 보세요.</p></article>').join(''));}
+  function launcherMarkup(dialog){
+    const currentMap=scenario.map||deferredStoredScenario?.map;
+    const tabs=`<section class="map-maker-entry"><div><strong>지도만 만들고 싶다면</strong><p>지역과 시대를 고르고 영토·국가 이름·색을 편집하세요. 지도 JSON으로 보관하고 갤러리에 공유할 수 있습니다.</p></div><div class="toolbar"><button type="button" class="btn primary" data-launch-action="map-maker">지도 제작기 열기</button><button type="button" class="btn secondary" data-launch-action="new-map">새 지도 만들기</button><a class="btn secondary" href="gallery.html?kind=map" data-community-only>지도 갤러리</a>${currentMap?'<button type="button" class="btn secondary" data-launch-action="copy-scenario-map">현재 시나리오 지도 복사</button>':''}</div></section><div class="launcher-actions map-start-action"><button type="button" class="btn secondary" data-launch-action="setup-map">${currentMap?'현재 시나리오의 지역·시대 설정':'시나리오에 지역·시대 지도 넣기'}</button><span class="small muted">지역 선택 → 시대 기본안 → 지도에서 영토 수정</span></div><div class="launcher-tabs" role="tablist" aria-label="시나리오를 시작하는 방법"><button type="button" role="tab" class="launcher-tab" data-launch-action="mode-file" aria-selected="${launcherMode==='file'}">JSON 파일 열기</button><button type="button" role="tab" class="launcher-tab" data-launch-action="mode-ai" aria-selected="${launcherMode==='ai'}"><span aria-hidden="true">✦</span> AI로 만들기 · 붙여 넣기</button></div>`;
+    const file=`<div class="scenario-dropzone" data-scenario-dropzone data-launch-action="choose-file" tabindex="0" role="button" aria-label="JSON 파일 불러오기. Enter 또는 스페이스 키로 파일을 고를 수 있습니다."><span class="drop-symbol" aria-hidden="true">↥</span><strong>JSON 파일을 이곳에 놓으세요</strong><span>또는 아래 버튼으로 파일 선택 · 최대 5 MB</span></div><div class="launcher-actions"><button type="button" class="btn primary" data-launch-action="choose-file">JSON 파일 불러오기</button><button type="button" class="btn secondary" data-launch-action="new">빈 시나리오 새로 작성</button></div><p class="launcher-progress" data-launch-progress role="status" aria-live="polite" ${launcherMessage?'':'hidden'}>${escape(launcherMessage)}</p><p class="launcher-error" data-launch-error role="alert" ${launcherError?'':'hidden'}>${escape(launcherError)}</p><button type="button" class="btn secondary" data-launch-action="retry-url" ${failedScenarioUrl?'':'hidden'}>주소에서 다시 불러오기</button><button type="button" class="btn secondary" data-launch-action="retry-startup" ${startupRetry?'':'hidden'}>저장한 시나리오 다시 열기</button>`;
+    return `<section class="scenario-launcher" aria-label="시나리오 불러오기"><div class="small-label">YOUR STORY, YOUR CHOICES</div><h2>${dialog?'시나리오 열기':'어떤 이야기를 시작할까요?'}</h2><p>보관한 시나리오 JSON 파일을 열거나, AI에게 시나리오를 만들어 달라고 해서 붙여 넣으세요. 직접 작성할 수도 있습니다.</p><a class="launcher-gallery" href="gallery.html" data-community-only>다른 사람이 만든 시나리오를 갤러리에서 바로 플레이하기 <span aria-hidden="true">→</span></a><div class="sample-picks" data-web-only><span class="small muted">기능 예시</span><button class="btn secondary" data-launch-action="demo-chronicle">연대기 · 세종과 지도</button><button class="btn secondary" data-launch-action="demo-reign">치세 · 유럽과 정산</button><button class="btn secondary" data-launch-action="demo-world">동아시아 · 임진왜란</button></div>${tabs}<div class="launcher-pane">${launcherMode==='ai'?aiMarkup():file}</div><p class="launcher-note">파일과 붙여 넣은 내용은 브라우저 안에서만 읽습니다. 시나리오와 진행은 접속한 브라우저에 각각 저장되며, 다른 접속자와 공유되지 않습니다. 원고는 JSON으로 따로 보관하세요.</p>${dialog?'<p class="launcher-note">새 시나리오를 열면 현재 시나리오가 교체됩니다. 형식 검사를 통과한 내용만 적용합니다.</p><div class="launcher-dialog-footer"><button type="button" class="btn secondary" data-launch-action="close">돌아가기</button></div>':''}</section>`;
+  }
+  function aiPromptOptions(){
+    const base=ai.base&&canUseBase()?scenario:null;
+    return {idea:ai.idea,size:ai.size,endings:ai.endings,mode:ai.mode,mapTemplateId:ai.mapTemplateId,baseScenario:base?E.clone(base):null};
+  }
+  function aiPromptPreview(){
+    if(aiMapLoading)return '선택한 지도만 불러오고 있습니다. 잠시 뒤 요청문을 확인할 수 있습니다.';
+    if(aiMapError)return aiMapError;
+    if(ai.mapTemplateId&&!globalThis.MapTemplates?.get(ai.mapTemplateId))return '선택한 지도를 불러온 뒤 요청문을 만들 수 있습니다. 요청문 복사를 누르면 다시 시도합니다.';
+    try{return ai.prompt||ScenarioAI.buildPrompt(aiPromptOptions());}catch(error){return error.message;}
+  }
+  function updateAIPromptControls(){
+    document.querySelectorAll('[data-launch-action="ai-copy-prompt"]').forEach(node=>{node.disabled=aiMapLoading;node.setAttribute('aria-busy',String(aiMapLoading));});
+    document.querySelectorAll('[data-ai-prompt]').forEach(node=>{node.value=aiPromptPreview();});
+    document.querySelectorAll('.ai-maker .ai-note').forEach(node=>{
+      if(node.closest('.ai-problem'))return;
+      const message=aiMapLoading?'선택한 지도만 불러오고 있습니다.':aiMapError||ai.promptNote;
+      node.textContent=message;node.hidden=!message;
+    });
+  }
+  function loadAIMap(){
+    const sequence=++aiMapSequence,id=ai.mapTemplateId;
+    aiMapError='';aiMapLoading=Boolean(id&&!globalThis.MapTemplates?.get(id));
+    updateAIPromptControls();
+    if(!aiMapLoading)return Promise.resolve(true);
+    return Promise.resolve().then(()=>globalThis.MapTemplates.ensure(id)).then(()=>{
+      if(sequence!==aiMapSequence)return false;
+      aiMapLoading=false;updateAIPromptControls();return true;
+    },error=>{
+      if(sequence!==aiMapSequence)return false;
+      aiMapLoading=false;aiMapError='지도를 불러오지 못했습니다. 요청문 복사를 눌러 다시 시도하세요. '+error.message;
+      updateAIPromptControls();return false;
+    });
+  }
+  function aiMarkup(){
+    const sizes=Object.entries(ScenarioAI.SIZES).map(([key,item])=>`<option value="${key}" ${ai.size===key?'selected':''}>${escape(item.label)} · 사건 ${escape(item.events)}개${item.note?' ('+escape(item.note)+')':''}</option>`).join('');
+    const endings=['3','4','5','6','8'].map(n=>`<option value="${n}" ${ai.endings===n?'selected':''}>${n}개</option>`).join('');
+    const base=canUseBase()?`<label class="ai-check"><input type="checkbox" data-ai-field="base" ${ai.base?'checked':''}> 지금 열린 「${escape(scenario.title)}」을 바탕으로 고치거나 늘리기</label>`:'';
+    const registry=globalThis.MapTemplates,regions=registry?.regions?.()||[],selected=registry?.selection?.(ai.mapTemplateId);
+    const legacy=Boolean(ai.mapTemplateId&&!selected),regionId=selected?.regionId||(legacy?'legacy':'');
+    const mapOptions=(registry?.list()||[]).filter(m=>!registry?.selection?.(m.id)).map(m=>`<option value="${escape(m.id)}" ${ai.mapTemplateId===m.id?'selected':''}>${escape(m.name)}</option>`).join('');
+    const regionOptions=regions.map(r=>`<option value="${escape(r.id)}" ${regionId===r.id?'selected':''}>${escape(r.name)}</option>`).join('');
+    const eraOptions=(selected?registry?.eras?.(selected.regionId):[]).map(era=>`<option value="${escape(era.id)}" ${selected?.eraId===era.id?'selected':''}>${escape(era.name)}</option>`).join('');
+    const mapFields=regions.length?`<label class="field"><span>지도 범위</span><select data-ai-field="mapRegion"><option value="" ${!regionId?'selected':''}>지도 없이</option>${regionOptions}<option value="legacy" ${legacy?'selected':''}>기존 지도 호환</option></select></label>${legacy?`<label class="field"><span>기존 지도</span><select data-ai-field="mapTemplateId">${mapOptions}</select></label>`:`<label class="field"><span>시대 기본안</span><select data-ai-field="mapEra" ${!selected?'disabled':''}>${eraOptions||'<option>지역을 먼저 선택하세요</option>'}</select></label>`}`:`<label class="field"><span>지도</span><select data-ai-field="mapTemplateId"><option value="">지도 없이</option>${mapOptions}</select></label>`;
+    const v2Options=`<div class="ai-v2-settings"><label class="field"><span>게임 방식</span><select data-ai-field="mode"><option value="chronicle" ${ai.mode==='chronicle'?'selected':''}>연대기 · 장면마다 선택</option><option value="reign" ${ai.mode==='reign'?'selected':''}>치세 · 분야별 선택 후 정산</option></select></label>${mapFields}</div>`;
+    const problem=ai.problem;
+    const repairable=problem&&problem.kind!=='blank';
+    const tip=problem&&problem.kind==='truncated'?'<p class="ai-help">AI에게 “이어서 출력해 줘”라고 보낸 뒤, 이어진 부분을 붙여 넣은 내용 맨 끝에 덧붙여 다시 불러와도 됩니다.</p>':'';
+    return `<div class="ai-maker"><p class="ai-intro">ChatGPT·Claude·Gemini 같은 AI에게 요청문을 붙여 넣으면, 이 프로그램에 바로 넣을 수 있는 시나리오 JSON을 써 줍니다. 이 사이트가 AI에 직접 접속하거나 내용을 보내지는 않습니다.</p><ol class="ai-steps">`+
+      `<li class="ai-step"><div class="ai-step-head"><span class="ai-step-no" aria-hidden="true">1</span><strong>요청문 복사하기</strong></div><label class="field"><span>어떤 이야기를 원하나요? <small>비워 두면 AI가 주제를 고릅니다</small></span><textarea data-ai-field="idea" rows="3" maxlength="4000" placeholder="예: 1592년, 조선 수군이 먼저 대마도를 친다면? 왕의 입장에서 결정하는 이야기">${escape(ai.idea)}</textarea></label><div class="ai-options"><label class="field"><span>분량</span><select data-ai-field="size">${sizes}</select></label><label class="field"><span>엔딩 수</span><select data-ai-field="endings">${endings}</select></label></div>${v2Options}${base}<div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-copy-prompt" ${aiMapLoading?'disabled aria-busy="true"':''}>AI 요청문 복사</button><span class="ai-links">AI 열기 <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT</a><a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude</a><a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Gemini</a></span></div><p class="ai-note" role="status" aria-live="polite" ${ai.promptNote?'':'hidden'}>${escape(ai.promptNote)}</p><details class="ai-prompt-view" ${ai.showPrompt?'open':''}><summary>요청문 내용 보기</summary><textarea readonly rows="8" data-ai-prompt aria-label="AI 요청문">${escape(aiPromptPreview())}</textarea></details></li>`+
+      `<li class="ai-step"><div class="ai-step-head"><span class="ai-step-no" aria-hidden="true">2</span><strong>AI 답변 붙여 넣기</strong></div><p class="ai-help">AI의 답변을 통째로 복사해 붙여 넣으세요. 앞뒤 설명이나 \`\`\`json 표시가 섞여 있어도 JSON 부분만 골라냅니다. 다른 곳에서 복사한 시나리오 JSON도 됩니다.</p><textarea class="ai-paste" data-ai-field="paste" rows="7" spellcheck="false" aria-label="AI 답변 붙여 넣기" placeholder="여기에 붙여 넣기 (Ctrl+V)">${escape(ai.paste)}</textarea><div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-import">불러와서 시작하기</button><button type="button" class="btn secondary" data-launch-action="ai-clear">지우기</button><span class="ai-shortcut">Ctrl + Enter</span></div></li>`+
+      `<li class="ai-step ai-problem" data-ai-problem tabindex="-1" ${problem?'':'hidden'}><div class="ai-step-head"><span class="ai-step-no warn" aria-hidden="true">3</span><strong>${repairable?'문제가 있어요 — AI에게 고쳐 달라고 하기':'붙여 넣은 내용을 확인해 주세요'}</strong></div><p class="launcher-error" role="alert">${escape(problem?.message||'')}</p>${repairable?`<p class="ai-help">아래 버튼으로 고쳐 달라는 문구를 복사해 <strong>같은 AI 대화</strong>에 보내세요. 새 답변을 2단계에 다시 붙여 넣으면 됩니다.</p>${tip}<div class="ai-row"><button type="button" class="btn primary" data-launch-action="ai-copy-repair">고쳐 달라는 문구 복사</button></div><p class="ai-note" role="status" aria-live="polite" ${ai.repairNote?'':'hidden'}>${escape(ai.repairNote||'')}</p><details class="ai-prompt-view" ${ai.showRepair?'open':''}><summary>문구 내용 보기</summary><textarea readonly rows="6" data-ai-repair aria-label="고쳐 달라는 문구">${escape(ai.repair)}</textarea></details>`:''}</li></ol></div>`;
+  }
+  function canUseBase(){return !isEmptyScenario();}
+  function refreshLaunchers(focus){
+    const dialog=byId('scenario-open-dialog');
+    if(dialog.open)byId('scenario-open-content').innerHTML=launcherMarkup(true);
+    if(homeMode)renderHome();else if(!state&&isEmptyScenario())byId('story-panel').innerHTML=launcherMarkup(false);
+    updateLauncherFeedback();updateAIPromptControls();
+    if(focus){const node=(dialog.open?dialog:byId('story-panel')).querySelector(focus);if(node){node.focus({preventScroll:true});node.scrollIntoView?.({block:'nearest',behavior:'smooth'});if(node.tagName==='TEXTAREA'&&node.readOnly)node.select();}}
+  }
+  async function copyText(text){
+    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);return true;}}catch{}
+    try{
+      const area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+      (document.querySelector('dialog[open]')||document.body).appendChild(area);area.select();const ok=document.execCommand('copy');area.remove();return ok;
+    }catch{return false;}
+  }
+  async function copyAIPrompt(){
+    const sequence=aiMapSequence;
+    if(ai.mapTemplateId&&!globalThis.MapTemplates?.get(ai.mapTemplateId)){
+      if(!await loadAIMap())return;
+      // Changing the selected map while it loads must not copy an old prompt.
+      if(aiMapSequence!==sequence+1)return;
+    }
+    let base=null;
+    if(ai.base&&canUseBase()){
+      base=E.clone(scenario);
+      if(JSON.stringify(base).length>150000){ai.promptNote='현재 시나리오가 너무 커서 AI 요청문에 함께 넣기 어렵습니다. ‘바탕으로 고치기’를 끄고 새로 만들거나, 고칠 부분만 따로 요청해 주세요.';ai.showPrompt=false;refreshLaunchers('[data-launch-action="ai-copy-prompt"]');return;}
+    }
+    ai.prompt=ScenarioAI.buildPrompt(aiPromptOptions());
+    const ok=await copyText(ai.prompt);
+    ai.showPrompt=!ok;
+    ai.promptNote=ok?'요청문을 복사했습니다. AI 대화창에 붙여 넣어 보내고, 답변이 오면 전체를 복사해 2단계에 붙여 넣으세요.':'이 브라우저에서는 자동 복사가 막혀 있습니다. 아래 요청문을 모두 선택(Ctrl+A)해 복사해 주세요.';
+    refreshLaunchers(ok?'[data-launch-action="ai-copy-prompt"]':'[data-ai-prompt]');
+    if(ok)notify('AI 요청문을 복사했습니다.');
+  }
+  async function copyRepair(){
+    if(!ai.repair)return;
+    const ok=await copyText(ai.repair);
+    ai.showRepair=!ok;
+    ai.repairNote=ok?'복사했습니다. 같은 AI 대화에 붙여 넣어 보내세요.':'자동 복사가 막혀 있습니다. 아래 문구를 모두 선택해 복사해 주세요.';
+    refreshLaunchers(ok?'[data-launch-action="ai-copy-repair"]':'[data-ai-repair]');
+    if(ok)notify('고쳐 달라는 문구를 복사했습니다.');
+  }
+  async function importPasted(){
+    ai.repairNote='';ai.showRepair=false;
+    if(!ai.paste.trim()){ai.problem={kind:'blank',message:'붙여 넣은 내용이 없습니다. AI의 답변을 복사해 2단계 칸에 붙여 넣어 주세요.'};ai.repair='';refreshLaunchers('[data-ai-field="paste"]');return;}
+    try{
+      checkedText(ai.paste);
+      const {value,cleaned}=ScenarioAI.extract(ai.paste);
+      const fixes=ScenarioAI.normalize(value);
+      const imported=await importScenario(value);if(!imported)return;
+      ai.paste='';ai.problem=null;ai.repair='';
+      const extra=[cleaned&&'불필요한 쉼표·주석 정리',fixes.length&&`빠진 항목 ${fixes.length}곳 기본값으로 채움`].filter(Boolean);
+      status((state?(awaitingName?'붙여 넣은 시나리오를 불러왔습니다. 이름을 입력하고 시작하세요.':'붙여 넣은 시나리오를 불러왔습니다. 새로운 역사를 시작하세요.'):'붙여 넣은 내용을 편집 초안으로 열었습니다.')+(extra.length?` (자동 보정: ${extra.join(', ')})`:''));
+      byId('story-panel').focus({preventScroll:true});
+    }catch(error){
+      if(error instanceof ScenarioAI.PasteError)ai.problem={kind:error.kind,detail:error.detail,message:error.message};
+      else{
+        const errors=String(error.message).split('\n').map(line=>line.trim()).filter(line=>line&&line!=='시나리오를 확인해 주세요.');
+        ai.problem={kind:'validate',errors,message:`형식 검사에서 문제 ${errors.length}개를 찾았습니다. 현재 작업은 그대로 유지됩니다.\n`+errors.map(line=>'· '+line).join('\n')};
+      }
+      ai.repair=ScenarioAI.buildRepairPrompt(ai.problem);
+      refreshLaunchers('[data-ai-problem]');
+    }
+  }
+  function updateLauncherFeedback(){
+    document.querySelectorAll('[data-launch-error]').forEach(node=>{node.textContent=launcherError;node.hidden=!launcherError;});
+    document.querySelectorAll('[data-launch-progress]').forEach(node=>{node.textContent=launcherMessage;node.hidden=!launcherMessage;});
+    document.querySelectorAll('[data-launch-action="retry-url"]').forEach(node=>{node.hidden=!failedScenarioUrl;node.disabled=launcherBusy;});
+    document.querySelectorAll('[data-launch-action="retry-startup"]').forEach(node=>{node.hidden=!startupRetry;node.disabled=launcherBusy;});
+    for(const action of ['resume-scenario','restart-scenario'])document.querySelectorAll(`[data-launch-action="${action}"]`).forEach(node=>{node.disabled=launcherBusy;});
+    document.querySelectorAll('[data-scenario-dropzone]').forEach(node=>node.setAttribute('aria-busy',String(launcherBusy)));
+  }
+  function setLauncherFeedback(message='',error=''){
+    launcherMessage=message;launcherError=error;updateLauncherFeedback();
+  }
+  function closeLauncher(){const dialog=byId('scenario-open-dialog');if(dialog.open)dialog.close();}
+  function openLauncher(){
+    const dialog=byId('scenario-open-dialog');byId('scenario-open-content').innerHTML=launcherMarkup(true);
+    if(!dialog.open)dialog.showModal();updateLauncherFeedback();
+    dialog.querySelector(launcherMode==='ai'?'[data-launch-action="mode-ai"]':'[data-launch-action="choose-file"]')?.focus({preventScroll:true});
+  }
+  function cancelPendingLoad(){
+    loadSequence+=1;pendingUrlController?.abort();pendingUrlController=null;launcherBusy=false;
+  }
+  function checkedText(text){
+    if(typeof text!=='string')throw Error('시나리오 파일의 내용을 텍스트로 읽을 수 없습니다.');
+    if(text.length>MAX_SCENARIO_BYTES||new TextEncoder().encode(text).byteLength>MAX_SCENARIO_BYTES)throw Error('시나리오 파일은 최대 5 MB까지 불러올 수 있습니다.');
+    return text.replace(/^\uFEFF/,'');
+  }
+  function parseScenarioText(text){
+    const source=checkedText(text);let parsed;
+    try{parsed=JSON.parse(source);}catch{throw Error('올바른 JSON 파일이 아닙니다. 파일 형식과 쉼표·따옴표를 확인해 주세요.');}
+    return parsed;
+  }
+  function prepareScenario(next){
+    const errors=E.validateScenario(next,{allowDraft:true}).errors;if(errors.length)throw Error(errors.join('\n'));
+    checkedText(JSON.stringify(next));
+    const copy=E.clone(next);
+    return {scenario:copy,state:copy.draft===true?null:E.createState(copy,{playerName:copy.player?.defaultName||'집정관'})};
+  }
+  function ensureScenarioMap(next){
+    const id=next?.map?.templateId,registry=globalThis.MapTemplates;
+    if(typeof id!=='string'||!id||!registry?.ensure||registry.get(id))return null;
+    return registry.ensure(id);
+  }
+  function prepareScenarioWithMap(next){
+    // Freeze the requested manuscript before any asynchronous asset request.
+    if(!next||typeof next!=='object')return prepareScenario(next);
+    checkedText(JSON.stringify(next));
+    const candidate=E.clone(next),loading=ensureScenarioMap(candidate);
+    return loading?Promise.resolve(loading).then(()=>prepareScenario(candidate)):prepareScenario(candidate);
+  }
+  function importScenario(next){
+    cancelPendingLoad();const sequence=loadSequence;
+    const finish=prepared=>{
+      if(sequence!==loadSequence)return null;
+      if(byId('editor-dialog').open&&ScenarioEditor.close()===false)throw Error('시나리오 교체를 취소했습니다. 편집 중인 초안은 그대로 남아 있습니다.');
+      failedScenarioUrl=null;setLauncherFeedback();
+      commitScenario(prepared);closeLauncher();return E.clone(scenario);
+    };
+    const prepared=prepareScenarioWithMap(next);
+    // Mapless and already loaded imports retain the original synchronous API.
+    if(!prepared||typeof prepared.then!=='function')return finish(prepared);
+    launcherBusy=true;setLauncherFeedback('시나리오에 필요한 지도만 불러오고 있습니다.');status('시나리오에 필요한 지도만 불러오고 있습니다.');
+    return prepared.then(finish).catch(error=>{
+      if(sequence!==loadSequence)return null;
+      setLauncherFeedback('',error.message);status('지도를 불러오지 못했습니다. 현재 시나리오와 진행은 유지됩니다.',true);throw error;
+    }).finally(()=>{if(sequence===loadSequence){launcherBusy=false;updateLauncherFeedback();}});
+  }
+  function importText(text){
+    const data=parseScenarioText(text);
+    if(globalThis.MapDocument?.isMap(data)){cancelPendingLoad();return Promise.resolve(MapMaker.importDocument(data)).then(result=>{closeLauncher();return result;});}
+    return importScenario(data);
+  }
+  function newScenario(){
+    importScenario(E.createBlankScenario());void runUI(()=>openScenarioEditor({page:'flowchart'}));return E.clone(scenario);
+  }
+  async function importFile(file){
+    if(!file)return;
+    cancelPendingLoad();const sequence=loadSequence;launcherBusy=true;failedScenarioUrl=null;setLauncherFeedback('파일을 읽고 검사하고 있습니다.');
+    try{
+      if(file.size>MAX_SCENARIO_BYTES)throw Error('시나리오 파일은 최대 5 MB까지 불러올 수 있습니다.');
+      const text=await file.text();if(sequence!==loadSequence)return;
+      const parsed=parseScenarioText(text);
+      if(globalThis.MapDocument?.isMap(parsed)){
+        await ensureScenarioMap(parsed);if(sequence!==loadSequence)return;
+        await MapMaker.importDocument(parsed);if(sequence!==loadSequence)return;
+        closeLauncher();setLauncherFeedback('지도를 지도 제작기로 열었습니다.');return;
+      }
+      const prepared=await prepareScenarioWithMap(parsed);if(sequence!==loadSequence)return;
+      if(byId('editor-dialog').open&&ScenarioEditor.close()===false)throw Error('시나리오 교체를 취소했습니다.');
+      commitScenario(prepared);closeLauncher();setLauncherFeedback('파일을 불러왔습니다.');
+    }catch(error){if(sequence===loadSequence){setLauncherFeedback('',error.message);status('시나리오를 불러오지 못했습니다. 현재 작업은 유지됩니다.',true);}}
+    finally{if(sequence===loadSequence){launcherBusy=false;updateLauncherFeedback();}}
+  }
+  async function responseText(response){
+    const size=Number(response.headers?.get('content-length'));
+    if(Number.isFinite(size)&&size>MAX_SCENARIO_BYTES)throw Error('시나리오 파일은 최대 5 MB까지 불러올 수 있습니다.');
+    if(!response.body||typeof response.body.getReader!=='function')return checkedText(await response.text());
+    const reader=response.body.getReader(),chunks=[];let total=0;
+    try{
+      while(true){const part=await reader.read();if(part.done)break;total+=part.value.byteLength;if(total>MAX_SCENARIO_BYTES){await reader.cancel();throw Error('시나리오 파일은 최대 5 MB까지 불러올 수 있습니다.');}chunks.push(part.value);}
+    }finally{reader.releaseLock?.();}
+    const bytes=new Uint8Array(total);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+    try{return checkedText(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch(error){if(error.message.includes('5 MB'))throw error;throw Error('시나리오는 UTF-8로 저장한 JSON 파일이어야 합니다.');}
+  }
+  async function loadScenarioUrl(path){
+    cancelPendingLoad();const sequence=loadSequence;failedScenarioUrl=path;launcherBusy=true;setLauncherFeedback('주소에서 시나리오를 불러오고 있습니다.');
+    let timeout;
+    try{
+      const current=new URL(location.href);
+      if(!['http:','https:'].includes(current.protocol))throw Error('주소로 불러오기는 웹 주소에서만 사용할 수 있습니다. JSON 파일 불러오기를 이용해 주세요.');
+      const url=new URL(path,current);
+      if(!['http:','https:'].includes(url.protocol)||url.origin!==current.origin||url.username||url.password)throw Error('현재 프로그램과 같은 사이트의 JSON 주소만 불러올 수 있습니다. 파일을 내려받아 직접 열어 주세요.');
+      const controller=new AbortController();pendingUrlController=controller;timeout=setTimeout(()=>controller.abort(),20000);
+      const response=await fetch(url.href,{credentials:'same-origin',redirect:'error',signal:controller.signal});
+      if(!response.ok)throw Error(`파일을 불러올 수 없습니다. 서버 응답: ${response.status}`);
+      if(response.url&&new URL(response.url,current).origin!==current.origin)throw Error('다른 사이트로 이동하는 시나리오 주소는 불러올 수 없습니다.');
+      const text=await responseText(response);if(sequence!==loadSequence)return null;
+      clearTimeout(timeout);pendingUrlController=null;
+      const prepared=await prepareScenarioWithMap(parseScenarioText(text));if(sequence!==loadSequence)return null;
+      if(byId('editor-dialog').open&&ScenarioEditor.close()===false)throw Error('시나리오 교체를 취소했습니다.');
+      if(hash(prepared.scenario)!==signature())commitScenario(prepared);
+      else saveSourceContext(storage.set('scenario',scenario));
+      failedScenarioUrl=null;closeLauncher();setLauncherFeedback();status('주소의 시나리오를 불러왔습니다.');return E.clone(scenario);
+    }catch(error){
+      if(sequence!==loadSequence)return null;
+      const message=error.name==='AbortError'?'주소에 연결하는 시간이 길어졌습니다. 다시 시도하거나 JSON 파일을 직접 열어 주세요.':error.message;
+      setLauncherFeedback('',message);status('주소에서 불러오지 못했습니다. 현재 시나리오와 진행은 유지됩니다.',true);
+      if(!isEmptyScenario())openLauncher();return null;
+    }finally{clearTimeout(timeout);if(sequence===loadSequence){launcherBusy=false;pendingUrlController=null;updateLauncherFeedback();}}
+  }
+  function download(name,text,type='application/json'){
+    const url=URL.createObjectURL(new Blob([text],{type:type+';charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  async function exportHTML(){
+    try{
+      let doc;
+      if(byId('scenario-data')||byId('bootstrap-script'))doc=document.cloneNode(true);
+      else{
+        const response=await fetch('standalone.html',{credentials:'same-origin',redirect:'error'});if(!response.ok)throw Error('다운로드 파일을 읽을 수 없습니다.');
+        doc=new DOMParser().parseFromString(await response.text(),'text/html');
+        const parts=doc.getElementById('program-download-manifest');
+        if(parts){
+          if(!globalThis.ProgramDownload)throw Error('프로그램 내려받기 도구를 불러오지 못했습니다. 새로고침한 뒤 다시 시도해 주세요.');
+          const html=await ProgramDownload.reconstruct(JSON.parse(parts.textContent),response.url||new URL('standalone.html',location.href).href);
+          doc=new DOMParser().parseFromString(html,'text/html');
+        }
+      }
+      const blank=E.createBlankScenario(),embedded=doc.getElementById('scenario-data'),bootstrap=doc.getElementById('bootstrap-script');
+      if(embedded)embedded.textContent=JSON.stringify(blank).replace(/</g,'\\u003c');
+      else if(bootstrap)bootstrap.textContent='globalThis.DEFAULT_SCENARIO = GameEngine.createBlankScenario();';
+      else throw Error('프로그램 내려받기 파일의 구성을 확인할 수 없습니다.');
+      // Export only the bundled application, excluding browser-injected assets.
+      const bundledScripts=new Set(['ai-script','engine-script','scenario-data','scenario-loader','bootstrap-script','flowchart-script','editor-script','app-script','map-templates-script','map-regions-script','map-view-script','map-document-script','map-maker-script']);
+      doc.querySelectorAll('script').forEach(script=>{if(!bundledScripts.has(script.id))script.remove();});
+      doc.querySelectorAll('link[rel="stylesheet"]').forEach(link=>link.remove());
+      doc.querySelectorAll('style').forEach(style=>{if(!['game-styles','flowchart-styles','launcher-styles','map-view-styles','map-maker-styles','editor-v2-styles','standalone-styles'].includes(style.id))style.remove();});
+      doc.querySelectorAll('dialog[open]').forEach(d=>d.removeAttribute('open'));
+      doc.getElementById('editor-dialog').removeAttribute('data-editor-bound');
+      doc.getElementById('editor-dialog').classList.remove('flowchart-mode','map-maker-mode');
+      for(const id of ['editor-root','info-content','scenario-open-content','story-panel','stats-panel','flags-panel','turn-label','scenario-title','scenario-subtitle','scenario-description','risk-summary','toast','status-message','player-map','map-reference-tools','scenario-mode-label','timeline-panel','timeline-note','play-guide-content']){const node=doc.getElementById(id);if(node){node.innerHTML='';node.textContent='';}}
+      for(const id of ['flags-count','ending-count']){const node=doc.getElementById(id);if(node)node.textContent=id==='flags-count'?'0':'0 / 0 →';}
+      const saveStatus=doc.getElementById('save-status');if(saveStatus)saveStatus.textContent='';
+      const timelineCount=doc.getElementById('timeline-count');if(timelineCount)timelineCount.textContent='0';
+      doc.querySelectorAll('input').forEach(input=>{input.removeAttribute('value');input.value='';});
+      doc.querySelectorAll('[data-web-only]').forEach(node=>node.remove());
+      if(doc.getElementById('player-map-panel'))doc.getElementById('player-map-panel').hidden=true;
+      doc.body.classList.remove('empty-workspace','has-player-map','is-home');doc.title='역사의 갈림길 · 시나리오 플레이어';
+      doc.getElementById('toast').hidden=true;doc.getElementById('status-message').hidden=true;
+      download('history-crossroads-player.html','<!doctype html>\n'+doc.documentElement.outerHTML,'text/html');
+      notify('시나리오가 포함되지 않은 프로그램을 내려받았습니다. 원고는 JSON으로 별도 보관하세요.');
+    }catch(error){status(error.message,true);}
+  }
+  function help(){
+    info('이야기를 불러오고 직접 쓰세요',`<p>시나리오의 사건을 읽고 선택지를 누르면 수치와 선택 기록이 바뀝니다. 조건과 확률에 따라 다음 사건과 결말이 달라집니다.</p><ol><li><strong>시나리오 열기:</strong> JSON 파일을 선택하거나 불러오기 화면에 끌어다 놓으세요.</li><li><strong>직접 쓰기:</strong> 흐름도에서 사건과 돌발 사건을 추가하고, 카드에서 본문·선택지·조건·수치 변화를 고칩니다. 작성 중에는 ‘초안 저장’, 플레이할 준비가 되면 ‘적용하고 새 게임’을 누르세요.</li><li><strong>지도와 게임 방식:</strong> 편집기 기본 설정에서 연대기/치세를 고르고 지도 탭에서 지역과 시대 기본안을 고른 뒤, 지역을 눌러 시작 소유권을 수정합니다. 빠른 칠하기로 여러 지역을 연속해서 바꿀 수 있습니다. 선택지에 지역 변화와 기준 역사 표시를 붙일 수 있습니다. 치세에서는 분야별로 결정한 뒤 정산하면 다음 해로 진행합니다.</li><li><strong>지도만 만들기:</strong> 상단의 지도 만들기에서 사건 없이 지도를 제작하고 별도 JSON으로 보관합니다. 지도 갤러리에 공유하거나 이 지도로 시나리오 만들기로 새 이야기를 시작할 수 있습니다.</li><li><strong>AI로 만들기:</strong> ‘시나리오 열기’의 ‘AI로 만들기’ 탭에서 요청문을 복사해 ChatGPT·Claude 같은 AI에 보내고, 받은 답변을 붙여 넣으면 바로 플레이합니다. 문제가 있으면 AI에게 보낼 수정 요청 문구도 만들어 줍니다.</li><li data-community-only><strong>갤러리:</strong> 위쪽 ‘갤러리’에서 다른 사람의 시나리오를 플레이하고 좋아요를 누를 수 있습니다. 완성한 시나리오는 ‘갤러리에 올리기’로 공개할 수 있습니다(구글 로그인 필요).</li><li><strong>원고 보관:</strong> 시나리오 JSON을 내보내 보관하세요. ‘프로그램 내려받기’에는 원고가 포함되지 않습니다.</li><li><strong>진행 저장:</strong> 자동 저장으로 이어 하거나, ‘진행 저장’과 ‘불러오기’로 같은 내용의 시나리오에서 저장 지점으로 돌아갑니다.</li></ol><p class="notice">시나리오와 진행은 접속한 브라우저에 각각 저장되며 다른 접속자와 공유되지 않습니다. 브라우저 데이터를 지우기 전에는 원고를 JSON으로 내보내세요.</p><div class="toolbar"><button class="btn primary" id="download-html">프로그램 내려받기</button><button class="btn secondary" id="download-json">시나리오 JSON 내보내기</button><button class="btn secondary" id="new-scenario">빈 시나리오 새로 작성</button><button class="btn secondary" type="button" data-launch-action="open-ai">✦ AI로 시나리오 만들기</button><a class="btn secondary" href="gallery.html#upload" data-community-only>갤러리에 올리기</a></div>`);
+    byId('download-html').onclick=exportHTML;
+    byId('download-json').onclick=()=>download('scenario.json',JSON.stringify(scenario,null,2));
+    byId('new-scenario').onclick=()=>{byId('info-dialog').close();newScenario();};
+  }
+  function applyScenario(next){
+    cancelPendingLoad();
+    return commitScenario(prepareScenario(next));
+  }
+  function commitScenario(prepared){
+    leaveHome();
+    deferredStoredScenario=null;startupRetry=false;
+    scenario=prepared.scenario;state=prepared.state;compareMap=false;referenceCache=null;
+    awaitingName=Boolean(state&&playerSettings().askName!==false);nameReturnState=null;
+    const saved=storage.set('scenario',scenario);saveSourceContext(saved);if(awaitingName)storage.set('autosave',null);else saveAuto();
+    render();status(saved?(state?(awaitingName?'시나리오를 적용했습니다. 이름을 입력하고 시작하세요.':'시나리오를 적용했습니다. 새로운 역사를 시작하세요.'):'작성 중인 초안을 저장했습니다. 흐름도에서 이어서 작성하세요.'):'브라우저 저장이 불가능하므로 JSON으로 내보내 보관하세요.');
+  }
+  byId('story-panel').addEventListener('submit',event=>{
+    if(event.target.id!=='player-name-form')return;
+    event.preventDefault();startWithName(byId('player-name-input').value);
+  });
+  byId('story-panel').addEventListener('click',event=>{
+    const partChoice=event.target.closest('[data-part-choice]');if(partChoice&&!partChoice.disabled){playReign(partChoice.dataset.partEvent,Number(partChoice.dataset.partChoice));return;}
+    const choice=event.target.closest('[data-choice]');if(choice&&!choice.disabled){play(Number(choice.dataset.choice));return;}
+    const action=event.target.closest('[data-action]')?.dataset.action;
+    if(action==='settle-reign')settleReign();
+    if(action==='restart')restart(false);if(action==='journal')journal();if(action==='collection')collection();
+    if(action==='edit-flow')void runUI(()=>openScenarioEditor({page:'flowchart'}));
+    if(action==='edit-scenario')void runUI(()=>openScenarioEditor());
+    if(action==='default-name')startWithName(playerSettings().defaultName);
+    if(action==='cancel-name'&&nameReturnState){state=nameReturnState;nameReturnState=null;awaitingName=false;render();status('이전 진행으로 돌아왔습니다.');}
+  });
+  byId('restart-button').onclick=()=>restart();byId('journal-button').onclick=journal;byId('collection-button').onclick=collection;byId('help-button').onclick=help;
+  byId('edit-button').onclick=()=>runUI(()=>openScenarioEditor());
+  byId('flow-button').onclick=()=>runUI(()=>openScenarioEditor({page:'flowchart'}));
+  byId('open-scenario-button').onclick=openLauncher;
+  byId('map-maker-button').onclick=()=>runUI(()=>MapMaker.open()).then(result=>{if(result!==null)closeLauncher();});
+  byId('scenario-import').addEventListener('change',event=>{const file=event.target.files?.[0];event.target.value='';void importFile(file);});
+  function chooseScenarioFile(){const input=byId('scenario-import');input.value='';input.click();}
+  document.addEventListener('click',event=>{
+    const action=event.target.closest('[data-launch-action]')?.dataset.launchAction;
+    if(event.target.closest('[data-map-compare]')){compareMap=!compareMap;renderMap();return;}
+    if(!action)return;
+    try{
+      if(action==='demo-chronicle'||action==='demo-reign')void loadScenarioUrl('examples/'+(action==='demo-chronicle'?'chronicle-sejong.json':'regional-europe-demo.json')); 
+      if(action==='demo-world')void loadScenarioUrl('examples/imjin-world.json');
+      if(action==='choose-file')chooseScenarioFile();
+      if(action==='resume-scenario'&&!launcherBusy)void runUI(()=>restoreDeferredScenario());
+      if(action==='restart-scenario'&&!launcherBusy)void runUI(()=>startScenarioOver());
+      if(action==='new')newScenario();
+      if(action==='setup-map')void runUI(()=>openScenarioEditor({page:'map'})).then(result=>{if(result!==null)closeLauncher();});
+      if(action==='map-maker')void runUI(()=>MapMaker.open()).then(result=>{if(result!==null)closeLauncher();});
+      if(action==='new-map')void runUI(()=>MapMaker.startNew()).then(result=>{if(result!==null)closeLauncher();});
+      if(action==='copy-scenario-map')void runUI(async()=>{if(deferredStoredScenario&&!await restoreDeferredScenario())return null;if(scenario.map)return MapMaker.open(MapDocument.fromScenario(scenario));}).then(result=>{if(result!==null)closeLauncher();});
+      if(action==='close')closeLauncher();
+      if(action==='retry-url'&&failedScenarioUrl&&!launcherBusy)void loadScenarioUrl(failedScenarioUrl);
+      if(action==='retry-startup'&&!launcherBusy)void restoreDeferredScenario(startupRestore);
+      if(action==='mode-file'||action==='mode-ai'){launcherMode=action==='mode-ai'?'ai':'file';refreshLaunchers(`[data-launch-action="${action}"]`);}
+      if(action==='ai-copy-prompt')void runUI(copyAIPrompt);
+      if(action==='ai-copy-repair')void copyRepair();
+      if(action==='ai-import')void importPasted();
+      if(action==='ai-clear'){ai.paste='';ai.problem=null;ai.repair='';refreshLaunchers('[data-ai-field="paste"]');}
+      if(action==='open-ai'){byId('info-dialog').close();launcherMode='ai';openLauncher();}
+    }catch(error){setLauncherFeedback('',error.message);}
+  });
+  const aiFieldInput=event=>{
+    const field=event.target.closest?.('[data-ai-field]');if(!field)return;
+    const key=field.dataset.aiField;ai[key]=field.type==='checkbox'?field.checked:field.value;
+    if(key==='mapRegion'){
+      const registry=globalThis.MapTemplates,region=registry?.regions?.().find(r=>r.id===field.value);
+      ai.mapTemplateId=region?registry.regionalId(region.id,region.defaultEra||registry.eras(region.id)[0].id):field.value==='legacy'?(registry.list().find(m=>!registry.selection?.(m.id))?.id||''):'';
+    }
+    if(key==='mapEra'){
+      const registry=globalThis.MapTemplates,selected=registry?.selection?.(ai.mapTemplateId);
+      if(selected)ai.mapTemplateId=registry.regionalId(selected.regionId,field.value);
+    }
+    if(key==='base'&&ai.base&&canUseBase()){
+      ai.mode=scenario.mode||'chronicle';ai.mapTemplateId=scenario.map?.templateId||'';
+      document.querySelectorAll('[data-ai-field="mode"]').forEach(node=>{node.value=ai.mode;});
+      document.querySelectorAll('[data-ai-field="mapTemplateId"]').forEach(node=>{node.value=ai.mapTemplateId;});
+    }
+    if(key==='paste')return;
+    ai.prompt='';ai.promptNote='';ai.showPrompt=document.querySelector('.ai-prompt-view[open] [data-ai-prompt]')!==null;
+    if(['mapRegion','mapEra','base','mapTemplateId'].includes(key)){refreshLaunchers();void loadAIMap();return;}
+    const preview=aiPromptPreview();
+    document.querySelectorAll('[data-ai-prompt]').forEach(node=>{node.value=preview;});
+    document.querySelectorAll('.ai-maker .ai-note').forEach(node=>{if(!node.closest('.ai-problem'))node.hidden=true;});
+  };
+  document.addEventListener('input',aiFieldInput);document.addEventListener('change',aiFieldInput);
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches?.('[data-ai-field="paste"]')&&event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();importPasted();}
+  });
+  document.addEventListener('keydown',event=>{
+    const zone=event.target.closest('[data-scenario-dropzone]');
+    if(zone&&(event.key==='Enter'||event.key===' ')){event.preventDefault();chooseScenarioFile();}
+  });
+  document.addEventListener('dragover',event=>{
+    const zone=event.target.closest('[data-scenario-dropzone]');
+    if(zone||Array.from(event.dataTransfer?.types||[]).includes('Files'))event.preventDefault();
+    if(zone){zone.classList.add('drag-over');if(event.dataTransfer)event.dataTransfer.dropEffect='copy';}
+  });
+  document.addEventListener('dragleave',event=>event.target.closest('[data-scenario-dropzone]')?.classList.remove('drag-over'));
+  document.addEventListener('drop',event=>{
+    const zone=event.target.closest('[data-scenario-dropzone]');
+    if(!zone&&!Array.from(event.dataTransfer?.types||[]).includes('Files'))return;
+    event.preventDefault();document.querySelectorAll('.drag-over').forEach(node=>node.classList.remove('drag-over'));
+    if(!zone){status('‘시나리오 열기’의 파일 영역에 JSON 파일을 놓아 주세요.');return;}
+    const files=event.dataTransfer?.files;
+    if(files?.length!==1){setLauncherFeedback('','JSON 파일을 한 번에 하나씩 놓아 주세요.');return;}
+    void importFile(files[0]);
+  });
+  byId('save-button').onclick=()=>{if(!state||awaitingName)return;const ok=storage.set('save',envelope());render();notify(ok?'현재 진행을 저장했습니다.':'저장할 수 없습니다. 브라우저 저장 설정을 확인해 주세요.');};
+  byId('load-button').onclick=()=>{
+    const saved=storage.get('save');if(!saved||saved.signature!==signature()){notify('현재 시나리오와 호환되는 저장이 없습니다.');return;}
+    if(!awaitingName&&state.turn&&!confirm('직접 저장한 지점으로 돌아갈까요?'))return;
+    try{state=restoreSavedState(saved.state);awaitingName=false;nameReturnState=null;saveAuto();rememberEnding();render();status('저장한 진행을 불러왔습니다.');}catch(error){status('저장 불러오기 실패: '+error.message,true);}
+  };
+  document.addEventListener('keydown',event=>{
+    if(homeMode||!state||awaitingName||event.altKey||event.ctrlKey||event.metaKey||document.querySelector('dialog[open]')||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;
+    if(reignMode()&&!state.activeRandomEventId&&/^[1-9]$/.test(event.key)){
+      const index=Number(event.key)-1,cards=E.getReignStatus(scenario,state).cards;
+      const card=cards.find(c=>!state.reign.decisions[c.part.id]);
+      if(card?.choices.find(c=>c.index===index)?.enabled){event.preventDefault();playReign(card.event.id,index);}return;
+    }
+    if(/^[1-9]$/.test(event.key)){const index=Number(event.key)-1,item=E.getChoices(scenario,state).find(c=>c.index===index);if(item?.enabled){event.preventDefault();play(index);}}
+  });
+  function initializeRuntime(prepared,restore=true){
+    scenario=prepared.scenario;state=prepared.state;
+    compareMap=false;referenceCache=null;awaitingName=Boolean(state&&playerSettings().askName!==false);nameReturnState=null;
+    const auto=restore&&storage.get('autosave');
+    if(state&&auto&&auto.signature===signature())try{state=restoreSavedState(auto.state);awaitingName=false;}catch{status('이전 자동 저장을 읽지 못해 새 회차를 시작합니다. 저장된 원본은 그대로 남아 있습니다.',true);}
+    rememberEnding();render();
+  }
+  async function hydrateStored(candidate,sequence=loadSequence,restore=true){
+    try{
+      const id=candidate?.map?.templateId;
+      if(id&&!globalThis.MapTemplates?.get(id)){
+        launcherBusy=true;setLauncherFeedback('저장한 시나리오에 필요한 지도만 불러오고 있습니다.');status('저장한 시나리오의 지도를 불러오고 있습니다.');
+      }
+      const prepared=await prepareScenarioWithMap(candidate);if(sequence!==loadSequence)return null;
+      deferredStoredScenario=null;startupRetry=false;
+      // Continuing an old save after a different link failed must not leave
+      // that failed link in the address or adopt it as the saved story's source.
+      const savedContext=storage.get('sourceContext');
+      if(new URL(location.href).searchParams.has('scenario')&&
+        (savedContext?.context!==sourceContext()||savedContext.signature!==hash(candidate))){
+        try{const url=new URL(location.href);url.searchParams.delete('scenario');globalThis.history?.replaceState(null,'',url.href);}catch{}
+      }
+      failedScenarioUrl=null;
+      setLauncherFeedback();leaveHome();status('');initializeRuntime(prepared,restore);
+      if(!restore&&state&&!awaitingName)saveAuto();
+      return E.clone(scenario);
+    }catch(error){
+      if(sequence!==loadSequence)return null;
+      startupRetry=true;startupRestore=restore;deferredStoredScenario=candidate;
+      setLauncherFeedback('',error.message);render();status('저장한 시나리오를 열지 못했습니다. 원고와 진행은 보존했습니다. ‘저장한 시나리오 다시 열기’로 재시도하세요. '+error.message,true);
+      return null;
+    }finally{if(sequence===loadSequence){launcherBusy=false;updateLauncherFeedback();}}
+  }
+  function restoreDeferredScenario(restore=true){
+    if(!deferredStoredScenario){leaveHome();render();return Promise.resolve(E.clone(scenario));}
+    const candidate=deferredStoredScenario;cancelPendingLoad();startupRestore=restore;
+    return hydrateStored(candidate,loadSequence,restore);
+  }
+  function startScenarioOver(){
+    if(!deferredStoredScenario&&!isEmptyScenario())deferredStoredScenario=E.clone(scenario);
+    return restoreDeferredScenario(false);
+  }
+  async function openScenarioEditor(settings){
+    if(deferredStoredScenario&&!await restoreDeferredScenario())return null;
+    return ScenarioEditor.open(scenario,applyScenario,settings);
+  }
+  // UI actions may become asynchronous when their selected map is not cached.
+  function runUI(action){
+    try{return Promise.resolve(action()).catch(error=>{setLauncherFeedback('',error.message);status(error.message,true);return null;});}
+    catch(error){setLauncherFeedback('',error.message);status(error.message,true);return Promise.resolve(null);}
+  }
+  async function initializeApplication(){
+    const scenarioPath=new URL(location.href).searchParams.get('scenario');
+    const savedContext=storage.get('sourceContext');
+    const sameSource=Boolean(custom&&savedContext?.context===sourceContext()&&savedContext.signature===hash(custom));
+    // The landing screen needs only the saved manuscript's title. Never load
+    // its map or replay its autosave before an explicit continue/restart action.
+    if(custom)deferredStoredScenario=custom;
+    initializeRuntime(prepareScenario(E.clone(DEFAULT_SCENARIO)),false);
+    if(scenarioPath&&!requestedHome&&!sameSource){
+      // A new scenario link is an explicit request; unrelated saved maps stay
+      // deferred even when the requested link fails.
+      return loadScenarioUrl(scenarioPath);
+    }
+    return E.clone(deferredStoredScenario||scenario);
+  }
+  // A mapless/loaded import is synchronous; an unloaded map import is awaitable.
+  // Home exposes the saved manuscript while leaving its heavy map unhydrated.
+  globalThis.HistoryCrossroads={getScenario:()=>E.clone(deferredStoredScenario||scenario),getState:()=>E.clone(state),importScenario,importText,newScenario,resumeScenario:restoreDeferredScenario,startScenarioOver,ready:Promise.resolve(null)};
+  globalThis.HistoryCrossroads.ready=initializeApplication();
+  globalThis.MapMaker?.configure({onCreateScenario:next=>{
+    cancelPendingLoad();failedScenarioUrl=null;
+    const prepared=prepareScenario(next);
+    // A reusable map starts a new draft only through this explicit action.
+    const url=new URL(location.href);url.searchParams.delete('scenario');url.searchParams.delete('mapMaker');
+    globalThis.history?.replaceState(null,'',url.href);
+    commitScenario(prepared);closeLauncher();
+    // Let the map editor finish its explicit create action before opening the
+    // new scenario editor, so it does not ask to discard the just-saved map.
+    void Promise.resolve().then(()=>runUI(()=>openScenarioEditor({page:'overview'})));
+  }});
+  globalThis.HistoryCrossroads.ready.then(async()=>{
+    if(!globalThis.MapMaker)return;
+    const url=new URL(location.href);if(url.searchParams.get('mapMaker')!=='1')return;
+    let pending;
+    try{pending=JSON.parse(sessionStorage.getItem('hc:pendingMapImport')||'null');}catch{}
+    try{
+      if(pending?.data)await MapMaker.importDocument(pending.data);else await MapMaker.open();
+      try{sessionStorage.removeItem('hc:pendingMapImport');}catch{}
+      url.searchParams.delete('mapMaker');globalThis.history?.replaceState(null,'',url.href);
+    }catch(error){status('지도를 열지 못했습니다. 현재 시나리오는 유지됩니다: '+error.message,true);}
+  }).catch(error=>status('초기 화면을 준비하지 못했습니다. 저장된 원고와 진행은 그대로 남아 있습니다: '+error.message,true));
+})();
+</script>
+</body>
+</html>

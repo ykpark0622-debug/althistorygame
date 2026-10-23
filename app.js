@@ -119,7 +119,7 @@
   }
   function renderMap(){
     const panel=byId('player-map-panel');if(!panel)return;
-    panel.hidden=!scenario.map;byId('map-reference-tools').hidden=!scenario.map;if(!scenario.map)return;
+    panel.hidden=!scenario.map;byId('map-reference-tools').hidden=!scenario.map;if(!scenario.map){MapView.dispose?.(byId('player-map'));return;}
     if(!referenceCache||referenceCache.signature!==signature())referenceCache={signature:signature(),reference:E.getHistoricalReference?.(scenario)};
     const reference=referenceCache.reference;
     byId('map-reference-tools').innerHTML=reference?.complete?`<button class="btn secondary" data-map-compare aria-pressed="${compareMap}" title="작성자가 표시한 기준 선택의 최종 지도와 비교합니다.">${compareMap?'기준 역사 비교 끄기':'기준 역사와 비교'}</button>`:'';
@@ -216,6 +216,7 @@
     byId('scenario-subtitle').textContent='시나리오를 불러오거나 새로운 이야기를 만드세요.';
     byId('scenario-mode-label').textContent='YOUR STORY, YOUR CHOICES';
     byId('scenario-description').textContent='';
+    MapView.dispose?.(byId('player-map'));
     byId('player-map-panel').hidden=true;byId('map-reference-tools').hidden=true;
     byId('story-panel').classList.remove('game-over');
     const current=Boolean(deferredStoredScenario||scenario.map||!isEmptyScenario());

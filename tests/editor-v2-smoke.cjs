@@ -5,6 +5,7 @@ class FakeElement{
   constructor(doc,tag='div',attributes={}){this.doc=doc;this.tagName=tag.toUpperCase();this.attributes={};this.dataset={};this.children=[];this.parentElement=null;this.listeners={};this._html='';this._text='';this.value='';this.files=[];this.hidden=false;this.disabled=false;this.open=false;this.className='';this.style={};this.classList={add:()=>{},remove:()=>{},toggle:()=>{},contains:()=>false};for(const [key,value]of Object.entries(attributes))this.setAttribute(key,value);}
   set id(value){if(this.attributes.id)this.doc.ids.delete(this.attributes.id);this.attributes.id=String(value);if(value)this.doc.ids.set(String(value),this);}
   get id(){return this.attributes.id||'';}
+  get ownerDocument(){return this.doc;}
   setAttribute(key,value){if(key==='id'){this.id=value;return;}this.attributes[key]=String(value);if(key.startsWith('data-'))this.dataset[key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=String(value);if(key==='class')this.className=String(value);}
   getAttribute(key){return this.attributes[key]??null;}
   removeAttribute(key){delete this.attributes[key];if(key==='open')this.open=false;}
@@ -35,11 +36,12 @@ class FakeElement{
   click(){if(this.tagName==='A'){this.doc.downloads.push({name:this.download,text:this.doc.blobs.get(this.href)});return;}this.dispatch('click');}
   focus(){this.doc.activeElement=this;}
   scrollIntoView(){}
+  getBoundingClientRect(){return {left:0,top:0,right:300,bottom:44,width:300,height:44};}
   showModal(){this.open=true;this.setAttribute('open','');}
   close(){this.open=false;this.removeAttribute('open');}
 }
 class FakeDocument{
-  constructor(index,options={}){this.ids=new Map();this.listeners={};this.all=[];this.title='역사의 갈림길';this.downloads=[];this.blobs=new Map();this.activeElement=null;this.options=options;this.body=this.createElement('body');this.parseChildren(this.body,index);this.documentElement={get outerHTML(){return '';}};}
+  constructor(index,options={}){this.ids=new Map();this.listeners={};this.all=[];this.title='역사의 갈림길';this.downloads=[];this.blobs=new Map();this.activeElement=null;this.options=options;this.head=this.createElement('head');this.body=this.createElement('body');this.parseChildren(this.body,index);this.documentElement={get outerHTML(){return '';}};}
   createElement(tag){const node=new FakeElement(this,tag);this.all.push(node);return node;}
   createElementNS(ns,tag){return this.createElement(tag);}
   createTextNode(text){const node=this.createElement('span');node.textContent=text;return node;}
@@ -47,6 +49,7 @@ class FakeDocument{
   parseChildren(parent,html){const markup=html.replace(/(<script\b[^>]*>)[\s\S]*?(<\/script\s*>)/gi,'$1$2').replace(/(<style\b[^>]*>)[\s\S]*?(<\/style\s*>)/gi,'$1$2');for(const match of markup.matchAll(/<([a-z][a-z0-9-]*)\b([^>]*)>/gi)){const node=this.createElement(match[1]);for(const attr of match[2].matchAll(/([\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g))node.setAttribute(attr[1],attr[2]??attr[3]??attr[4]??'');parent.append(node);}}
   addEventListener(type,listener){(this.listeners[type]??=[]).push(listener);}
   dispatch(type,event){for(const listener of this.listeners[type]||[])listener(event);}
+  removeEventListener(type,listener){this.listeners[type]=(this.listeners[type]||[]).filter(item=>item!==listener);}
   querySelectorAll(selector){return this.all.filter(node=>(node===this.body||this.body.contains(node))&&node.matches(selector));}
   querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
   cloneNode(){
@@ -60,6 +63,7 @@ function setup(){
  const doc=new FakeDocument('<dialog id="editor-dialog"></dialog><div id="editor-root"></div>');
  const context=vm.createContext({document:doc,console,confirm:()=>true,requestAnimationFrame:()=>1,cancelAnimationFrame(){},setTimeout,clearTimeout,Blob,URL,crypto:require('node:crypto').webcrypto});
  context.globalThis=context;context.window=context;
+ context.innerWidth=1440;context.innerHeight=1000;context.addEventListener=(...args)=>doc.addEventListener(...args);context.removeEventListener=(...args)=>doc.removeEventListener(...args);
  for(const file of ['map-templates.js','engine.js'])vm.runInContext(fs.readFileSync(path.join(base,file),'utf8'),context);
  require('./preloaded-map-fixture.cjs')(context);
  let mapClick;
@@ -69,8 +73,8 @@ function setup(){
  const visible=()=>doc.all.filter(node=>doc.body.contains(node));
  const buttons=text=>visible().filter(node=>node.tagName==='BUTTON'&&node.textContent===text);
  const click=text=>{const button=buttons(text)[0];assert(button,'missing button '+text);button.click();};
- const field=label=>{const node=visible().find(node=>node.tagName==='LABEL'&&node.children[0]?.textContent===label);assert(node,'missing field '+label);return node.children.find(child=>['INPUT','SELECT','TEXTAREA'].includes(child.tagName));};
- const change=(label,value,type='change')=>{const node=field(label);node.value=value;node.dispatch(type);};
+ const field=label=>{const picker=visible().find(node=>node.getAttribute('role')==='combobox'&&node.getAttribute('aria-label')===label);if(picker)return picker;const node=visible().find(node=>node.tagName==='LABEL'&&node.children[0]?.textContent===label);assert(node,'missing field '+label);return node.children.find(child=>['INPUT','SELECT','TEXTAREA'].includes(child.tagName));};
+ const change=(label,value,type='change')=>{const node=field(label);if(node.getAttribute('role')==='combobox'){node.click();const wrap=node.parentElement,search=wrap.querySelector('input');search.value=value;search.dispatch('input');const option=wrap.querySelectorAll('[role="option"]').find(item=>item.getAttribute('data-country-id')===value);assert(option,'missing country result '+label+' '+value);option.click();return;}node.value=value;node.dispatch(type);};
  const realm=value=>vm.runInContext('JSON.parse('+JSON.stringify(JSON.stringify(value))+')',context);
  return {doc,context,click,buttons,field,change,realm,mapClick:()=>mapClick};
 }

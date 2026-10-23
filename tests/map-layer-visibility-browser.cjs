@@ -11,7 +11,9 @@ function passed(name,details){report.checks.push({name,passed:true,...(details?{
 const overlays=(page,layer)=>page.locator('#editor-root [data-map-overlay="'+layer+'"]');
 const control=(page,layer)=>page.locator('#editor-root [data-map-layer="'+layer+'"]');
 async function ready(page,id){await page.waitForFunction(id=>{const t=MapTemplates.get(id);return t&&document.querySelector('#editor-dialog[open]')&&document.querySelector('#editor-root .map-heading h2')?.textContent.includes(t.name);},id);}
-async function choose(page,region,era,id){await page.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption(region);await page.getByLabel('② 시대 기본안',{exact:true}).selectOption(era);await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();await ready(page,id);}
+async function choose(page,region,era,id){await settings(page);await page.getByLabel('① 사용할 지역 지도',{exact:true}).selectOption(region);await page.getByLabel('② 시대 기본안',{exact:true}).selectOption(era);await page.getByRole('button',{name:'③ 이 설정으로 지도 준비',exact:true}).click();await ready(page,id);}
+async function settings(page){const field=page.getByLabel('① 사용할 지역 지도',{exact:true});if(!await field.isVisible())await page.getByRole('button',{name:'지도 설정',exact:true}).click();}
+async function countryValue(page,label){return page.getByRole('combobox',{name:label,exact:true}).getAttribute('data-country-id');}
 async function save(page){await page.getByRole('button',{name:'지도 저장',exact:true}).click();return page.evaluate(()=>MapMaker.getStored());}
 async function game(page){return page.evaluate(()=>({scenario:HistoryCrossroads.getScenario(),state:HistoryCrossroads.getState(),rawScenario:localStorage.getItem('history-crossroads:web:v1:scenario'),rawSave:localStorage.getItem('history-crossroads:web:v1:autosave')}));}
 async function main(){
@@ -27,8 +29,8 @@ async function main(){
   passed('Previously distributed 1444 gallery JSON opens with clean country colors and influence hatching off',{influenceRegionsRetained:expectedInfluence});
   await page.screenshot({path:path.join(output,'map-hatching-fixed.png'),fullPage:true});
   await control(page,'influence').check();assert.equal(await overlays(page,'influence').count(),expectedInfluence);
-  const influenced=Object.keys(fixture.map.initial.influence)[0];await page.locator('#editor-root [data-province="'+influenced+'"]').dispatchEvent('click');assert.equal(await page.getByLabel('영향국',{exact:true}).inputValue(),fixture.map.initial.influence[influenced]);
-  await control(page,'influence').uncheck();assert.equal(await overlays(page,'influence').count(),0);assert.equal(await page.getByLabel('영향국',{exact:true}).inputValue(),fixture.map.initial.influence[influenced]);assert.deepEqual(await save(page),portableSaved);assert.deepEqual(await game(page),initialGame);
+  const influenced=Object.keys(fixture.map.initial.influence)[0];await page.locator('#editor-root [data-province="'+influenced+'"]').dispatchEvent('click');assert.equal(await countryValue(page,'영향국'),fixture.map.initial.influence[influenced]);
+  await control(page,'influence').uncheck();assert.equal(await overlays(page,'influence').count(),0);assert.equal(await countryValue(page,'영향국'),fixture.map.initial.influence[influenced]);assert.deepEqual(await save(page),portableSaved);assert.deepEqual(await game(page),initialGame);
   passed('Influence hatching can be shown and hidden while real region editing, stored map JSON and game progress stay unchanged');
   await choose(page,'europe_med','historical_1444','historical_europe_1444');assert.equal(await control(page,'influence').isChecked(),false);assert.equal(await overlays(page,'influence').count(),0);
   await control(page,'influence').check();const templateInfluence=definitions.find(row=>row.id==='historical_europe_1444').influence;assert.equal(await overlays(page,'influence').count(),Object.keys(templateInfluence).length);await control(page,'influence').uncheck();
@@ -37,7 +39,7 @@ async function main(){
   assert.ok(occupationCount>0);assert.equal(await control(page,'occupation').isChecked(),true);assert.equal(await control(page,'influence').isChecked(),false);assert.equal(await overlays(page,'occupation').count(),occupationCount);assert.equal(await overlays(page,'influence').count(),0);
   const ww2Saved=await save(page);await control(page,'occupation').uncheck();assert.equal(await overlays(page,'occupation').count(),0);await control(page,'influence').check();assert.equal(await overlays(page,'influence').count(),influenceCount);assert.equal(await overlays(page,'occupation').count(),0);await control(page,'occupation').check();assert.equal(await overlays(page,'occupation').count(),occupationCount);await control(page,'influence').uncheck();assert.equal(await overlays(page,'influence').count(),0);assert.deepEqual(await save(page),ww2Saved);
   passed('1939 military occupation remains visible by default and its checkbox works independently from influence',{occupationCount,influenceCount});
-  const occupied=Object.keys(ww2.occupation)[0];await page.locator('#editor-root [data-province="'+occupied+'"]').dispatchEvent('click');assert.equal(await page.getByLabel('군사 점령국',{exact:true}).inputValue(),ww2.occupation[occupied]);
+  const occupied=Object.keys(ww2.occupation)[0];await page.locator('#editor-root [data-province="'+occupied+'"]').dispatchEvent('click');assert.equal(await countryValue(page,'군사 점령국'),ww2.occupation[occupied]);
   const before=await page.locator('#editor-root [data-map-world]').getAttribute('transform');await page.locator('#editor-root [data-map-tool="in"]').click();const after=await page.locator('#editor-root [data-map-world]').getAttribute('transform');assert.notEqual(after,before);
   passed('Region selection and zoom remain available with the new display controls');
   await page.getByRole('button',{name:'닫기',exact:true}).last().click();

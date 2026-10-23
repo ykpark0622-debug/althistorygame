@@ -19,6 +19,7 @@ class FakeElement{
   constructor(doc,tag='div',attributes={}){this.doc=doc;this.tagName=tag.toUpperCase();this.attributes={};this.dataset={};this.children=[];this.parentElement=null;this.listeners={};this._html='';this._text='';this.value='';this.files=[];this.hidden=false;this.disabled=false;this.open=false;this.className='';this.style={};this.classList={add:(...values)=>{this.className=[...new Set([...this.className.split(/\s+/).filter(Boolean),...values])].join(' ');},remove:(...values)=>{this.className=this.className.split(/\s+/).filter(value=>value&&!values.includes(value)).join(' ');},toggle:(value,force)=>{const exists=this.classList.contains(value),next=force===undefined?!exists:Boolean(force);if(next)this.classList.add(value);else this.classList.remove(value);return next;},contains:value=>this.className.split(/\s+/).includes(value)};for(const [key,value]of Object.entries(attributes))this.setAttribute(key,value);}
   set id(value){if(this.attributes.id)this.doc.ids.delete(this.attributes.id);this.attributes.id=String(value);if(value)this.doc.ids.set(String(value),this);}
   get id(){return this.attributes.id||'';}
+  get ownerDocument(){return this.doc;}
   setAttribute(key,value){if(key==='id'){this.id=value;return;}this.attributes[key]=String(value);if(key.startsWith('data-'))this.dataset[key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=String(value);if(key==='class')this.className=String(value);if(['disabled','hidden','open'].includes(key))this[key]=true;}
   getAttribute(key){return this.attributes[key]??null;}
   removeAttribute(key){delete this.attributes[key];if(['disabled','hidden','open'].includes(key))this[key]=false;}
@@ -62,6 +63,7 @@ class FakeDocument{
   parseChildren(parent,html){const markup=html.replace(/(<script\b[^>]*>)[\s\S]*?(<\/script\s*>)/gi,'$1$2').replace(/(<style\b[^>]*>)[\s\S]*?(<\/style\s*>)/gi,'$1$2');for(const match of markup.matchAll(/<([a-z][a-z0-9-]*)\b([^>]*)>/gi)){const node=this.createElement(match[1]);for(const attr of match[2].matchAll(/([\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g))node.setAttribute(attr[1],attr[2]??attr[3]??attr[4]??'');parent.append(node);}}
   addEventListener(type,listener){(this.listeners[type]??=[]).push(listener);}
   dispatch(type,event){for(const listener of this.listeners[type]||[])listener(event);}
+  removeEventListener(type,listener){this.listeners[type]=(this.listeners[type]||[]).filter(item=>item!==listener);}
   querySelectorAll(selector){return this.all.filter(node=>(node===this.body||this.body.contains(node))&&node.matches(selector));}
   querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
   cloneNode(){
@@ -94,6 +96,7 @@ async function boot(options={}){
     setTimeout:()=>0,clearTimeout(){},requestAnimationFrame:()=>0,cancelAnimationFrame(){},confirm:()=>true,crypto:{getRandomValues:array=>{array[0]=0;return array;}}});
   context.window=context;context.globalThis=context;
   context.addEventListener=(...args)=>doc.addEventListener(...args);
+  context.removeEventListener=(...args)=>doc.removeEventListener(...args);
   context.URL=class extends URL{};context.URL.createObjectURL=blob=>{const id='blob:'+doc.blobs.size;doc.blobs.set(id,blob.text);return id;};context.URL.revokeObjectURL=()=>{};
   for(const script of scripts){
     if(/\btype=["']application\/json["']/.test(script.attributes))continue;
